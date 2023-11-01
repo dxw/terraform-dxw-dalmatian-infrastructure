@@ -1,9 +1,9 @@
-# <REPLACE WITH USEFUL TERRAFORM DESCRIPTION>
+# Terraform dxw Dalmatian infrastructure
 
-[![Terraform CI](./actions/workflows/continuous-integration-terraform.yml/badge.svg?branch=main)](./actions/workflows/continuous-integration-terraform.yml?branch=main)
-[![GitHub release](./releases)](./releases)
+[![Terraform CI](https://github.com/dxw/terraform-dxw-dalmatian-infrastructure/actions/workflows/continuous-integration-terraform.yml/badge.svg?branch=main)](https://github.com/dxw/terraform-dxw-dalmatian-infrastructure/actions/workflows/continuous-integration-terraform.yml?branch=main)
+[![GitHub release](https://github.com/dxw/terraform-dxw-dalmatian-infrastructure/releases)](https://github.com/dxw/terraform-dxw-dalmatian-infrastructure/releases)
 
-This <module/project> creates and manages <REPLACE WITH MAIN RESOURCE NAMES/URLS>.
+This project creates and manages resources within an AWS account for infrastructures on dxw's Dalmatian hosting platform.
 
 ## Usage
 
@@ -11,9 +11,7 @@ Example module usage:
 
 ```hcl
 module "<MODULE NAME>" {
-  source  = "github.com/<ORG>/<MODULE NAME>?ref=v<VERSION>"
-
-  environment = "dev/staging/test/pre-prod/prod/post-prod"
+  source  = "github.com/dxw/terraform-dxw-dalmatian-infrastructure?ref=v<VERSION>"
 }
 ```
 
@@ -22,7 +20,7 @@ module "<MODULE NAME>" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.3 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.2 |
 
 ## Providers
 
@@ -34,13 +32,9 @@ No resources.
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_environment"></a> [environment](#input\_environment) | Environment name | `string` | n/a | yes |
+No inputs.
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_environment"></a> [environment](#output\_environment) | n/a |
+No outputs.
 <!-- END_TF_DOCS -->
