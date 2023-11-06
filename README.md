@@ -1,7 +1,7 @@
 # Terraform dxw Dalmatian infrastructure
 
 [![Terraform CI](https://github.com/dxw/terraform-dxw-dalmatian-infrastructure/actions/workflows/continuous-integration-terraform.yml/badge.svg?branch=main)](https://github.com/dxw/terraform-dxw-dalmatian-infrastructure/actions/workflows/continuous-integration-terraform.yml?branch=main)
-[![GitHub release](https://github.com/dxw/terraform-dxw-dalmatian-infrastructure/releases)](https://github.com/dxw/terraform-dxw-dalmatian-infrastructure/releases)
+[![GitHub release](https://img.shields.io/github/release/dxw/terraform-dxw-dalmatian-infrastructure.svg)](https://github.com/dxw/terraform-dxw-dalmatian-infrastructure/releases)
 
 This project creates and manages resources within an AWS account for infrastructures on dxw's Dalmatian hosting platform.
 
