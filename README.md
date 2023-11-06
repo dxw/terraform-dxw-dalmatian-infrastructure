@@ -5,16 +5,6 @@
 
 This project creates and manages resources within an AWS account for infrastructures on dxw's Dalmatian hosting platform.
 
-## Usage
-
-Example module usage:
-
-```hcl
-module "<MODULE NAME>" {
-  source  = "github.com/dxw/terraform-dxw-dalmatian-infrastructure?ref=v<VERSION>"
-}
-```
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
