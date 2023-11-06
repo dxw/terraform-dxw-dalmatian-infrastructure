@@ -22,6 +22,9 @@ jobs:
           DOTFILE_VERSION=$(cat .terraform-version)
           echo "version=$DOTFILE_VERSION" >> $GITHUB_OUTPUT
 
+      - name: Remove AWS backend
+        run: rm ./backend.tf
+
       - name: Pull Terraform image
         run: |
           docker pull hashicorp/terraform:${{ steps.get-terraform-version.outputs.version }}
