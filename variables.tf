@@ -17,3 +17,8 @@ variable "aws_region" {
   description = "AWS region in which to launch resources"
   type        = string
 }
+
+variable "infrastructure_kms_encryption" {
+  description = "Enable infrastructure KMS encryption. This will create a single KMS key to be used across all resources that support KMS encryption."
+  type        = bool
+}
