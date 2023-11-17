@@ -22,3 +22,8 @@ variable "infrastructure_kms_encryption" {
   description = "Enable infrastructure KMS encryption. This will create a single KMS key to be used across all resources that support KMS encryption."
   type        = bool
 }
+
+variable "infrastructure_logging_bucket_retention" {
+  description = "Retention in days for the infrasrtucture S3 logs. This is for the default S3 logs bucket, where all AWS service logs will be delivered"
+  type        = number
+}
