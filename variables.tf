@@ -62,3 +62,28 @@ variable "infrastructure_vpc_assign_generated_ipv6_cidr_block" {
   description = "Assign generated IPv6 CIDR block on infrastructure VPC"
   type        = bool
 }
+
+variable "infrastructure_vpc_flow_logs_cloudwatch_logs" {
+  description = "Enable VPC logs on infrastructure VPC to CloudWatch Logs"
+  type        = bool
+}
+
+variable "infrastructure_vpc_flow_logs_s3_with_athena" {
+  description = "Enable VPC flow logs in infrastructure VPC to the S3 logs bucket. A compatible Glue table/database and Athena workgroup will also be created to allow querying the logs."
+  type        = bool
+}
+
+variable "infrastructure_vpc_flow_logs_retention" {
+  description = "VPC flow logs retention in days"
+  type        = number
+}
+
+variable "infrastructure_vpc_flow_logs_traffic_type" {
+  description = "Infrastructure VPC flow logs traffic type"
+  type        = string
+}
+
+variable "infrastructure_vpc_flow_logs_s3_key_prefix" {
+  description = "Flow Logs by default will go into the infrastructure S3 logs bucket. This is the key prefix used to isolate them from other logs"
+  type        = string
+}
