@@ -14,6 +14,17 @@ resource "aws_kms_key" "infrastructure" {
       {
         aws_account_id = local.aws_account_id
       }
+      )}${local.infrastructure_vpc_flow_logs_cloudwatch_logs && local.infrastructure_kms_encryption ? "," : ""}
+      ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudwatch-logs-allow.json.tpl",
+      {
+        log_group_arn = local.infrastructure_vpc_flow_logs_cloudwatch_logs && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:${local.resource_prefix}-infrastructure-vpc-flow-logs" : ""
+      }
+      )}${local.infrastructure_vpc_flow_logs_s3_with_athena && local.infrastructure_kms_encryption ? "," : ""}
+      ${templatefile("${path.root}/policies/kms-key-policy-statements/log-delivery-allow.json.tpl",
+      {
+        account_id = local.infrastructure_vpc_flow_logs_s3_with_athena && local.infrastructure_kms_encryption ? local.aws_account_id : ""
+        region     = local.aws_region
+      }
   )}
       ]
       EOT
