@@ -25,6 +25,15 @@ locals {
   infrastructure_vpc_instance_tenancy                     = var.infrastructure_vpc_instance_tenancy
   infrastructure_vpc_enable_network_address_usage_metrics = var.infrastructure_vpc_enable_network_address_usage_metrics
   infrastructure_vpc_assign_generated_ipv6_cidr_block     = var.infrastructure_vpc_assign_generated_ipv6_cidr_block
+  infrastructure_vpc_network_enable_public                = local.infrastructure_vpc && var.infrastructure_vpc_network_enable_public
+  infrastructure_vpc_network_enable_private               = local.infrastructure_vpc && var.infrastructure_vpc_network_enable_private
+  infrastructure_vpc_network_availability_zones           = toset(sort(var.infrastructure_vpc_network_availability_zones))
+  infrastructure_vpc_network_public_cidr                  = cidrsubnet(local.infrastructure_vpc_cidr_block, 1, 0)
+  infrastructure_vpc_network_public_cidr_prefix           = basename(local.infrastructure_vpc_network_public_cidr)
+  infrastructure_vpc_network_public_cidr_newbits          = 24 - local.infrastructure_vpc_network_public_cidr_prefix
+  infrastructure_vpc_network_private_cidr                 = cidrsubnet(local.infrastructure_vpc_cidr_block, 1, 1)
+  infrastructure_vpc_network_private_cidr_prefix          = basename(local.infrastructure_vpc_network_private_cidr)
+  infrastructure_vpc_network_private_cidr_newbits         = 24 - local.infrastructure_vpc_network_private_cidr_prefix
   infrastructure_vpc_flow_logs_cloudwatch_logs            = var.infrastructure_vpc_flow_logs_cloudwatch_logs && local.infrastructure_vpc
   infrastructure_vpc_flow_logs_s3_with_athena             = var.infrastructure_vpc_flow_logs_s3_with_athena && local.infrastructure_vpc
   infrastructure_vpc_flow_logs_s3_key_prefix              = trim(var.infrastructure_vpc_flow_logs_s3_key_prefix, "/")
