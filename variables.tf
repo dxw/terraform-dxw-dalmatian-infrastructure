@@ -102,3 +102,79 @@ variable "infrastructure_vpc_network_availability_zones" {
   description = "A list of availability zone characters (eg. [\"a\", \"b\", \"c\"])"
   type        = list(string)
 }
+
+variable "infrastructure_vpc_network_acl_egress_lockdown_private" {
+  description = "Creates a network ACL for the private subnets which blocks all egress traffic, permitting only the ports required for resources deployed by this module and custom rules."
+  type        = bool
+}
+
+variable "infrastructure_vpc_network_acl_egress_custom_rules_private" {
+  description = "Infrastructure vpc egress custom rules for the private subnets. These will be evaluated before any automatically added rules."
+  type = list(object({
+    protocol        = string
+    from_port       = number
+    to_port         = number
+    action          = string
+    cidr_block      = string
+    ipv6_cidr_block = optional(string, null)
+    icmp_type       = optional(number, null)
+    icmp_code       = optional(number, null)
+  }))
+}
+
+variable "infrastructure_vpc_network_acl_egress_lockdown_public" {
+  description = "Creates a network ACL for the public subnets which blocks all egress traffic, permitting only the ports required for resources deployed by this module and custom rules."
+  type        = bool
+}
+
+variable "infrastructure_vpc_network_acl_egress_custom_rules_public" {
+  description = "Infrastructure vpc egress custom rules for the public subnets. These will be evaluated before any automatically added rules."
+  type = list(object({
+    protocol        = string
+    from_port       = number
+    to_port         = number
+    action          = string
+    cidr_block      = string
+    ipv6_cidr_block = optional(string, null)
+    icmp_type       = optional(number, null)
+    icmp_code       = optional(number, null)
+  }))
+}
+
+variable "infrastructure_vpc_network_acl_ingress_lockdown_private" {
+  description = "Creates a network ACL for the private subnets which blocks all ingress traffic, permitting only the ports required for resources deployed by this module and custom rules."
+  type        = bool
+}
+
+variable "infrastructure_vpc_network_acl_ingress_custom_rules_private" {
+  description = "Infrastructure vpc ingress custom rules for the private subnets. These will be evaluated before any automatically added rules."
+  type = list(object({
+    protocol        = string
+    from_port       = number
+    to_port         = number
+    action          = string
+    cidr_block      = string
+    ipv6_cidr_block = optional(string, null)
+    icmp_type       = optional(number, null)
+    icmp_code       = optional(number, null)
+  }))
+}
+
+variable "infrastructure_vpc_network_acl_ingress_lockdown_public" {
+  description = "Creates a network ACL for the public subnets which blocks all ingress traffic, permitting only the ports required for resources deployed by this module and custom rules."
+  type        = bool
+}
+
+variable "infrastructure_vpc_network_acl_ingress_custom_rules_public" {
+  description = "Infrastructure vpc ingress custom rules for the public subnets. These will be evaluated before any automatically added rules."
+  type = list(object({
+    protocol        = string
+    from_port       = number
+    to_port         = number
+    action          = string
+    cidr_block      = string
+    ipv6_cidr_block = optional(string, null)
+    icmp_type       = optional(number, null)
+    icmp_code       = optional(number, null)
+  }))
+}
