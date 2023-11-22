@@ -87,3 +87,18 @@ variable "infrastructure_vpc_flow_logs_s3_key_prefix" {
   description = "Flow Logs by default will go into the infrastructure S3 logs bucket. This is the key prefix used to isolate them from other logs"
   type        = string
 }
+
+variable "infrastructure_vpc_network_enable_public" {
+  description = "Enable public networking on Infrastructure VPC. This will create subnets with a route to an Internet Gateway"
+  type        = bool
+}
+
+variable "infrastructure_vpc_network_enable_private" {
+  description = "Enable private networking on Infrastructure VPC. This will create subnets with a route to a NAT Gateway (If Public networking has been enabled)"
+  type        = bool
+}
+
+variable "infrastructure_vpc_network_availability_zones" {
+  description = "A list of availability zone characters (eg. [\"a\", \"b\", \"c\"])"
+  type        = list(string)
+}

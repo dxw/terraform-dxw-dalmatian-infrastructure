@@ -19,7 +19,7 @@ resource "aws_iam_role" "infrastructure_vpc_flow_logs" {
 resource "aws_iam_role_policy" "infrastructure_vpc_flow_logs_allow_cloudwatch_rw" {
   count = local.infrastructure_vpc_flow_logs_cloudwatch_logs ? 1 : 0
 
-  name   = "${local.resource_prefix}-ecs-vpc-flow-logs-cloudwatch-logs-rw"
+  name   = "${local.resource_prefix}-vpc-flow-logs-cloudwatch-logs-rw"
   role   = aws_iam_role.infrastructure_vpc_flow_logs[0].id
   policy = templatefile("${path.root}/policies/cloudwatch-logs-rw.json.tpl", {})
 }

@@ -25,20 +25,31 @@ This project creates and manages resources within an AWS account for infrastruct
 |------|------|
 | [aws_athena_workgroup.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/athena_workgroup) | resource |
 | [aws_cloudwatch_log_group.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_eip.infrastructure_nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eip) | resource |
 | [aws_flow_log.infrastructure_vpc_flow_logs_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/flow_log) | resource |
 | [aws_flow_log.infrastructure_vpc_flow_logs_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/flow_log) | resource |
 | [aws_glue_catalog_database.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_catalog_database) | resource |
 | [aws_glue_catalog_table.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_catalog_table) | resource |
 | [aws_iam_role.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.infrastructure_vpc_flow_logs_allow_cloudwatch_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_internet_gateway.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
 | [aws_kms_alias.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_key.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_nat_gateway.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway) | resource |
+| [aws_route.infrustructure_public_internet_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
+| [aws_route.private_nat_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
+| [aws_route_table.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
+| [aws_route_table.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
+| [aws_route_table_association.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
+| [aws_route_table_association.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_s3_bucket.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_lifecycle_configuration.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
 | [aws_s3_bucket_policy.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_public_access_block.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_versioning.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
+| [aws_subnet.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
+| [aws_subnet.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 
@@ -63,6 +74,9 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_infrastructure_vpc_flow_logs_s3_with_athena"></a> [infrastructure\_vpc\_flow\_logs\_s3\_with\_athena](#input\_infrastructure\_vpc\_flow\_logs\_s3\_with\_athena) | Enable VPC flow logs in infrastructure VPC to the S3 logs bucket. A compatible Glue table/database and Athena workgroup will also be created to allow querying the logs. | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_flow_logs_traffic_type"></a> [infrastructure\_vpc\_flow\_logs\_traffic\_type](#input\_infrastructure\_vpc\_flow\_logs\_traffic\_type) | Infrastructure VPC flow logs traffic type | `string` | n/a | yes |
 | <a name="input_infrastructure_vpc_instance_tenancy"></a> [infrastructure\_vpc\_instance\_tenancy](#input\_infrastructure\_vpc\_instance\_tenancy) | Infrastructure VPC instance tenancy | `string` | n/a | yes |
+| <a name="input_infrastructure_vpc_network_availability_zones"></a> [infrastructure\_vpc\_network\_availability\_zones](#input\_infrastructure\_vpc\_network\_availability\_zones) | A list of availability zone characters (eg. ["a", "b", "c"]) | `list(string)` | n/a | yes |
+| <a name="input_infrastructure_vpc_network_enable_private"></a> [infrastructure\_vpc\_network\_enable\_private](#input\_infrastructure\_vpc\_network\_enable\_private) | Enable private networking on Infrastructure VPC. This will create subnets with a route to a NAT Gateway (If Public networking has been enabled) | `bool` | n/a | yes |
+| <a name="input_infrastructure_vpc_network_enable_public"></a> [infrastructure\_vpc\_network\_enable\_public](#input\_infrastructure\_vpc\_network\_enable\_public) | Enable public networking on Infrastructure VPC. This will create subnets with a route to an Internet Gateway | `bool` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Project name to be used as a prefix for all resources | `string` | n/a | yes |
 
 ## Outputs
