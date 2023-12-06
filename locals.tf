@@ -18,6 +18,12 @@ locals {
     local.infrastructure_vpc_flow_logs_s3_with_athena ? ["arn:aws:logs:${local.aws_region}:${local.aws_account_id}:*"] : [],
   )
 
+  route53_root_hosted_zone_domain_name      = var.route53_root_hosted_zone_domain_name
+  aws_profile_name_route53_root             = var.aws_profile_name_route53_root
+  enable_infrastructure_route53_hosted_zone = var.enable_infrastructure_route53_hosted_zone
+  create_infrastructure_route53_delegations = local.route53_root_hosted_zone_domain_name != "" && local.aws_profile_name_route53_root != "" && local.enable_infrastructure_route53_hosted_zone
+  infrastructure_route53_domain             = "${local.environment}.${var.infrastructure_name}.${local.route53_root_hosted_zone_domain_name}"
+
   infrastructure_vpc                                          = var.infrastructure_vpc
   infrastructure_vpc_cidr_block                               = var.infrastructure_vpc_cidr_block
   infrastructure_vpc_enable_dns_support                       = var.infrastructure_vpc_enable_dns_support
