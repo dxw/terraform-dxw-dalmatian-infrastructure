@@ -178,3 +178,18 @@ variable "infrastructure_vpc_network_acl_ingress_custom_rules_public" {
     icmp_code       = optional(number, null)
   }))
 }
+
+variable "route53_root_hosted_zone_domain_name" {
+  description = "Route53 Hosted Zone in which to delegate Infrastructure Route53 Hosted Zones."
+  type        = string
+}
+
+variable "aws_profile_name_route53_root" {
+  description = "AWS Profile name which is configured for the account in which the root Route53 Hosted Zone exists."
+  type        = string
+}
+
+variable "enable_infrastructure_route53_hosted_zone" {
+  description = "Creates a Route53 hosted zone, where DNS records will be created for resources launched within this module."
+  type        = bool
+}
