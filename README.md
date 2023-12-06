@@ -17,8 +17,8 @@ This project creates and manages resources within an AWS account for infrastruct
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.26.0 |
-| <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.26.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.29.0 |
+| <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.29.0 |
 
 ## Resources
 
