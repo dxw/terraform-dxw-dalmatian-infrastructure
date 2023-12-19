@@ -10,13 +10,15 @@ This project creates and manages resources within an AWS account for infrastruct
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.3 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.24.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.5 |
+| <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.4.1 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.30.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
+| <a name="provider_archive"></a> [archive](#provider\_archive) | 2.4.1 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 5.30.0 |
 | <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.30.0 |
 
@@ -25,18 +27,43 @@ This project creates and manages resources within an AWS account for infrastruct
 | Name | Type |
 |------|------|
 | [aws_athena_workgroup.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/athena_workgroup) | resource |
+| [aws_autoscaling_group.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group) | resource |
+| [aws_autoscaling_lifecycle_hook.infrastructure_ecs_cluster_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
+| [aws_cloudwatch_log_group.ecs_cluster_infrastructure_draining_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_default_network_acl.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_network_acl) | resource |
+| [aws_ecs_cluster.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_eip.infrastructure_nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eip) | resource |
 | [aws_flow_log.infrastructure_vpc_flow_logs_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/flow_log) | resource |
 | [aws_flow_log.infrastructure_vpc_flow_logs_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/flow_log) | resource |
 | [aws_glue_catalog_database.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_catalog_database) | resource |
 | [aws_glue_catalog_table.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_catalog_table) | resource |
+| [aws_iam_instance_profile.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
+| [aws_iam_policy.ecs_cluster_infrastructure_draining_ecs_container_instance_state_update_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.ecs_cluster_infrastructure_draining_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.ecs_cluster_infrastructure_draining_sns_publish_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_sns_publish](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.infrastructure_ecs_cluster_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.infrastructure_vpc_flow_logs_allow_cloudwatch_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_draining_ecs_container_instance_state_update_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_draining_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_draining_sns_publish_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_sns_publish](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_internet_gateway.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
 | [aws_kms_alias.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_key.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_lambda_function.ecs_cluster_infrastructure_draining](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
+| [aws_lambda_permission.ecs_cluster_infrastructure_draining_allow_sns_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
+| [aws_launch_template.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) | resource |
 | [aws_nat_gateway.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway) | resource |
 | [aws_network_acl.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl) | resource |
 | [aws_network_acl.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl) | resource |
@@ -50,6 +77,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_network_acl_rule.ingress_allow_all_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
 | [aws_network_acl_rule.ingress_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
 | [aws_network_acl_rule.ingress_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
+| [aws_placement_group.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/placement_group) | resource |
 | [aws_route.infrustructure_public_internet_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_route.private_nat_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_route53_record.infrastructure_ns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
@@ -64,9 +92,20 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_bucket_public_access_block.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_versioning.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
+| [aws_security_group.infrastructure_ecs_cluster_container_instances](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_https_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_https_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_ingress_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_ingress_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_sns_topic.infrastructure_ecs_cluster_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
+| [aws_sns_topic_subscription.ecs_cluster_infrastructure_draining_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
 | [aws_subnet.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
+| [archive_file.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
+| [aws_ami.ecs_cluster_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_route53_zone.root](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 
@@ -76,8 +115,22 @@ This project creates and manages resources within an AWS account for infrastruct
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_profile_name_route53_root"></a> [aws\_profile\_name\_route53\_root](#input\_aws\_profile\_name\_route53\_root) | AWS Profile name which is configured for the account in which the root Route53 Hosted Zone exists. | `string` | n/a | yes |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region in which to launch resources | `string` | n/a | yes |
+| <a name="input_enable_infrastructure_ecs_cluster"></a> [enable\_infrastructure\_ecs\_cluster](#input\_enable\_infrastructure\_ecs\_cluster) | Enable creation of infrastructure ECS cluster, to place ECS services | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_route53_hosted_zone"></a> [enable\_infrastructure\_route53\_hosted\_zone](#input\_enable\_infrastructure\_route53\_hosted\_zone) | Creates a Route53 hosted zone, where DNS records will be created for resources launched within this module. | `bool` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name to be used as part of the resource prefix | `string` | n/a | yes |
+| <a name="input_infrastructure_dockerhub_email"></a> [infrastructure\_dockerhub\_email](#input\_infrastructure\_dockerhub\_email) | Dockerhub email | `string` | n/a | yes |
+| <a name="input_infrastructure_dockerhub_token"></a> [infrastructure\_dockerhub\_token](#input\_infrastructure\_dockerhub\_token) | Dockerhub token which has permissions to pull images | `string` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_ami_version"></a> [infrastructure\_ecs\_cluster\_ami\_version](#input\_infrastructure\_ecs\_cluster\_ami\_version) | AMI version for ECS cluster instances (amzn2-ami-ecs-hvm-<version>) | `string` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_draining_lambda_enabled"></a> [infrastructure\_ecs\_cluster\_draining\_lambda\_enabled](#input\_infrastructure\_ecs\_cluster\_draining\_lambda\_enabled) | Enable the Lambda which ensures all containers have drained before terminating ECS cluster instances | `bool` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_draining_lambda_log_retention"></a> [infrastructure\_ecs\_cluster\_draining\_lambda\_log\_retention](#input\_infrastructure\_ecs\_cluster\_draining\_lambda\_log\_retention) | Log retention for the ECS cluster draining Lambda | `number` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_ebs_docker_storage_volume_size"></a> [infrastructure\_ecs\_cluster\_ebs\_docker\_storage\_volume\_size](#input\_infrastructure\_ecs\_cluster\_ebs\_docker\_storage\_volume\_size) | Size of EBS volume for Docker storage on the infrastructure ECS instances | `number` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_ebs_docker_storage_volume_type"></a> [infrastructure\_ecs\_cluster\_ebs\_docker\_storage\_volume\_type](#input\_infrastructure\_ecs\_cluster\_ebs\_docker\_storage\_volume\_type) | Type of EBS volume for Docker storage on the infrastructure ECS instances (eg. gp3) | `string` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_instance_type"></a> [infrastructure\_ecs\_cluster\_instance\_type](#input\_infrastructure\_ecs\_cluster\_instance\_type) | The instance type for EC2 instances launched in the ECS cluster | `string` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_max_instance_lifetime"></a> [infrastructure\_ecs\_cluster\_max\_instance\_lifetime](#input\_infrastructure\_ecs\_cluster\_max\_instance\_lifetime) | Maximum lifetime in seconds of an instance within the ECS cluster | `number` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_max_size"></a> [infrastructure\_ecs\_cluster\_max\_size](#input\_infrastructure\_ecs\_cluster\_max\_size) | Maximum number of instances for the ECS cluster | `number` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_min_size"></a> [infrastructure\_ecs\_cluster\_min\_size](#input\_infrastructure\_ecs\_cluster\_min\_size) | Minimum number of instances for the ECS cluster | `number` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_publicly_avaialble"></a> [infrastructure\_ecs\_cluster\_publicly\_avaialble](#input\_infrastructure\_ecs\_cluster\_publicly\_avaialble) | Conditionally launch the ECS cluster EC2 instances into the Public subnet | `bool` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_termination_timeout"></a> [infrastructure\_ecs\_cluster\_termination\_timeout](#input\_infrastructure\_ecs\_cluster\_termination\_timeout) | The timeout for the terminiation lifecycle hook | `number` | n/a | yes |
 | <a name="input_infrastructure_kms_encryption"></a> [infrastructure\_kms\_encryption](#input\_infrastructure\_kms\_encryption) | Enable infrastructure KMS encryption. This will create a single KMS key to be used across all resources that support KMS encryption. | `bool` | n/a | yes |
 | <a name="input_infrastructure_logging_bucket_retention"></a> [infrastructure\_logging\_bucket\_retention](#input\_infrastructure\_logging\_bucket\_retention) | Retention in days for the infrasrtucture S3 logs. This is for the default S3 logs bucket, where all AWS service logs will be delivered | `number` | n/a | yes |
 | <a name="input_infrastructure_name"></a> [infrastructure\_name](#input\_infrastructure\_name) | The infrastructure name to be used as part of the resource prefix | `string` | n/a | yes |

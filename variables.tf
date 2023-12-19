@@ -18,6 +18,17 @@ variable "aws_region" {
   type        = string
 }
 
+variable "infrastructure_dockerhub_email" {
+  description = "Dockerhub email"
+  type        = string
+}
+
+variable "infrastructure_dockerhub_token" {
+  description = "Dockerhub token which has permissions to pull images"
+  type        = string
+  sensitive   = true
+}
+
 variable "infrastructure_kms_encryption" {
   description = "Enable infrastructure KMS encryption. This will create a single KMS key to be used across all resources that support KMS encryption."
   type        = bool
@@ -192,4 +203,64 @@ variable "aws_profile_name_route53_root" {
 variable "enable_infrastructure_route53_hosted_zone" {
   description = "Creates a Route53 hosted zone, where DNS records will be created for resources launched within this module."
   type        = bool
+}
+
+variable "enable_infrastructure_ecs_cluster" {
+  description = "Enable creation of infrastructure ECS cluster, to place ECS services"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_ami_version" {
+  description = "AMI version for ECS cluster instances (amzn2-ami-ecs-hvm-<version>)"
+  type        = string
+}
+
+variable "infrastructure_ecs_cluster_ebs_docker_storage_volume_size" {
+  description = "Size of EBS volume for Docker storage on the infrastructure ECS instances"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_ebs_docker_storage_volume_type" {
+  description = "Type of EBS volume for Docker storage on the infrastructure ECS instances (eg. gp3)"
+  type        = string
+}
+
+variable "infrastructure_ecs_cluster_publicly_avaialble" {
+  description = "Conditionally launch the ECS cluster EC2 instances into the Public subnet"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_instance_type" {
+  description = "The instance type for EC2 instances launched in the ECS cluster"
+  type        = string
+}
+
+variable "infrastructure_ecs_cluster_termination_timeout" {
+  description = "The timeout for the terminiation lifecycle hook"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_draining_lambda_enabled" {
+  description = "Enable the Lambda which ensures all containers have drained before terminating ECS cluster instances"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_draining_lambda_log_retention" {
+  description = "Log retention for the ECS cluster draining Lambda"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_min_size" {
+  description = "Minimum number of instances for the ECS cluster"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_max_size" {
+  description = "Maximum number of instances for the ECS cluster"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_max_instance_lifetime" {
+  description = "Maximum lifetime in seconds of an instance within the ECS cluster"
+  type        = number
 }
