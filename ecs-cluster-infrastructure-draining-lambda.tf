@@ -9,7 +9,8 @@ resource "aws_cloudwatch_log_group" "ecs_cluster_infrastructure_draining_lambda_
 resource "aws_iam_role" "ecs_cluster_infrastructure_draining_lambda" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled ? 1 : 0
 
-  name = "${local.resource_prefix}-ecs-cluster-infrastructure-draining-lambda"
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-infrastructure-draining-lambda"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-cluster-infrastructure-draining-lambda"
   assume_role_policy = templatefile(
     "${path.root}/policies/assume-roles/service-principle-standard.json.tpl",
     { services = jsonencode(["lambda.amazonaws.com"]) }

@@ -104,7 +104,8 @@ resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instanc
 resource "aws_iam_role" "infrastructure_ecs_cluster" {
   count = local.enable_infrastructure_ecs_cluster ? 1 : 0
 
-  name = "${local.resource_prefix}-infrastructure-ecs-cluster"
+  name        = "${local.resource_prefix}-${substr(sha512("infrastructure-ecs-cluster"), 0, 6)}"
+  description = "${local.resource_prefix}-infrastructure-ecs-cluster"
   assume_role_policy = templatefile(
     "${path.root}/policies/assume-roles/service-principle-standard.json.tpl",
     { services = jsonencode(["ecs.amazonaws.com", "ec2.amazonaws.com"]) }
@@ -265,7 +266,8 @@ resource "aws_sns_topic" "infrastructure_ecs_cluster_autoscaling_lifecycle_termi
 resource "aws_iam_role" "infrastructure_ecs_cluster_autoscaling_lifecycle_termination" {
   count = local.enable_infrastructure_ecs_cluster ? 1 : 0
 
-  name = "${local.resource_prefix}-ecs-termination-hook"
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-termination-hook"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-termination-hook"
   assume_role_policy = templatefile(
     "${path.root}/policies/assume-roles/service-principle-standard.json.tpl",
     { services = jsonencode(["autoscaling.amazonaws.com"]) }

@@ -10,7 +10,8 @@ resource "aws_cloudwatch_log_group" "infrastructure_vpc_flow_logs" {
 resource "aws_iam_role" "infrastructure_vpc_flow_logs" {
   count = local.infrastructure_vpc_flow_logs_cloudwatch_logs ? 1 : 0
 
-  name = "${local.resource_prefix}-infrastructure-vpc-flow-logs"
+  name        = "${local.resource_prefix}-${substr(sha512("infrastructure-vpc-flow-logs"), 0, 6)}"
+  description = "${local.resource_prefix}-infrastructure-vpc-flow-logs"
   assume_role_policy = templatefile("${path.root}/policies/assume-roles/service-principle-standard.json.tpl", {
     services = jsonencode(["vpc-flow-logs.amazonaws.com"])
   })
