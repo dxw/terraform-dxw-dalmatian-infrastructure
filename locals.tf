@@ -89,6 +89,34 @@ locals {
     hour   = "string"
   }
 
+  infrastructure_dockerhub_email = var.infrastructure_dockerhub_email
+  infrastructure_dockerhub_token = var.infrastructure_dockerhub_token
+
+  enable_infrastructure_ecs_cluster                                = var.enable_infrastructure_ecs_cluster && local.infrastructure_vpc
+  infrastructure_ecs_cluster_name                                  = "${local.resource_prefix}-infrastructure"
+  infrastructure_ecs_cluster_ami_version                           = var.infrastructure_ecs_cluster_ami_version
+  infrastructure_ecs_cluster_ebs_docker_storage_volume_device_name = "/dev/xvdcz"
+  infrastructure_ecs_cluster_ebs_docker_storage_volume_size        = var.infrastructure_ecs_cluster_ebs_docker_storage_volume_size
+  infrastructure_ecs_cluster_ebs_docker_storage_volume_type        = var.infrastructure_ecs_cluster_ebs_docker_storage_volume_type
+  infrastructure_ecs_cluster_publicly_avaialble                    = var.infrastructure_ecs_cluster_publicly_avaialble && local.infrastructure_vpc_network_enable_public
+  infrastructure_ecs_cluster_instance_type                         = var.infrastructure_ecs_cluster_instance_type
+  infrastructure_ecs_cluster_termination_timeout                   = var.infrastructure_ecs_cluster_termination_timeout
+  infrastructure_ecs_cluster_draining_lambda_enabled               = var.infrastructure_ecs_cluster_draining_lambda_enabled && local.enable_infrastructure_ecs_cluster
+  infrastructure_ecs_cluster_draining_lambda_log_retention         = var.infrastructure_ecs_cluster_draining_lambda_log_retention
+  infrastructure_ecs_cluster_termination_sns_topic_name            = "${local.resource_prefix}-infrastructure-ecs-cluster-termination"
+  infrastructure_ecs_cluster_min_size                              = var.infrastructure_ecs_cluster_min_size
+  infrastructure_ecs_cluster_max_size                              = var.infrastructure_ecs_cluster_max_size
+  infrastructure_ecs_cluster_max_instance_lifetime                 = var.infrastructure_ecs_cluster_max_instance_lifetime
+  infrastructure_ecs_cluster_user_data = base64encode(
+    templatefile("ec2-userdata/ecs-instance.tpl", {
+      docker_storage_volume_device_name = local.infrastructure_ecs_cluster_ebs_docker_storage_volume_device_name,
+      ecs_cluster_name                  = local.infrastructure_ecs_cluster_name,
+      dockerhub_token                   = local.infrastructure_dockerhub_token,
+      dockerhub_email                   = local.infrastructure_dockerhub_email,
+      docker_storage_size               = local.infrastructure_ecs_cluster_ebs_docker_storage_volume_size
+    })
+  )
+
   default_tags = {
     Project        = local.project_name,
     Infrastructure = local.infrastructure_name,
