@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_log_group" "ecs_cluster_infrastructure_draining_lambda_log_group" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled ? 1 : 0
 
-  name              = "/aws/lambda/${local.project_name}-ecs-cluster-infrastructure-draining"
+  name              = "/aws/lambda/${local.resource_prefix}-ecs-cluster-infrastructure-draining"
   kms_key_id        = local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
   retention_in_days = local.infrastructure_ecs_cluster_draining_lambda_log_retention
 }
@@ -9,7 +9,7 @@ resource "aws_cloudwatch_log_group" "ecs_cluster_infrastructure_draining_lambda_
 resource "aws_iam_role" "ecs_cluster_infrastructure_draining_lambda" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled ? 1 : 0
 
-  name = "${local.project_name}-ecs-cluster-infrastructure-draining-lambda"
+  name = "${local.resource_prefix}-ecs-cluster-infrastructure-draining-lambda"
   assume_role_policy = templatefile(
     "${path.root}/policies/assume-roles/service-principle-standard.json.tpl",
     { services = jsonencode(["lambda.amazonaws.com"]) }
@@ -19,13 +19,13 @@ resource "aws_iam_role" "ecs_cluster_infrastructure_draining_lambda" {
 resource "aws_iam_policy" "ecs_cluster_infrastructure_draining_lambda" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled ? 1 : 0
 
-  name = "${local.project_name}-ecs-cluster-infrastructure-draining-lambda"
+  name = "${local.resource_prefix}-ecs-cluster-infrastructure-draining-lambda"
   policy = templatefile(
     "${path.root}/policies/lambda-default.json.tpl",
     {
       region        = local.aws_region
       account_id    = local.aws_account_id
-      function_name = "${local.project_name}-ecs-cluster-infrastructure-draining"
+      function_name = "${local.resource_prefix}-ecs-cluster-infrastructure-draining"
     }
   )
 }
@@ -40,7 +40,7 @@ resource "aws_iam_role_policy_attachment" "ecs_cluster_infrastructure_draining_l
 resource "aws_iam_policy" "ecs_cluster_infrastructure_draining_ecs_container_instance_state_update_lambda" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled ? 1 : 0
 
-  name = "${local.project_name}-ecs-cluster-infrastructure-ecs-container-instance-state-update"
+  name = "${local.resource_prefix}-ecs-cluster-infrastructure-ecs-container-instance-state-update"
   policy = templatefile(
     "${path.root}/policies/ecs-container-instance-state-update.json.tpl", {}
   )
@@ -56,7 +56,7 @@ resource "aws_iam_role_policy_attachment" "ecs_cluster_infrastructure_draining_e
 resource "aws_iam_policy" "ecs_cluster_infrastructure_draining_sns_publish_lambda" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled ? 1 : 0
 
-  name = "${local.project_name}-ecs-cluster-infrastructure-sns-publish"
+  name = "${local.resource_prefix}-ecs-cluster-infrastructure-sns-publish"
   policy = templatefile(
     "${path.root}/policies/sns-publish.json.tpl",
     { sns_topic_arn = aws_sns_topic.infrastructure_ecs_cluster_autoscaling_lifecycle_termination[0].arn }
@@ -73,7 +73,7 @@ resource "aws_iam_role_policy_attachment" "ecs_cluster_infrastructure_draining_s
 resource "aws_iam_policy" "ecs_cluster_infrastructure_draining_kms_encrypt" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled && local.infrastructure_kms_encryption ? 1 : 0
 
-  name = "${local.project_name}-ecs-cluster-infrastructure-kms-encrypt"
+  name = "${local.resource_prefix}-ecs-cluster-infrastructure-kms-encrypt"
   policy = templatefile(
     "${path.root}/policies/kms-encrypt.json.tpl",
     { kms_key_arn = aws_kms_key.infrastructure[0].arn }
@@ -99,8 +99,8 @@ resource "aws_lambda_function" "ecs_cluster_infrastructure_draining" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled ? 1 : 0
 
   filename         = data.archive_file.ecs_cluster_infrastructure_draining_lambda[0].output_path
-  function_name    = "${local.project_name}-ecs-cluster-infrastructure-draining"
-  description      = "${local.project_name} ECS Cluster Infrastructure Draining"
+  function_name    = "${local.resource_prefix}-ecs-cluster-infrastructure-draining"
+  description      = "${local.resource_prefix} ECS Cluster Infrastructure Draining"
   handler          = "function.lambda_handler"
   runtime          = "python3.11"
   role             = aws_iam_role.ecs_cluster_infrastructure_draining_lambda[0].arn

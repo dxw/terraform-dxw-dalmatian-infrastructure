@@ -114,7 +114,7 @@ resource "aws_iam_role" "infrastructure_ecs_cluster" {
 resource "aws_iam_policy" "infrastructure_ecs_cluster_ec2_ecs" {
   count = local.enable_infrastructure_ecs_cluster ? 1 : 0
 
-  name   = "${local.project_name}-ec2-ecs"
+  name   = "${local.resource_prefix}-ec2-ecs"
   policy = templatefile("${path.root}/policies/ec2-ecs.json.tpl", {})
 }
 
