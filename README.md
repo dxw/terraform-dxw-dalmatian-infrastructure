@@ -13,6 +13,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.5 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.4.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.30.0 |
+| <a name="requirement_external"></a> [external](#requirement\_external) | >= 2.3.2 |
 
 ## Providers
 
@@ -21,6 +22,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="provider_archive"></a> [archive](#provider\_archive) | 2.4.1 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 5.31.0 |
 | <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.31.0 |
+| <a name="provider_external"></a> [external](#provider\_external) | 2.3.2 |
 
 ## Resources
 
@@ -51,6 +53,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_policy.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_sns_publish](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_pass_role_ssm_dhmc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_ssm_service_setting_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_ecs_cluster_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -63,6 +67,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_sns_publish](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_pass_role_ssm_dhmc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ssm_service_setting_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_internet_gateway.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
 | [aws_kms_alias.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_key.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
@@ -116,6 +122,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_ami.ecs_cluster_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_route53_zone.root](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
+| [external_external.ssm_dhmc_setting](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
 ## Inputs
 
