@@ -36,6 +36,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_log_group.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_default_network_acl.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_network_acl) | resource |
 | [aws_ecs_cluster.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
+| [aws_efs_file_system.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_file_system) | resource |
+| [aws_efs_mount_target.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_mount_target) | resource |
 | [aws_eip.infrastructure_nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eip) | resource |
 | [aws_flow_log.infrastructure_vpc_flow_logs_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/flow_log) | resource |
 | [aws_flow_log.infrastructure_vpc_flow_logs_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/flow_log) | resource |
@@ -96,12 +98,15 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_bucket_server_side_encryption_configuration.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_versioning.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_security_group.infrastructure_ecs_cluster_container_instances](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.infrastructure_ecs_cluster_efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_https_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_https_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_nfs_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_ingress_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_ingress_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ecs_cluster_efs_ingress_nfs_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_sns_topic.infrastructure_ecs_cluster_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
 | [aws_sns_topic_subscription.ecs_cluster_infrastructure_draining_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
 | [aws_subnet.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
@@ -118,7 +123,12 @@ This project creates and manages resources within an AWS account for infrastruct
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_profile_name_route53_root"></a> [aws\_profile\_name\_route53\_root](#input\_aws\_profile\_name\_route53\_root) | AWS Profile name which is configured for the account in which the root Route53 Hosted Zone exists. | `string` | n/a | yes |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region in which to launch resources | `string` | n/a | yes |
+| <a name="input_ecs_cluster_efs_directories"></a> [ecs\_cluster\_efs\_directories](#input\_ecs\_cluster\_efs\_directories) | ECS cluster EFS directories to create | `list(string)` | n/a | yes |
+| <a name="input_ecs_cluster_efs_infrequent_access_transition"></a> [ecs\_cluster\_efs\_infrequent\_access\_transition](#input\_ecs\_cluster\_efs\_infrequent\_access\_transition) | ECS cluser EFS IA transiton in days. Set to 0 to disable IA transition. | `number` | n/a | yes |
+| <a name="input_ecs_cluster_efs_performance_mode"></a> [ecs\_cluster\_efs\_performance\_mode](#input\_ecs\_cluster\_efs\_performance\_mode) | ECS cluser EFS performance mode | `string` | n/a | yes |
+| <a name="input_ecs_cluster_efs_throughput_mode"></a> [ecs\_cluster\_efs\_throughput\_mode](#input\_ecs\_cluster\_efs\_throughput\_mode) | ECS cluser EFS throughput mode | `string` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster"></a> [enable\_infrastructure\_ecs\_cluster](#input\_enable\_infrastructure\_ecs\_cluster) | Enable creation of infrastructure ECS cluster, to place ECS services | `bool` | n/a | yes |
+| <a name="input_enable_infrastructure_ecs_cluster_efs"></a> [enable\_infrastructure\_ecs\_cluster\_efs](#input\_enable\_infrastructure\_ecs\_cluster\_efs) | Conditionally create and mount EFS to the ECS cluster instances | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_route53_hosted_zone"></a> [enable\_infrastructure\_route53\_hosted\_zone](#input\_enable\_infrastructure\_route53\_hosted\_zone) | Creates a Route53 hosted zone, where DNS records will be created for resources launched within this module. | `bool` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name to be used as part of the resource prefix | `string` | n/a | yes |
 | <a name="input_infrastructure_dockerhub_email"></a> [infrastructure\_dockerhub\_email](#input\_infrastructure\_dockerhub\_email) | Dockerhub email | `string` | n/a | yes |

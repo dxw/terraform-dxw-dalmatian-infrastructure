@@ -285,3 +285,28 @@ variable "infrastructure_ecs_cluster_autoscaling_time_based_custom" {
     })
   )
 }
+
+variable "enable_infrastructure_ecs_cluster_efs" {
+  description = "Conditionally create and mount EFS to the ECS cluster instances"
+  type        = bool
+}
+
+variable "ecs_cluster_efs_performance_mode" {
+  description = "ECS cluser EFS performance mode"
+  type        = string
+}
+
+variable "ecs_cluster_efs_throughput_mode" {
+  description = "ECS cluser EFS throughput mode"
+  type        = string
+}
+
+variable "ecs_cluster_efs_infrequent_access_transition" {
+  description = "ECS cluser EFS IA transiton in days. Set to 0 to disable IA transition."
+  type        = number
+}
+
+variable "ecs_cluster_efs_directories" {
+  description = "ECS cluster EFS directories to create"
+  type        = list(string)
+}

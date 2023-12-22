@@ -119,8 +119,19 @@ locals {
       dockerhub_token                   = local.infrastructure_dockerhub_token,
       dockerhub_email                   = local.infrastructure_dockerhub_email,
       docker_storage_size               = local.infrastructure_ecs_cluster_ebs_docker_storage_volume_size
+      efs_id = local.enable_infrastructure_ecs_cluster_efs && (
+        local.infrastructure_vpc_network_enable_private || local.infrastructure_vpc_network_enable_public
+      ) ? aws_efs_file_system.infrastructure_ecs_cluster[0].id : "",
+      region   = local.aws_region,
+      efs_dirs = join(" ", local.ecs_cluster_efs_directories)
     })
   )
+
+  enable_infrastructure_ecs_cluster_efs        = var.enable_infrastructure_ecs_cluster_efs && local.infrastructure_vpc
+  ecs_cluster_efs_performance_mode             = var.ecs_cluster_efs_performance_mode
+  ecs_cluster_efs_throughput_mode              = var.ecs_cluster_efs_throughput_mode
+  ecs_cluster_efs_infrequent_access_transition = var.ecs_cluster_efs_infrequent_access_transition
+  ecs_cluster_efs_directories                  = var.ecs_cluster_efs_directories
 
   default_tags = {
     Project        = local.project_name,
