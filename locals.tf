@@ -107,6 +107,11 @@ locals {
   infrastructure_ecs_cluster_min_size                              = var.infrastructure_ecs_cluster_min_size
   infrastructure_ecs_cluster_max_size                              = var.infrastructure_ecs_cluster_max_size
   infrastructure_ecs_cluster_max_instance_lifetime                 = var.infrastructure_ecs_cluster_max_instance_lifetime
+  infrastructure_ecs_cluster_autoscaling_time_based_max            = toset(var.infrastructure_ecs_cluster_autoscaling_time_based_max)
+  infrastructure_ecs_cluster_autoscaling_time_based_min            = toset(var.infrastructure_ecs_cluster_autoscaling_time_based_min)
+  infrastructure_ecs_cluster_autoscaling_time_based_custom = {
+    for custom in toset(var.infrastructure_ecs_cluster_autoscaling_time_based_custom) : "${custom["min"]}-${custom["max"]} ${custom["cron"]}" => custom
+  }
   infrastructure_ecs_cluster_user_data = base64encode(
     templatefile("ec2-userdata/ecs-instance.tpl", {
       docker_storage_volume_device_name = local.infrastructure_ecs_cluster_ebs_docker_storage_volume_device_name,
