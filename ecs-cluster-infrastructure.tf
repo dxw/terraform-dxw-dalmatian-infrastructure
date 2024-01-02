@@ -138,6 +138,43 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_ec2_ecs" {
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_ec2_ecs[0].arn
 }
 
+resource "aws_iam_policy" "infrastructure_ecs_cluster_ssm_service_setting_rw" {
+  count = local.infrastructure_ecs_cluster_enable_ssm_dhmc ? 1 : 0
+
+  name = "${local.resource_prefix}-ssm-service-setting-rw"
+  policy = templatefile(
+    "${path.root}/policies/ssm-service-setting-rw.json.tpl",
+    { ssm_service_setting_arn = data.external.ssm_dhmc_setting[0].result.arn }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_ssm_service_setting_rw" {
+  count = local.infrastructure_ecs_cluster_enable_ssm_dhmc ? 1 : 0
+
+  role       = aws_iam_role.infrastructure_ecs_cluster[0].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_ssm_service_setting_rw[0].arn
+}
+
+resource "aws_iam_policy" "infrastructure_ecs_cluster_pass_role_ssm_dhmc" {
+  count = local.infrastructure_ecs_cluster_enable_ssm_dhmc ? 1 : 0
+
+  name = "${local.resource_prefix}-pass-role-ssm-dhmc"
+  policy = templatefile(
+    "${path.root}/policies/pass-role.json.tpl",
+    {
+      role_arn = "arn:aws:iam::${local.aws_account_id}:role/${data.external.ssm_dhmc_setting[0].result.setting_value}",
+      service  = "ssm.amazonaws.com"
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_pass_role_ssm_dhmc" {
+  count = local.infrastructure_ecs_cluster_enable_ssm_dhmc ? 1 : 0
+
+  role       = aws_iam_role.infrastructure_ecs_cluster[0].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_pass_role_ssm_dhmc[0].arn
+}
+
 resource "aws_iam_instance_profile" "infrastructure_ecs_cluster" {
   count = local.enable_infrastructure_ecs_cluster ? 1 : 0
 
@@ -293,6 +330,12 @@ resource "aws_autoscaling_group" "infrastructure_ecs_cluster" {
     "WarmPoolTerminatingCapacity",
     "WarmPoolTotalCapacity",
     "WarmPoolWarmedCapacity",
+  ]
+
+  depends_on = [
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ec2_ecs,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ssm_service_setting_rw,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_pass_role_ssm_dhmc,
   ]
 }
 

@@ -26,3 +26,16 @@ data "aws_ami" "ecs_cluster_ami" {
     ]
   }
 }
+
+# aws_ssm_service_setting doesn't yet have a data source, so we need to use
+# a script to retrieve SSM service settings
+# https://github.com/hashicorp/terraform-provider-aws/issues/25170
+data "external" "ssm_dhmc_setting" {
+  count = local.enable_infrastructure_ecs_cluster ? 1 : 0
+
+  program = ["/bin/bash", "external-data-scripts/get-ssm-service-setting.sh"]
+
+  query = {
+    setting_id = "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:servicesetting/ssm/managed-instance/default-ec2-instance-management-role"
+  }
+}
