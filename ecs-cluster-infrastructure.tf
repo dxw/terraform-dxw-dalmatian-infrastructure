@@ -254,6 +254,30 @@ resource "aws_autoscaling_group" "infrastructure_ecs_cluster" {
   timeouts {
     delete = "15m"
   }
+
+  enabled_metrics = [
+    "GroupAndWarmPoolDesiredCapacity",
+    "GroupAndWarmPoolTotalCapacity",
+    "GroupDesiredCapacity",
+    "GroupInServiceCapacity",
+    "GroupInServiceInstances",
+    "GroupMaxSize",
+    "GroupMinSize",
+    "GroupPendingCapacity",
+    "GroupPendingInstances",
+    "GroupStandbyCapacity",
+    "GroupStandbyInstances",
+    "GroupTerminatingCapacity",
+    "GroupTerminatingInstances",
+    "GroupTotalCapacity",
+    "GroupTotalInstances",
+    "WarmPoolDesiredCapacity",
+    "WarmPoolMinSize",
+    "WarmPoolPendingCapacity",
+    "WarmPoolTerminatingCapacity",
+    "WarmPoolTotalCapacity",
+    "WarmPoolWarmedCapacity",
+  ]
 }
 
 resource "aws_sns_topic" "infrastructure_ecs_cluster_autoscaling_lifecycle_termination" {
