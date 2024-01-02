@@ -264,3 +264,24 @@ variable "infrastructure_ecs_cluster_max_instance_lifetime" {
   description = "Maximum lifetime in seconds of an instance within the ECS cluster"
   type        = number
 }
+
+variable "infrastructure_ecs_cluster_autoscaling_time_based_max" {
+  description = "List of cron expressions to scale the ECS cluster to the configured max size"
+  type        = list(string)
+}
+
+variable "infrastructure_ecs_cluster_autoscaling_time_based_min" {
+  description = "List of cron expressions to scale the ECS cluster to the configured min size"
+  type        = list(string)
+}
+
+variable "infrastructure_ecs_cluster_autoscaling_time_based_custom" {
+  description = "List of objects with min/max sizes and cron expressions to scale the ECS cluster. Min size will be used as desired."
+  type = list(
+    object({
+      cron = string
+      min  = number
+      max  = number
+    })
+  )
+}
