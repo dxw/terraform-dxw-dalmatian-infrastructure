@@ -101,6 +101,18 @@ resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instanc
   security_group_id = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
 }
 
+resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instances_egress_nfs_tcp" {
+  count = local.enable_infrastructure_ecs_cluster && local.enable_infrastructure_ecs_cluster_efs ? 1 : 0
+
+  description              = "Allow NFS tcp outbound to EFS security group"
+  type                     = "egress"
+  from_port                = 2049
+  to_port                  = 2049
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.infrastructure_ecs_cluster_efs[0].id
+  security_group_id        = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
+}
+
 resource "aws_iam_role" "infrastructure_ecs_cluster" {
   count = local.enable_infrastructure_ecs_cluster ? 1 : 0
 
@@ -192,6 +204,10 @@ resource "aws_launch_template" "infrastructure_ecs_cluster" {
   instance_type                        = local.infrastructure_ecs_cluster_instance_type
 
   user_data = local.infrastructure_ecs_cluster_user_data
+
+  depends_on = [
+    aws_efs_mount_target.infrastructure_ecs_cluster,
+  ]
 }
 
 resource "aws_placement_group" "infrastructure_ecs_cluster" {

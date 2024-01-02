@@ -28,3 +28,14 @@ fi
 sudo yum install -y \
   jq \
   rsync
+%{~ if efs_id != ""}
+# EFS
+sudo mkdir -p /mnt/efs
+sudo yum install -y nfs-utils
+echo '${efs_id}.efs.${region}.amazonaws.com:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0' | sudo tee -a /etc/fstab
+sudo mount -a
+%{if efs_dirs != "" ~}
+cd /mnt/efs
+mkdir -p ${efs_dirs}
+cd ..
+%{~ endif}%{endif}
