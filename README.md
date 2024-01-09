@@ -185,5 +185,7 @@ This project creates and manages resources within an AWS account for infrastruct
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_resource_map"></a> [resource\_map](#output\_resource\_map) | Simplified map of resources and their dependencies, associations and attachments |
 <!-- END_TF_DOCS -->
