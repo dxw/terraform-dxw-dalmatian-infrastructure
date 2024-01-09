@@ -286,6 +286,43 @@ variable "infrastructure_ecs_cluster_autoscaling_time_based_custom" {
   )
 }
 
+variable "infrastructure_ecs_cluster_service_defaults" {
+  description = "Default values for ECS Cluster Services"
+  type = object({
+    github_v1_source        = optional(bool, null)
+    github_v1_oauth_token   = optional(string, null)
+    codestar_connection_arn = optional(string, null)
+    github_owner            = optional(string, null)
+    github_repo             = optional(string, null)
+    github_track_revision   = optional(string, null)
+  })
+
+}
+
+variable "infrastructure_ecs_cluster_services" {
+  description = <<EOT
+    Map of ECS Cluster Services (The key will be the service name). Values in here will override `infrastructure_ecs_cluster_service_defaults` values if set."
+    {
+      service-name = {
+        github_v1_source: Conditionally use GitHubV1 for the CodePipeline source (CodeStar will be used by default)
+        github_v1_oauth_token: If `github_v1_source` is set to true, provide the GitHub OAuthToken here
+        codestar_connection_arn: The CodeStar Connection ARN to use in the CodePipeline source
+        github_owner: The GitHub Owner of the repository to be pulled by the CodePipeline source
+        github_repo: The GitHub repo name to be pulled by the CodePipeline source
+        github_track_revision: The branch/revision of the GitHub repository to be pulled by the CodePipeline source
+      }
+    }
+  EOT
+  type = map(object({
+    github_v1_source        = optional(bool, null)
+    github_v1_oauth_token   = optional(string, null)
+    codestar_connection_arn = optional(string, null)
+    github_owner            = optional(string, null)
+    github_repo             = optional(string, null)
+    github_track_revision   = optional(string, null)
+  }))
+}
+
 variable "enable_infrastructure_ecs_cluster_efs" {
   description = "Conditionally create and mount EFS to the ECS cluster instances"
   type        = bool

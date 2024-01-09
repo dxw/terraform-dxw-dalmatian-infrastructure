@@ -12,10 +12,12 @@ locals {
   infrastructure_logging_bucket_retention = var.infrastructure_logging_bucket_retention
 
   enable_infrastructure_logs_bucket = (
-    local.infrastructure_vpc_flow_logs_s3_with_athena
+    local.infrastructure_vpc_flow_logs_s3_with_athena ||
+    length(local.infrastructure_ecs_cluster_services) != 0
   )
   logs_bucket_source_arns = concat(
     local.infrastructure_vpc_flow_logs_s3_with_athena ? ["arn:aws:logs:${local.aws_region}:${local.aws_account_id}:*"] : [],
+    length(local.infrastructure_ecs_cluster_services) != 0 ? [aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn] : []
   )
 
   route53_root_hosted_zone_domain_name      = var.route53_root_hosted_zone_domain_name
@@ -133,6 +135,18 @@ locals {
   ecs_cluster_efs_throughput_mode              = var.ecs_cluster_efs_throughput_mode
   ecs_cluster_efs_infrequent_access_transition = var.ecs_cluster_efs_infrequent_access_transition
   ecs_cluster_efs_directories                  = var.ecs_cluster_efs_directories
+
+  infrastructure_ecs_cluster_service_defaults = var.infrastructure_ecs_cluster_service_defaults
+  infrastructure_ecs_cluster_services = {
+    for k, v in var.infrastructure_ecs_cluster_services : k => {
+      github_v1_source        = try(coalesce(v["github_v1_source"], local.infrastructure_ecs_cluster_service_defaults["github_v1_source"]), null)
+      github_v1_oauth_token   = try(coalesce(v["github_v1_oauth_token"], local.infrastructure_ecs_cluster_service_defaults["github_v1_oauth_token"]), null)
+      codestar_connection_arn = try(coalesce(v["codestar_connection_arn"], local.infrastructure_ecs_cluster_service_defaults["codestar_connection_arn"]), null)
+      github_owner            = try(coalesce(v["github_owner"], local.infrastructure_ecs_cluster_service_defaults["github_owner"]), null)
+      github_repo             = try(coalesce(v["github_repo"], local.infrastructure_ecs_cluster_service_defaults["github_repo"]), null)
+      github_track_revision   = try(coalesce(v["github_track_revision"], local.infrastructure_ecs_cluster_service_defaults["github_track_revision"]), null)
+    }
+  }
 
   default_tags = {
     Project        = local.project_name,
