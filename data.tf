@@ -27,6 +27,19 @@ data "aws_ami" "ecs_cluster_ami" {
   }
 }
 
+data "aws_s3_object" "ecs_cluster_service_buildspec" {
+  for_each = {
+    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["buildspec_from_github_repo"] == null || service["buildspec_from_github_repo"] == false
+  }
+
+  bucket = aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store[0].id
+  key    = each.value["buildspec"] != null ? each.value["buildspec"] : "dalmatian-default.yml"
+
+  depends_on = [
+    aws_s3_object.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store_files,
+  ]
+}
+
 # aws_ssm_service_setting doesn't yet have a data source, so we need to use
 # a script to retrieve SSM service settings
 # https://github.com/hashicorp/terraform-provider-aws/issues/25170

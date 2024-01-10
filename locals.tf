@@ -137,15 +137,11 @@ locals {
   ecs_cluster_efs_directories                  = var.ecs_cluster_efs_directories
 
   infrastructure_ecs_cluster_service_defaults = var.infrastructure_ecs_cluster_service_defaults
+  infrastructure_ecs_cluster_services_keys    = length(var.infrastructure_ecs_cluster_services) > 0 ? keys(values(var.infrastructure_ecs_cluster_services)[0]) : []
   infrastructure_ecs_cluster_services = {
-    for k, v in var.infrastructure_ecs_cluster_services : k => {
-      github_v1_source        = try(coalesce(v["github_v1_source"], local.infrastructure_ecs_cluster_service_defaults["github_v1_source"]), null)
-      github_v1_oauth_token   = try(coalesce(v["github_v1_oauth_token"], local.infrastructure_ecs_cluster_service_defaults["github_v1_oauth_token"]), null)
-      codestar_connection_arn = try(coalesce(v["codestar_connection_arn"], local.infrastructure_ecs_cluster_service_defaults["codestar_connection_arn"]), null)
-      github_owner            = try(coalesce(v["github_owner"], local.infrastructure_ecs_cluster_service_defaults["github_owner"]), null)
-      github_repo             = try(coalesce(v["github_repo"], local.infrastructure_ecs_cluster_service_defaults["github_repo"]), null)
-      github_track_revision   = try(coalesce(v["github_track_revision"], local.infrastructure_ecs_cluster_service_defaults["github_track_revision"]), null)
-    }
+    for k, v in var.infrastructure_ecs_cluster_services : k => merge({
+      for service_key in local.infrastructure_ecs_cluster_services_keys : service_key => try(coalesce(v[service_key], local.infrastructure_ecs_cluster_service_defaults[service_key]), null)
+    })
   }
 
   default_tags = {
