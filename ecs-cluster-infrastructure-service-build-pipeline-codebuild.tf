@@ -62,9 +62,15 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
     image           = "aws/codebuild/standard:5.0"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
+
+    environment_variable {
+      name  = "CONTAINER_NAME"
+      value = "${local.resource_prefix}-${each.key}"
+    }
   }
 
   source {
-    type = "CODEPIPELINE"
+    type      = "CODEPIPELINE"
+    buildspec = each.value["buildspec_from_github_repo"] != null || each.value["buildspec_from_github_repo"] == true ? each.value["buildspec"] : data.aws_s3_object.ecs_cluster_service_buildspec[each.key].body
   }
 }
