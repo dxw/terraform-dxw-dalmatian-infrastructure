@@ -39,6 +39,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_codebuild_project.infrastructure_ecs_cluster_service_build](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
 | [aws_codepipeline.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codepipeline) | resource |
 | [aws_default_network_acl.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_network_acl) | resource |
+| [aws_ecr_repository.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecs_cluster.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_efs_file_system.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_file_system) | resource |
 | [aws_efs_mount_target.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_mount_target) | resource |
@@ -61,6 +62,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_policy.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_pass_role_ssm_dhmc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_service_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_service_codebuild_ecr_push](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_service_codebuild_kms_decrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_service_codepipeline](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_service_codepipeline_codestar_connection](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -82,6 +84,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_pass_role_ssm_dhmc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codebuild_ecr_push](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codebuild_kms_decrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codepipeline](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codepipeline_codestar_connection](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
