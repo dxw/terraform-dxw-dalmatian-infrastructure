@@ -46,6 +46,24 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_co
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codebuild_kms_decrypt[each.key].arn
 }
 
+resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codebuild_ecr_push" {
+  for_each = local.infrastructure_ecs_cluster_services
+
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-service-codepipeline-codebuild-${each.key}-ecr-push"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-service-codepipeline-codebuild-${each.key}-ecr-push"
+  policy = templatefile(
+    "${path.root}/policies/ecr-push.json.tpl",
+    { ecr_repository_arn = aws_ecr_repository.infrastructure_ecs_cluster_service[each.key].arn }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_codebuild_ecr_push" {
+  for_each = local.infrastructure_ecs_cluster_services
+
+  role       = aws_iam_role.infrastructure_ecs_cluster_service_codebuild[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codebuild_ecr_push[each.key].arn
+}
+
 resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
   for_each = local.infrastructure_ecs_cluster_services
 
@@ -64,8 +82,18 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
     privileged_mode = true
 
     environment_variable {
-      name  = "CONTAINER_NAME"
-      value = "${local.resource_prefix}-${each.key}"
+      name  = "AWS_ACCOUNT_ID"
+      value = local.aws_account_id
+    }
+
+    environment_variable {
+      name  = "IMAGE_REPO_NAME"
+      value = aws_ecr_repository.infrastructure_ecs_cluster_service[each.key].name
+    }
+
+    environment_variable {
+      name  = "REPOSITORY_URL"
+      value = aws_ecr_repository.infrastructure_ecs_cluster_service[each.key].repository_url
     }
   }
 
