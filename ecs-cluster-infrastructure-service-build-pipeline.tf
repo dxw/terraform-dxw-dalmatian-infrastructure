@@ -9,7 +9,6 @@ resource "aws_iam_role" "infrastructure_ecs_cluster_service_codepipeline" {
     { services = jsonencode(["codepipeline.amazonaws.com"]) }
   )
 }
-
 resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codepipeline" {
   for_each = local.infrastructure_ecs_cluster_services
 
@@ -136,15 +135,39 @@ resource "aws_codepipeline" "infrastructure_ecs_cluster_service" {
     name = "Build"
 
     action {
-      name            = "Build"
-      category        = "Build"
-      owner           = "AWS"
-      provider        = "CodeBuild"
-      version         = "1"
-      input_artifacts = ["source"]
+      name             = "Build"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
+      version          = "1"
+      input_artifacts  = ["source"]
+      output_artifacts = ["imagedefinitions"]
 
       configuration = {
         ProjectName = aws_codebuild_project.infrastructure_ecs_cluster_service_build[each.key].name
+      }
+    }
+  }
+
+  dynamic "stage" {
+    for_each = each.value["deployment_type"] == "rolling" ? [1] : []
+
+    content {
+      name = "Deploy-Rolling-Update"
+
+      action {
+        name            = "Deploy"
+        category        = "Deploy"
+        owner           = "AWS"
+        provider        = "ECS"
+        input_artifacts = ["imagedefinitions"]
+        version         = "1"
+
+        configuration = {
+          ClusterName = aws_ecs_cluster.infrastructure[0].name
+          ServiceName = each.key
+          FileName    = "imagedefinitions.json"
+        }
       }
     }
   }

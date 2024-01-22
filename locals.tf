@@ -91,8 +91,9 @@ locals {
     hour   = "string"
   }
 
-  infrastructure_dockerhub_email = var.infrastructure_dockerhub_email
-  infrastructure_dockerhub_token = var.infrastructure_dockerhub_token
+  infrastructure_dockerhub_email    = var.infrastructure_dockerhub_email
+  infrastructure_dockerhub_username = var.infrastructure_dockerhub_username
+  infrastructure_dockerhub_token    = var.infrastructure_dockerhub_token
 
   enable_infrastructure_ecs_cluster                                = var.enable_infrastructure_ecs_cluster && local.infrastructure_vpc
   infrastructure_ecs_cluster_name                                  = "${local.resource_prefix}-infrastructure"

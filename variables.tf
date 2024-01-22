@@ -23,10 +23,14 @@ variable "infrastructure_dockerhub_email" {
   type        = string
 }
 
+variable "infrastructure_dockerhub_username" {
+  description = "Dockerhub username"
+  type        = string
+}
+
 variable "infrastructure_dockerhub_token" {
   description = "Dockerhub token which has permissions to pull images"
   type        = string
-  sensitive   = true
 }
 
 variable "infrastructure_kms_encryption" {
@@ -298,6 +302,15 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     buildspec                     = optional(string, null)
     buildspec_from_github_repo    = optional(bool, null)
     ecr_scan_target_sns_topic_arn = optional(string, null)
+    deployment_type               = optional(string, null)
+    enable_cloudwatch_logs        = optional(bool, null)
+    cloudwatch_logs_retention     = optional(number, null)
+    enable_execute_command        = optional(bool, null)
+    container_entrypoint          = optional(list(string), null)
+    container_port                = optional(number, null)
+    container_volumes             = optional(list(map(string)), null)
+    container_extra_hosts         = optional(list(map(string)), null)
+    container_count               = optional(number, null)
   })
 }
 
@@ -315,6 +328,15 @@ variable "infrastructure_ecs_cluster_services" {
         buildspec: The filename of the buildspec to use for the CodePipeline build phase, stored within the 'codepipeline buildspec store' S3 bucket
         buildspec_from_github_repo: Conditionally use the 'buildspec' filename stored within the GitHub repo as the buildspec
         ecr_scan_target_sns_topic_arn: An SNS topic ARN to publish ECR scan results to
+        deployment_type: The service deployment type - Can be one of 'rolling' or 'blue-green'
+        enable_cloudwatch_logs: Conditionally enable cloudwatch logs for the service
+        cloudwatch_logs_retention: CloudWatch log retention in days
+        enable_execute_command: Enable Amazon ECS Exec to directly interact with containers
+        container_entrypoint: The container entrypoint
+        container_port: The service container port
+        container_volumes: List of maps containing volume mappings eg. [ { "name" = "my-volume", "host_path" = "/mnt/efs/my-dir", "container_path" = "/mnt/my-dir" } ]
+        container_extra_hosts: List of maps containing extra hosts eg. [ { "hostname" = "my.host", "ip_address" = "10.1.2.3" } ]
+        container_count: Number of containers to launch for the service
       }
     }
   EOT
@@ -328,6 +350,15 @@ variable "infrastructure_ecs_cluster_services" {
     buildspec                     = optional(string, null)
     buildspec_from_github_repo    = optional(bool, null)
     ecr_scan_target_sns_topic_arn = optional(string, null)
+    deployment_type               = optional(string, null)
+    enable_cloudwatch_logs        = optional(bool, null)
+    cloudwatch_logs_retention     = optional(number, null)
+    enable_execute_command        = optional(bool, null)
+    container_entrypoint          = optional(list(string), null)
+    container_port                = optional(number, null)
+    container_volumes             = optional(list(map(string)), null)
+    container_extra_hosts         = optional(list(map(string)), null)
+    container_count               = optional(number, null)
   }))
 }
 
