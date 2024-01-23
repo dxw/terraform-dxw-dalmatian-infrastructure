@@ -289,14 +289,15 @@ variable "infrastructure_ecs_cluster_autoscaling_time_based_custom" {
 variable "infrastructure_ecs_cluster_service_defaults" {
   description = "Default values for ECS Cluster Services"
   type = object({
-    github_v1_source           = optional(bool, null)
-    github_v1_oauth_token      = optional(string, null)
-    codestar_connection_arn    = optional(string, null)
-    github_owner               = optional(string, null)
-    github_repo                = optional(string, null)
-    github_track_revision      = optional(string, null)
-    buildspec                  = optional(string, null)
-    buildspec_from_github_repo = optional(bool, null)
+    github_v1_source              = optional(bool, null)
+    github_v1_oauth_token         = optional(string, null)
+    codestar_connection_arn       = optional(string, null)
+    github_owner                  = optional(string, null)
+    github_repo                   = optional(string, null)
+    github_track_revision         = optional(string, null)
+    buildspec                     = optional(string, null)
+    buildspec_from_github_repo    = optional(bool, null)
+    ecr_scan_target_sns_topic_arn = optional(string, null)
   })
 }
 
@@ -313,18 +314,20 @@ variable "infrastructure_ecs_cluster_services" {
         github_track_revision: The branch/revision of the GitHub repository to be pulled by the CodePipeline source
         buildspec: The filename of the buildspec to use for the CodePipeline build phase, stored within the 'codepipeline buildspec store' S3 bucket
         buildspec_from_github_repo: Conditionally use the 'buildspec' filename stored within the GitHub repo as the buildspec
+        ecr_scan_target_sns_topic_arn: An SNS topic ARN to publish ECR scan results to
       }
     }
   EOT
   type = map(object({
-    github_v1_source           = optional(bool, null)
-    github_v1_oauth_token      = optional(string, null)
-    codestar_connection_arn    = optional(string, null)
-    github_owner               = optional(string, null)
-    github_repo                = optional(string, null)
-    github_track_revision      = optional(string, null)
-    buildspec                  = optional(string, null)
-    buildspec_from_github_repo = optional(bool, null)
+    github_v1_source              = optional(bool, null)
+    github_v1_oauth_token         = optional(string, null)
+    codestar_connection_arn       = optional(string, null)
+    github_owner                  = optional(string, null)
+    github_repo                   = optional(string, null)
+    github_track_revision         = optional(string, null)
+    buildspec                     = optional(string, null)
+    buildspec_from_github_repo    = optional(bool, null)
+    ecr_scan_target_sns_topic_arn = optional(string, null)
   }))
 }
 
