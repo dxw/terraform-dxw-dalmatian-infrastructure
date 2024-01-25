@@ -28,22 +28,22 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_co
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codebuild[each.key].arn
 }
 
-resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codebuild_kms_decrypt" {
+resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codebuild_kms_encrypt" {
   for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
 
-  name        = "${local.resource_prefix}-${substr(sha512("ecs-service-codepipeline-codebuild-${each.key}-kms-decrypt"), 0, 6)}"
-  description = "${local.resource_prefix}-ecs-service-codepipeline-codebuild-${each.key}-kms-decrypt"
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-service-codepipeline-codebuild-${each.key}-kms-encrypt"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-service-codepipeline-codebuild-${each.key}-kms-encrypt"
   policy = templatefile(
-    "${path.root}/policies/kms-decrypt.json.tpl",
+    "${path.root}/policies/kms-encrypt.json.tpl",
     { kms_key_arn = aws_kms_key.infrastructure[0].arn }
   )
 }
 
-resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_codebuild_kms_decrypt" {
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_codebuild_kms_encrypt" {
   for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
 
   role       = aws_iam_role.infrastructure_ecs_cluster_service_codebuild[each.key].name
-  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codebuild_kms_decrypt[each.key].arn
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codebuild_kms_encrypt[each.key].arn
 }
 
 resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codebuild_ecr_push" {
@@ -87,6 +87,11 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
     }
 
     environment_variable {
+      name  = "CONTAINER_NAME"
+      value = each.key
+    }
+
+    environment_variable {
       name  = "IMAGE_REPO_NAME"
       value = aws_ecr_repository.infrastructure_ecs_cluster_service[each.key].name
     }
@@ -95,10 +100,34 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
       name  = "REPOSITORY_URL"
       value = aws_ecr_repository.infrastructure_ecs_cluster_service[each.key].repository_url
     }
+
+    dynamic "environment_variable" {
+      for_each = local.infrastructure_dockerhub_username != "" ? [1] : []
+
+      content {
+        name  = "DOCKER_USERNAME"
+        value = local.infrastructure_dockerhub_username
+      }
+    }
+
+    dynamic "environment_variable" {
+      for_each = local.infrastructure_dockerhub_token != "" ? [1] : []
+
+      content {
+        name  = "DOCKER_ACCESS_TOKEN"
+        value = local.infrastructure_dockerhub_token
+      }
+    }
   }
 
   source {
     type      = "CODEPIPELINE"
     buildspec = each.value["buildspec_from_github_repo"] != null || each.value["buildspec_from_github_repo"] == true ? each.value["buildspec"] : data.aws_s3_object.ecs_cluster_service_buildspec[each.key].body
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codebuild,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codebuild_kms_encrypt,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codebuild_ecr_push,
+  ]
 }
