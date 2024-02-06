@@ -1,5 +1,7 @@
 data "aws_caller_identity" "current" {}
 
+data "aws_elb_service_account" "current" {}
+
 data "aws_route53_zone" "root" {
   count = local.create_infrastructure_route53_delegations ? 1 : 0
 
