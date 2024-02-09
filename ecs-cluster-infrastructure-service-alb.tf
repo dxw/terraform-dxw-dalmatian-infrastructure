@@ -162,9 +162,49 @@ resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header
     target_group_arn = each.value["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn : null
   }
 
+  dynamic "condition" {
+    for_each = each.value["enable_cloudfront"] == true && each.value["cloudfront_bypass_protection_enabled"] == true ? [1] : []
+
+    content {
+      http_header {
+        http_header_name = "X-CloudFront-Secret"
+        values           = [random_password.infrastructure_ecs_cluster_service_cloudfront_bypass_protection_secret[each.key].result]
+      }
+    }
+  }
+
   condition {
     host_header {
       values = ["${each.key}.${local.infrastructure_route53_domain}"]
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      action,
+    ]
+  }
+}
+
+resource "aws_alb_listener_rule" "service_alb_host_rule_bypass_exclusions" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if(
+      v["enable_cloudfront"] == true &&
+      v["cloudfront_bypass_protection_enabled"] == true &&
+      v["cloudfront_bypass_protection_excluded_domains"] != null
+    )
+  }
+
+  listener_arn = local.enable_infrastructure_wildcard_certificate ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
+
+  action {
+    type             = "forward"
+    target_group_arn = each.value["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn : null
+  }
+
+  condition {
+    host_header {
+      values = each.value["cloudfront_bypass_protection_excluded_domains"]
     }
   }
 

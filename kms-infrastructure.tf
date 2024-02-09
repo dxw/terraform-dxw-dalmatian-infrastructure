@@ -29,7 +29,7 @@ resource "aws_kms_key" "infrastructure" {
       {
         log_group_arn = length(local.infrastructure_ecs_cluster_services) > 0 && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:${local.resource_prefix}-infrastructure-ecs-cluster-service-logs-*" : ""
       }
-      )}${local.infrastructure_vpc_flow_logs_s3_with_athena && local.infrastructure_kms_encryption ? "," : ""}
+      )}${(local.infrastructure_vpc_flow_logs_s3_with_athena || contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true)) && local.infrastructure_kms_encryption ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/log-delivery-allow.json.tpl",
       {
         account_id = local.infrastructure_vpc_flow_logs_s3_with_athena && local.infrastructure_kms_encryption ? local.aws_account_id : ""

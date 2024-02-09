@@ -42,6 +42,30 @@ data "aws_s3_object" "ecs_cluster_service_buildspec" {
   ]
 }
 
+data "aws_cloudfront_cache_policy" "managed_policy" {
+  for_each = toset([
+    for service in local.infrastructure_ecs_cluster_services : service["cloudfront_managed_cache_policy"] if service["cloudfront_managed_cache_policy"] != null
+  ])
+
+  name = "Managed-${each.value}"
+}
+
+data "aws_cloudfront_origin_request_policy" "managed_policy" {
+  for_each = toset([
+    for service in local.infrastructure_ecs_cluster_services : service["cloudfront_managed_origin_request_policy"] if service["cloudfront_managed_origin_request_policy"] != null
+  ])
+
+  name = "Managed-${each.value}"
+}
+
+data "aws_cloudfront_response_headers_policy" "managed_policy" {
+  for_each = toset([
+    for service in local.infrastructure_ecs_cluster_services : service["cloudfront_managed_response_headers_policy"] if service["cloudfront_managed_response_headers_policy"] != null
+  ])
+
+  name = "Managed-${each.value}"
+}
+
 # aws_ssm_service_setting doesn't yet have a data source, so we need to use
 # a script to retrieve SSM service settings
 # https://github.com/hashicorp/terraform-provider-aws/issues/25170
