@@ -20,27 +20,27 @@ resource "aws_security_group" "infrastructure_ecs_cluster_container_instances" {
 resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instances_ingress_tcp" {
   count = local.enable_infrastructure_ecs_cluster && local.infrastructure_vpc_network_enable_public ? 1 : 0
 
-  description = "Allow container port tcp ingress from public subnet (TO BE CHANGED TO ONLY ALLOW ALB)"
-  type        = "ingress"
-  from_port   = 32768
-  to_port     = 65535
-  protocol    = "tcp"
-  # TODO: Update to `source_security_group_id`, using the ECS service ALB's security group id
-  cidr_blocks       = [for subnet in aws_subnet.infrastructure_public : subnet.cidr_block]
-  security_group_id = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
+  description              = "Allow container port tcp ingress from ALB if launched, otherwise from Public Subnets"
+  type                     = "ingress"
+  from_port                = 32768
+  to_port                  = 65535
+  protocol                 = "tcp"
+  cidr_blocks              = length(local.infrastructure_ecs_cluster_services) == 0 ? [for subnet in aws_subnet.infrastructure_public : subnet.cidr_block] : null
+  source_security_group_id = length(local.infrastructure_ecs_cluster_services) > 0 ? aws_security_group.infrastructure_ecs_cluster_service_alb[0].id : null
+  security_group_id        = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
 }
 
 resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instances_ingress_udp" {
   count = local.enable_infrastructure_ecs_cluster && local.infrastructure_vpc_network_enable_public ? 1 : 0
 
-  description = "Allow container port udp ingress from public subnet (TO BE CHANGED TO ONLY ALLOW ALB)"
-  type        = "ingress"
-  from_port   = 32768
-  to_port     = 65535
-  protocol    = "udp"
-  # TODO: Update to `source_security_group_id`, using the ECS service ALB's security group id
-  cidr_blocks       = [for subnet in aws_subnet.infrastructure_public : subnet.cidr_block]
-  security_group_id = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
+  description              = "Allow container port udp ingress from ALB if launched, otherwise from Public Subnets"
+  type                     = "ingress"
+  from_port                = 32768
+  to_port                  = 65535
+  protocol                 = "udp"
+  cidr_blocks              = length(local.infrastructure_ecs_cluster_services) == 0 ? [for subnet in aws_subnet.infrastructure_public : subnet.cidr_block] : null
+  source_security_group_id = length(local.infrastructure_ecs_cluster_services) > 0 ? aws_security_group.infrastructure_ecs_cluster_service_alb[0].id : null
+  security_group_id        = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
 }
 
 resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instances_egress_https_tcp" {

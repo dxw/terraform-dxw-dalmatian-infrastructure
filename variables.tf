@@ -306,11 +306,14 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     enable_cloudwatch_logs        = optional(bool, null)
     cloudwatch_logs_retention     = optional(number, null)
     enable_execute_command        = optional(bool, null)
+    deregistration_delay          = optional(number, null)
     container_entrypoint          = optional(list(string), null)
     container_port                = optional(number, null)
     container_volumes             = optional(list(map(string)), null)
     container_extra_hosts         = optional(list(map(string)), null)
     container_count               = optional(number, null)
+    container_heath_check_path    = optional(string, null)
+    container_heath_grace_period  = optional(number, null)
   })
 }
 
@@ -332,11 +335,14 @@ variable "infrastructure_ecs_cluster_services" {
         enable_cloudwatch_logs: Conditionally enable cloudwatch logs for the service
         cloudwatch_logs_retention: CloudWatch log retention in days
         enable_execute_command: Enable Amazon ECS Exec to directly interact with containers
+        deregistration_delay: Amount time for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused
         container_entrypoint: The container entrypoint
         container_port: The service container port
         container_volumes: List of maps containing volume mappings eg. [ { "name" = "my-volume", "host_path" = "/mnt/efs/my-dir", "container_path" = "/mnt/my-dir" } ]
         container_extra_hosts: List of maps containing extra hosts eg. [ { "hostname" = "my.host", "ip_address" = "10.1.2.3" } ]
         container_count: Number of containers to launch for the service
+        container_heath_check_path: Destination for the health check request
+        container_heath_grace_period: Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown
       }
     }
   EOT
@@ -354,12 +360,30 @@ variable "infrastructure_ecs_cluster_services" {
     enable_cloudwatch_logs        = optional(bool, null)
     cloudwatch_logs_retention     = optional(number, null)
     enable_execute_command        = optional(bool, null)
+    deregistration_delay          = optional(number, null)
     container_entrypoint          = optional(list(string), null)
     container_port                = optional(number, null)
     container_volumes             = optional(list(map(string)), null)
     container_extra_hosts         = optional(list(map(string)), null)
     container_count               = optional(number, null)
+    container_heath_check_path    = optional(string, null)
+    container_heath_grace_period  = optional(number, null)
   }))
+}
+
+variable "infrastructure_ecs_cluster_services_alb_ip_allow_list" {
+  description = "IP allow list for ingress traffic to the infrastructure ECS cluster services ALB"
+  type        = list(string)
+}
+
+variable "enable_infrastructure_ecs_cluster_services_alb_logs" {
+  description = "Enable Infrastructure ECS cluster services ALB logs"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_services_alb_logs_retention" {
+  description = "Retention in days for the infrasrtucture ecs cluster ALB logs"
+  type        = number
 }
 
 variable "enable_infrastructure_ecs_cluster_efs" {

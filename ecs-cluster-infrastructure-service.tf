@@ -182,5 +182,23 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
     field = "instanceId"
   }
 
+  dynamic "load_balancer" {
+    for_each = each.value["deployment_type"] == "rolling" ? [1] : []
+
+    content {
+      target_group_arn = aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn
+      container_name   = each.key
+      container_port   = each.value["container_port"]
+    }
+  }
+
+  health_check_grace_period_seconds = each.value["container_heath_grace_period"]
+
   launch_type = "EC2"
+
+  depends_on = [
+    aws_alb_listener.infrastructure_ecs_cluster_service_http_https_redirect,
+    aws_alb_listener.infrastructure_ecs_cluster_service_http,
+    aws_alb_listener.infrastructure_ecs_cluster_service_https,
+  ]
 }

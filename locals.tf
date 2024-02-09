@@ -26,6 +26,8 @@ locals {
   create_infrastructure_route53_delegations = local.route53_root_hosted_zone_domain_name != "" && local.aws_profile_name_route53_root != "" && local.enable_infrastructure_route53_hosted_zone
   infrastructure_route53_domain             = "${local.environment}.${var.infrastructure_name}.${local.route53_root_hosted_zone_domain_name}"
 
+  enable_infrastructure_wildcard_certificate = local.enable_infrastructure_route53_hosted_zone && length(local.infrastructure_ecs_cluster_services) > 0
+
   infrastructure_vpc                                          = var.infrastructure_vpc
   infrastructure_vpc_cidr_block                               = var.infrastructure_vpc_cidr_block
   infrastructure_vpc_enable_dns_support                       = var.infrastructure_vpc_enable_dns_support
@@ -144,6 +146,9 @@ locals {
       for service_key in local.infrastructure_ecs_cluster_services_keys : service_key => try(coalesce(v[service_key], local.infrastructure_ecs_cluster_service_defaults[service_key]), null)
     })
   }
+  infrastructure_ecs_cluster_services_alb_ip_allow_list  = var.infrastructure_ecs_cluster_services_alb_ip_allow_list
+  enable_infrastructure_ecs_cluster_services_alb_logs    = var.enable_infrastructure_ecs_cluster_services_alb_logs && length(local.infrastructure_ecs_cluster_services) > 0
+  infrastructure_ecs_cluster_services_alb_logs_retention = var.infrastructure_ecs_cluster_services_alb_logs_retention
 
   default_tags = {
     Project        = local.project_name,
