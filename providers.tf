@@ -7,6 +7,15 @@ provider "aws" {
 }
 
 provider "aws" {
+  region = "us-east-1"
+  alias  = "useast1"
+
+  default_tags {
+    tags = local.default_tags
+  }
+}
+
+provider "aws" {
   region  = local.aws_region
   alias   = "awsroute53root"
   profile = local.aws_profile_name_route53_root != "" ? local.aws_profile_name_route53_root : null

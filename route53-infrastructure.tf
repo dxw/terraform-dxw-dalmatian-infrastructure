@@ -61,8 +61,8 @@ resource "aws_route53_record" "service_record" {
   type    = "A"
 
   alias {
-    name                   = aws_alb.infrastructure_ecs_cluster_service[0].dns_name
-    zone_id                = aws_alb.infrastructure_ecs_cluster_service[0].zone_id
+    name                   = each.value["enable_cloudfront"] == true ? aws_cloudfront_distribution.infrastructure_ecs_cluster_service_cloudfront[each.key].domain_name : aws_alb.infrastructure_ecs_cluster_service[0].dns_name
+    zone_id                = each.value["enable_cloudfront"] == true ? aws_cloudfront_distribution.infrastructure_ecs_cluster_service_cloudfront[each.key].hosted_zone_id : aws_alb.infrastructure_ecs_cluster_service[0].zone_id
     evaluate_target_health = true
   }
 }

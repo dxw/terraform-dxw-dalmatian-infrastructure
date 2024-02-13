@@ -1,9 +1,27 @@
-# https://github.com/aquasecurity/tfsec/issues/2081
-# tfsec:ignore:aws-s3-enable-bucket-logging
 resource "aws_s3_bucket" "infrastructure_logs" {
   count = local.enable_infrastructure_logs_bucket ? 1 : 0
 
   bucket = "${local.resource_prefix_hash}-logs"
+}
+
+resource "aws_s3_bucket_ownership_controls" "infrastructure_logs" {
+  count = local.enable_infrastructure_logs_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.infrastructure_logs[0].id
+  rule {
+    object_ownership = contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true) ? "BucketOwnerPreferred" : "BucketOwnerEnforced"
+  }
+}
+
+resource "aws_s3_bucket_acl" "infrastructure_logs_log_delivery_write" {
+  count = local.enable_infrastructure_logs_bucket && contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true) ? 1 : 0
+
+  bucket = aws_s3_bucket.infrastructure_logs[0].id
+  acl    = "log-delivery-write"
+
+  depends_on = [
+    aws_s3_bucket_ownership_controls.infrastructure_logs,
+  ]
 }
 
 resource "aws_s3_bucket_policy" "infrastructure_logs" {
