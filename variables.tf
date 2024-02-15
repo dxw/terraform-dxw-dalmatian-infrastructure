@@ -395,6 +395,69 @@ variable "infrastructure_ecs_cluster_services" {
   }))
 }
 
+variable "infrastructure_rds_defaults" {
+  description = "Default values for RDSs"
+  type = object({
+    type                              = optional(string, null)
+    engine                            = optional(string, null)
+    engine_version                    = optional(string, null)
+    parameters                        = optional(map(string), null)
+    instance_class                    = optional(string, null)
+    allocated_storage                 = optional(number, null)
+    storage_type                      = optional(string, null)
+    iops                              = optional(number, null)
+    storage_throughput                = optional(number, null)
+    multi_az                          = optional(bool, null)
+    monitoring_interval               = optional(number, null)
+    cloudwatch_logs_export_types      = optional(list(string), null)
+    cluster_instance_count            = optional(number, null)
+    cluster_serverlessv2_min_capacity = optional(number, null)
+    cluster_serverlessv2_max_capacity = optional(number, null)
+  })
+}
+
+variable "infrastructure_rds" {
+  description = <<EOT
+    Map of RDSs (The key will be the rds name). Values in here will override `infrastructure_rds_defaults` values if set."
+    {
+      rds-name = {
+        type: Choose either `instance` for RDS instance, or `cluster` for RDS Aurora
+        engine: RDS engine (Either `mysql` or `postgres`)
+        engine_version: RDS Engine version (Specify the major version only, to prevent terraform attempting to downgrade minor versions)
+        parameters: Map of Parameters for the DB parameter group ({ parameter-name = parameter-value, ... })
+        instance_class: RDS instance class
+        allocated_storage: RDS allocated storage
+        storage_type: RDS storage type
+        iops: RDS iops (When `type` is `instance`, this is only required for storage type of `io1` or `gp3` - When `cluster`, this must be a multiple between .5 and 50 of the storage amount for the DB cluster.`)
+        storage_throughput: RDS storage throughput (Only required when `storage_type` is `gp3`. Only applicable for `type` of `instance`)
+        multi_az: Enable Multi-AZ RDS (Not applicable for `type` of `cluster`. For `cluster - set `storage_type`, `allocated_storage`, `iops` and `instance_class`)
+        monitoring_interval: The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. Valid Values: 0, 1, 5, 10, 15, 30, 60.
+        cloudwatch_logs_export_types: List of log types to enable for exporting to CloudWatch Logs. See `EnableCloudwatchLogsExports.member.N` (https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html) for valid values.
+        cluster_instance_count: Number of instances to launch within the Aurora DB cluster
+        cluster_serverlessv2_min_capacity: Minimum capacity for an Aurora DB cluster
+        cluster_serverlessv2_max_capacity: Maximum capacity for an Aurora DB cluster
+      }
+    }
+  EOT
+  type = map(object({
+    type                              = optional(string, null)
+    engine                            = optional(string, null)
+    engine_version                    = optional(string, null)
+    parameters                        = optional(map(string), null)
+    instance_class                    = optional(string, null)
+    allocated_storage                 = optional(number, null)
+    storage_type                      = optional(string, null)
+    iops                              = optional(number, null)
+    storage_throughput                = optional(number, null)
+    multi_az                          = optional(bool, null)
+    monitoring_interval               = optional(number, null)
+    cloudwatch_logs_export_types      = optional(list(string), null)
+    cluster_instance_count            = optional(number, null)
+    cluster_serverlessv2_min_capacity = optional(number, null)
+    cluster_serverlessv2_max_capacity = optional(number, null)
+  }))
+}
+
 variable "infrastructure_ecs_cluster_services_alb_ip_allow_list" {
   description = "IP allow list for ingress traffic to the infrastructure ECS cluster services ALB"
   type        = list(string)
