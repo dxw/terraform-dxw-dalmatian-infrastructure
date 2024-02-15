@@ -65,9 +65,9 @@ resource "aws_cloudfront_distribution" "infrastructure_ecs_cluster_service_cloud
     allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = "${each.key}-default"
-    min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
+    min_ttl                = each.value["cloudfront_managed_cache_policy"] == null ? 0 : null
+    default_ttl            = each.value["cloudfront_managed_cache_policy"] == null ? 86400 : null
+    max_ttl                = each.value["cloudfront_managed_cache_policy"] == null ? 31536000 : null
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
 
