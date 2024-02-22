@@ -13,7 +13,7 @@ resource "aws_secretsmanager_secret" "infrastructure_rds_root_password" {
     for k, v in local.infrastructure_rds : k => v if v["type"] != null
   }
 
-  name = "${local.resource_prefix_hash}-${each.key}-rds-root-password"
+  name = "${local.resource_prefix_hash}/rds/root-password/${each.key}"
 }
 
 resource "aws_secretsmanager_secret_version" "infrastructure_rds_root_password" {
