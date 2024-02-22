@@ -150,6 +150,32 @@ locals {
   enable_infrastructure_ecs_cluster_services_alb_logs    = var.enable_infrastructure_ecs_cluster_services_alb_logs && length(local.infrastructure_ecs_cluster_services) > 0
   infrastructure_ecs_cluster_services_alb_logs_retention = var.infrastructure_ecs_cluster_services_alb_logs_retention
 
+  infrastructure_rds_defaults = var.infrastructure_rds_defaults
+  infrastructure_rds_keys     = length(var.infrastructure_rds) > 0 ? keys(values(var.infrastructure_rds)[0]) : []
+  infrastructure_rds = {
+    for k, v in var.infrastructure_rds : k => merge({
+      for rds_key in local.infrastructure_rds_keys : rds_key => try(coalesce(v[rds_key], local.infrastructure_rds_defaults[rds_key]), null)
+    })
+  }
+  rds_engines = {
+    "instance" = {
+      "mysql"    = "mysql",
+      "postgres" = "postgres"
+    },
+    "cluster" = {
+      "mysql"    = "aurora-mysql",
+      "postgres" = "aurora-postgresql"
+    }
+  }
+  rds_licenses = {
+    "mysql"    = "general-public-license"
+    "postgres" = "postgresql-license"
+  }
+  rds_ports = {
+    "mysql"    = 3306
+    "postgres" = 5432
+  }
+
   default_tags = {
     Project        = local.project_name,
     Infrastructure = local.infrastructure_name,
