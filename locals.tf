@@ -176,6 +176,8 @@ locals {
     "postgres" = 5432
   }
 
+  custom_route53_hosted_zones = var.custom_route53_hosted_zones
+
   default_tags = {
     Project        = local.project_name,
     Infrastructure = local.infrastructure_name,

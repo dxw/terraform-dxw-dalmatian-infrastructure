@@ -458,6 +458,48 @@ variable "infrastructure_rds" {
   }))
 }
 
+variable "custom_route53_hosted_zones" {
+  description = <<EOT
+    Map of Route53 Hosted Zone configurations to create
+    {
+      example.com = {
+        ns_records: Map of NS records to create ({ "domain.example.com"  = { values = ["ns1.example.com", "ns2.example.com"], ttl = 300 })
+        a_records: Map of A records to create ({ "domain.example.com"  = { values = ["1.2.3.4", "5.6.7.8"], ttl = 300 })
+        alias_records: Map of ALIAS records to create ({ "domain.example.com"  = { value = "example.cloudfront.com", zone_id = "Z2FDTNDATAQYW2" })
+        cname_records: Map of CNAME records to create ({ "domain.example.com"  = { values = ["external1.example.com", "external2.example.com"], ttl = 60 })
+        mx_records: Map of MX records to create ({ "example.com"  = { values = ["1 mail.example.com", "5 mail2.example.com"], ttl = 60 })
+        txt_records: Map of TXT records to create ({ "example.com"  = { values = ["v=spf1 include:spf.example.com -all"], ttl = 60 })
+      }
+    }
+  EOT
+  type = map(object({
+    ns_records = optional(map(object({
+      values = list(string)
+      ttl    = optional(number, 300)
+    })), null)
+    a_records = optional(map(object({
+      values = list(string)
+      ttl    = optional(number, 300)
+    })), null)
+    alias_records = optional(map(object({
+      value   = string
+      zone_id = string
+    })), null)
+    cname_records = optional(map(object({
+      values = list(string)
+      ttl    = optional(number, 300)
+    })), null)
+    mx_records = optional(map(object({
+      values = list(string)
+      ttl    = optional(number, 300)
+    })), null)
+    txt_records = optional(map(object({
+      values = list(string)
+      ttl    = optional(number, 300)
+    })), null)
+  }))
+}
+
 variable "infrastructure_ecs_cluster_services_alb_ip_allow_list" {
   description = "IP allow list for ingress traffic to the infrastructure ECS cluster services ALB"
   type        = list(string)
