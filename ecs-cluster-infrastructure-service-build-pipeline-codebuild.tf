@@ -28,6 +28,27 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_co
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codebuild[each.key].arn
 }
 
+resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codebuild_blue_green" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "blue-green"
+  }
+
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-service-codepipeline-codebuild-blue-green-${each.key}"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-service-codepipeline-codebuild-blue-green-${each.key}"
+  policy = templatefile(
+    "${path.root}/policies/codebuild-ecs-blue-green.json.tpl", {}
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_codebuild_blue_green" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "blue-green"
+  }
+
+  role       = aws_iam_role.infrastructure_ecs_cluster_service_codebuild[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codebuild_blue_green[each.key].arn
+}
+
 resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codebuild_kms_encrypt" {
   for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
 
@@ -116,6 +137,24 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
       content {
         name  = "DOCKER_ACCESS_TOKEN"
         value = local.infrastructure_dockerhub_token
+      }
+    }
+
+    dynamic "environment_variable" {
+      for_each = each.value["deployment_type"] == "blue-green" ? [1] : []
+
+      content {
+        name  = "BLUE_GREEN"
+        value = "true"
+      }
+    }
+
+    dynamic "environment_variable" {
+      for_each = each.value["deployment_type"] == "blue-green" ? [1] : []
+
+      content {
+        name  = "TASK_DEFINITION_FAMILY"
+        value = aws_ecs_task_definition.infrastructure_ecs_cluster_service[each.key].family
       }
     }
   }
