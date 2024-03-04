@@ -29,12 +29,56 @@ phases:
       - IMAGE_TAG=commit-$CODEBUILD_RESOLVED_SOURCE_VERSION
       - docker push $REPOSITORY_URL:latest
       - docker push $REPOSITORY_URL:$IMAGE_TAG
+      - >-
+        if [ -n "$BLUE_GREEN" ];
+        then
+          echo "Writing appspec file..."
+          aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_FAMILY" | jq > latest-task-definition.json;
+          cat latest-task-definition.json | jq -r --arg image "$REPOSITORY_URL:$IMAGE_TAG" '.taskDefinition.containerDefinitions | .[0].image = $image' > new-container-defs.json;
+          NEW_TASK_DEFINITION="$(aws ecs register-task-definition \
+            --family "$TASK_DEFINITION_FAMILY" \
+            --container-definitions file://new-container-defs.json \
+            --task-role-arn "$(cat latest-task-definition.json | jq -r '.taskDefinition.taskRoleArn')" \
+            --execution-role-arn "$(cat latest-task-definition.json | jq -r '.taskDefinition.executionRoleArn')" \
+            --network-mode "$(cat latest-task-definition.json | jq -r '.taskDefinition.networkMode')" \
+            --volumes "$(cat latest-task-definition.json | jq -r '.taskDefinition.volumes')" \
+            --placement-constraints "$(cat latest-task-definition.json | jq -r '.taskDefinition.placementConstraints')" \
+            --requires-compatibilities "$(cat latest-task-definition.json | jq -r '.taskDefinition.requiresCompatibilities')")";
+          NEW_TASK_DEFINITION_ARN=$(echo "$NEW_TASK_DEFINITION" | jq -r '.taskDefinition.taskDefinitionArn')
+          CONTAINER_PORT=$(echo "$NEW_TASK_DEFINITION" | jq -r '.taskDefinition.containerDefinitions[0].portMappings[0].containerPort')
+          APPSPEC=$(jq -rn \
+            --arg task_definition_arn "$NEW_TASK_DEFINITION_ARN" \
+            --arg container_name "$CONTAINER_NAME" \
+            --argjson container_port "$CONTAINER_PORT" \
+            '{
+              Resources: [
+                {
+                  TargetService: {
+                    Type: "AWS::ECS::Service",
+                    Properties: {
+                      TaskDefinition: $task_definition_arn,
+                      LoadBalancerInfo: {
+                        ContainerName: $container_name,
+                        ContainerPort: $container_port
+                      }
+                    }
+                  }
+                }
+              ]
+            }')
+            echo "$APPSPEC" > appspec.json
+        fi
+      - touch appspec.json
       - echo "Writing image definitions file..."
       - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URL:$IMAGE_TAG > imagedefinitions.json
 artifacts:
   files:
     - imagedefinitions.json
+    - appspec.json
   secondary-artifacts:
     imagedefinitions:
       files:
         - imagedefinitions.json
+    appspec:
+      files:
+        - appspec.json

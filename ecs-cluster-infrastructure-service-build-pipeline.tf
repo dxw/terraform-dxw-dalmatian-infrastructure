@@ -27,6 +27,27 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_co
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codepipeline[each.key].arn
 }
 
+resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codepipeline_codedeploy" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "blue-green"
+  }
+
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-service-codepipeline-codedeploy-${each.key}"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-service-codepipeline-codedeploy${each.key}"
+  policy = templatefile(
+    "${path.root}/policies/codepipeline-ecs-codedeploy.json.tpl", {}
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_codepipeline_codedeploy" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "blue-green"
+  }
+
+  role       = aws_iam_role.infrastructure_ecs_cluster_service_codepipeline[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codepipeline_codedeploy[each.key].arn
+}
+
 resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codepipeline_kms_encrypt" {
   for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
 
@@ -141,7 +162,7 @@ resource "aws_codepipeline" "infrastructure_ecs_cluster_service" {
       provider         = "CodeBuild"
       version          = "1"
       input_artifacts  = ["source"]
-      output_artifacts = ["imagedefinitions"]
+      output_artifacts = ["imagedefinitions", "appspec"]
 
       configuration = {
         ProjectName = aws_codebuild_project.infrastructure_ecs_cluster_service_build[each.key].name
@@ -171,4 +192,33 @@ resource "aws_codepipeline" "infrastructure_ecs_cluster_service" {
       }
     }
   }
+
+  dynamic "stage" {
+    for_each = each.value["deployment_type"] == "blue-green" ? [1] : []
+
+    content {
+      name = "Deploy-Blue-Green"
+
+      action {
+        name            = "Deploy"
+        category        = "Deploy"
+        owner           = "AWS"
+        provider        = "CodeDeploy"
+        input_artifacts = ["appspec"]
+        version         = "1"
+
+        configuration = {
+          ApplicationName     = aws_codedeploy_app.infrastructure_ecs_cluster_service_blue_green[each.key].name
+          DeploymentGroupName = aws_codedeploy_deployment_group.infrastructure_ecs_cluster_service_blue_green[each.key].deployment_group_name
+        }
+      }
+    }
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codepipeline,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codepipeline_codedeploy,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codepipeline_kms_encrypt,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codepipeline_codestar_connection,
+  ]
 }

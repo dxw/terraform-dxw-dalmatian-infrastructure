@@ -169,7 +169,7 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
   enable_execute_command = each.value["enable_execute_command"]
 
   deployment_controller {
-    type = each.value["deployment_type"] == "rolling" ? "ECS" : null
+    type = each.value["deployment_type"] == "rolling" ? "ECS" : each.value["deployment_type"] == "blue-green" ? "CODE_DEPLOY" : null
   }
 
   ordered_placement_strategy {
@@ -183,10 +183,10 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
   }
 
   dynamic "load_balancer" {
-    for_each = each.value["deployment_type"] == "rolling" ? [1] : []
+    for_each = each.value["deployment_type"] == "rolling" || each.value["deployment_type"] == "blue-green" ? [1] : []
 
     content {
-      target_group_arn = aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn
+      target_group_arn = each.value["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn : each.value["deployment_type"] == "blue-green" ? aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.key].arn : null
       container_name   = each.key
       container_port   = each.value["container_port"]
     }
@@ -201,4 +201,11 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
     aws_alb_listener.infrastructure_ecs_cluster_service_http,
     aws_alb_listener.infrastructure_ecs_cluster_service_https,
   ]
+
+  lifecycle {
+    ignore_changes = [
+      load_balancer,
+      task_definition,
+    ]
+  }
 }
