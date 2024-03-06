@@ -500,6 +500,11 @@ variable "custom_route53_hosted_zones" {
   }))
 }
 
+variable "infrastructure_ecs_cluster_services_alb_enable_global_accelerator" {
+  description = "Enable Global Accelerator (GA) for the infrastructure ECS cluster services ALB. If `cloudfront_bypass_protection_enabled` is set for a service, any domain pointing towards the GA must be added to the `cloudfront_bypass_protection_excluded_domains` list. It is recommended that the GA only be used for apex domains that redirect to the domain associated with CloudFront. Ideally, apex domains would use an ALIAS record pointing towards the CloudFront distribution."
+  type        = bool
+}
+
 variable "infrastructure_ecs_cluster_services_alb_ip_allow_list" {
   description = "IP allow list for ingress traffic to the infrastructure ECS cluster services ALB"
   type        = list(string)

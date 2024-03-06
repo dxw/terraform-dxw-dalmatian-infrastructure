@@ -146,9 +146,10 @@ locals {
       for service_key in local.infrastructure_ecs_cluster_services_keys : service_key => try(coalesce(v[service_key], local.infrastructure_ecs_cluster_service_defaults[service_key]), null)
     })
   }
-  infrastructure_ecs_cluster_services_alb_ip_allow_list  = var.infrastructure_ecs_cluster_services_alb_ip_allow_list
-  enable_infrastructure_ecs_cluster_services_alb_logs    = var.enable_infrastructure_ecs_cluster_services_alb_logs && length(local.infrastructure_ecs_cluster_services) > 0
-  infrastructure_ecs_cluster_services_alb_logs_retention = var.infrastructure_ecs_cluster_services_alb_logs_retention
+  infrastructure_ecs_cluster_services_alb_enable_global_accelerator = var.infrastructure_ecs_cluster_services_alb_enable_global_accelerator && length(local.infrastructure_ecs_cluster_services) > 0
+  infrastructure_ecs_cluster_services_alb_ip_allow_list             = var.infrastructure_ecs_cluster_services_alb_ip_allow_list
+  enable_infrastructure_ecs_cluster_services_alb_logs               = var.enable_infrastructure_ecs_cluster_services_alb_logs && length(local.infrastructure_ecs_cluster_services) > 0
+  infrastructure_ecs_cluster_services_alb_logs_retention            = var.infrastructure_ecs_cluster_services_alb_logs_retention
 
   infrastructure_rds_defaults = var.infrastructure_rds_defaults
   infrastructure_rds_keys     = length(var.infrastructure_rds) > 0 ? keys(values(var.infrastructure_rds)[0]) : []
