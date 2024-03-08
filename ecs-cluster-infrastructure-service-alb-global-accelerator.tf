@@ -43,7 +43,7 @@ resource "aws_globalaccelerator_endpoint_group" "service_loadbalancer_alb_http" 
   traffic_dial_percentage       = 100
 
   endpoint_configuration {
-    client_ip_preservation_enabled = false
+    client_ip_preservation_enabled = true
     endpoint_id                    = aws_alb.infrastructure_ecs_cluster_service[0].arn
     weight                         = 100
   }
@@ -60,7 +60,7 @@ resource "aws_globalaccelerator_endpoint_group" "service_loadbalancer_alb_https"
   traffic_dial_percentage       = 100
 
   endpoint_configuration {
-    client_ip_preservation_enabled = false
+    client_ip_preservation_enabled = true
     endpoint_id                    = aws_alb.infrastructure_ecs_cluster_service[0].arn
     weight                         = 100
   }
