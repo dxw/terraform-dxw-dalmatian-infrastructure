@@ -1,7 +1,7 @@
 resource "aws_globalaccelerator_accelerator" "infrastructure_ecs_cluster_service_alb" {
   count = local.infrastructure_ecs_cluster_services_alb_enable_global_accelerator ? 1 : 0
 
-  name            = "${local.resource_prefix}-infrastructure-ecs-cluster-service-alb"
+  name            = "${local.resource_prefix_hash}-infrastructure-ecs-cluster-service-alb"
   ip_address_type = "DUAL_STACK"
   enabled         = true
 }
