@@ -184,7 +184,6 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_route53_record.infrastructure_wildcard_ssl_verification](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_route53_record.service_loadbalancer_record_alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_route53_record.service_loadbalancer_record_alb_global_accelerator_a](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
-| [aws_route53_record.service_loadbalancer_record_alb_global_accelerator_aaaa](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_route53_record.service_record](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_route53_zone.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
 | [aws_route53_zone.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
