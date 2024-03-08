@@ -67,20 +67,6 @@ resource "aws_route53_record" "service_loadbalancer_record_alb_global_accelerato
   }
 }
 
-resource "aws_route53_record" "service_loadbalancer_record_alb_global_accelerator_aaaa" {
-  count = local.infrastructure_ecs_cluster_services_alb_enable_global_accelerator && local.enable_infrastructure_route53_hosted_zone ? 1 : 0
-
-  zone_id = aws_route53_zone.infrastructure[0].zone_id
-  name    = "ga.${local.infrastructure_route53_domain}."
-  type    = "AAAA"
-
-  alias {
-    name                   = aws_globalaccelerator_accelerator.infrastructure_ecs_cluster_service_alb[0].dns_name
-    zone_id                = aws_globalaccelerator_accelerator.infrastructure_ecs_cluster_service_alb[0].hosted_zone_id
-    evaluate_target_health = true
-  }
-}
-
 resource "aws_route53_record" "service_record" {
   for_each = local.enable_infrastructure_route53_hosted_zone ? local.infrastructure_ecs_cluster_services : {}
 
