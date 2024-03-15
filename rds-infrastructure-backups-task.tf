@@ -46,7 +46,7 @@ resource "aws_iam_role_policy_attachment" "infrastructure_rds_daily_backups_task
   for_each = local.infrastructure_rds_backups_enabled
 
   role       = aws_iam_role.infrastructure_rds_daily_backups_task_execution[each.key].name
-  policy_arn = aws_iam_policy.infrastructure_rds_daily_backups_task_execution_s3_write-blobs[each.key].arn
+  policy_arn = aws_iam_policy.infrastructure_rds_daily_backups_task_execution_s3_write_blobs[each.key].arn
 }
 
 # Generate an IAM Policy to enable KMS Encryption on S3 Blobs
@@ -83,7 +83,7 @@ resource "aws_ecs_task_definition" "infrastructure_rds_daily_backups" {
         tolist([
           "/bin/bash",
           "-c",
-          local.infrastructure_rds_backups_commands[each.engine]
+          local.infrastructure_rds_backups_commands[each.value.engine]
         ])
       )
       environment = []

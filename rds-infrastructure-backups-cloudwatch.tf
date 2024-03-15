@@ -16,7 +16,7 @@ resource "aws_cloudwatch_event_rule" "infrastructure_rds_daily_backups" {
 
   name                = "${local.resource_prefix_hash}-${each.key}-rds-backups"
   description         = "Execute ${local.resource_prefix_hash}-${each.key}-rds-backups task at a scheduled time"
-  schedule_expression = "cron(0 ${format("%g", random_integer.infrastructure_rds_daily_backups_hour.result)} * * ? *)"
+  schedule_expression = "cron(0 ${format("%g", random_integer.infrastructure_rds_daily_backups_hour[each.key].result)} * * ? *)"
 }
 
 # When the Cloudwatch event fires, invoke the new Task Definition
