@@ -5,8 +5,8 @@ resource "random_integer" "infrastructure_rds_daily_backups_hour" {
   min = 0
   max = 6
   keepers = {
-    # Generate a new value if the event rule changes
-    listener_arn = aws_cloudwatch_event_rule.infrastructure_rds_daily_backups[each.key]
+    # Generate a new value if the db instance changes
+    listener_arn = aws_db_instance.infrastructure_rds[each.key].arn
   }
 }
 
