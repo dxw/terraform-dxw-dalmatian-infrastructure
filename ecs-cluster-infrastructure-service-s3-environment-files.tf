@@ -62,24 +62,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "infrastructure_ec
 
   bucket = aws_s3_bucket.infrastructure_ecs_cluster_service_environment_files[0].id
 
-  dynamic "rule" {
-    for_each = local.infrastructure_kms_encryption ? [1] : []
-
-    content {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = aws_kms_key.infrastructure[0].arn
-        sse_algorithm     = "aws:kms"
-      }
-    }
-  }
-
-  dynamic "rule" {
-    for_each = local.infrastructure_kms_encryption ? [] : [1]
-
-    content {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
+      sse_algorithm     = local.infrastructure_kms_encryption ? "aws:kms" : "AES256"
     }
   }
 }
