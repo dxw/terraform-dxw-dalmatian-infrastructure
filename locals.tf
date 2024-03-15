@@ -162,6 +162,35 @@ locals {
     for k, v in local.infrastructure_rds : k => v if v["daily_backup_to_s3"] == true
   }
 
+  infrastructure_rds_backups_command_preamble  = "DATE_STRING=$(date +%Y%m%d%H%M) && mkdir -p /tmp/sqlbackups/$DB_NAME"
+  infrastructure_rds_backups_command_postamble = "cd /tmp/sqlbackups && aws s3 sync . s3://$AWS_S3_BUCKET_TARGET && rm /tmp/sqlbackups/*.sql && echo 'SQL Backup Success!'"
+  infrastructure_rds_backups_commands = {
+    "mysql"    = <<BASH
+      ${local.infrastructure_rds_backups_command_preamble} && \
+      mysql -N -u "$DB_USER" -p"$DB_ROOT_PASSWORD" -h "$DB_HOSTNAME" -e 'show databases' | \
+      while read DB_NAME; do
+        if [ "$DB_NAME" != 'information_schema' ]; then
+          mysqldump -u "$DB_USER" -p"$DB_ROOT_PASSWORD" -h "$DB_HOSTNAME" \
+            --set-gtid-purged=OFF \
+            --column-statistics=0 \
+            --single-transaction "$DB_NAME" > "/tmp/sqlbackups/$DATE_STRING-$DB_NAME.sql";
+        fi;
+      done && \
+      ${local.infrastructure_rds_backups_command_postamble}"
+    BASH
+    "postgres" = <<BASH
+      ${local.infrastructure_rds_backups_command_preamble} && \
+      PGPASSWORD="$DB_ROOT_PASSWORD"
+      psql -U "$DB_USER" -h "$DB_HOSTNAME" -t -c 'SELECT datname FROM pg_database WHERE NOT datistemplate' | \
+      while read DB_NAME; do
+        if [[ -n "$DB_NAME" && "$DB_NAME" != "rdsadmin" ]]; then
+          pg_dump --clean --if-exists \postgres://$DB_USER:$DB_ROOT_PASSWORD@$DB_HOSTNAME:5432/$DB_NAME > "/tmp/sqlbackups/$DB_NAME/$DATE_STRING-$DB_NAME.sql";
+        fi;
+      done && \
+      ${local.infrastructure_rds_backups_command_preamble}"
+    BASH
+  }
+
   rds_engines = {
     "instance" = {
       "mysql"    = "mysql",
