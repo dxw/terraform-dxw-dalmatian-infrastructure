@@ -158,6 +158,10 @@ locals {
       for rds_key in local.infrastructure_rds_keys : rds_key => try(coalesce(v[rds_key], local.infrastructure_rds_defaults[rds_key]), null)
     })
   }
+  infrastructure_rds_backups_enabled = {
+    for k, v in local.infrastructure_rds : k => v if v["daily_backup_to_s3"] == true
+  }
+
   rds_engines = {
     "instance" = {
       "mysql"    = "mysql",
