@@ -402,6 +402,7 @@ variable "infrastructure_rds_defaults" {
     engine                            = optional(string, null)
     engine_version                    = optional(string, null)
     parameters                        = optional(map(string), null)
+    daily_backup_to_s3                = optional(bool, null)
     instance_class                    = optional(string, null)
     allocated_storage                 = optional(number, null)
     storage_type                      = optional(string, null)
@@ -425,6 +426,7 @@ variable "infrastructure_rds" {
         engine: RDS engine (Either `mysql` or `postgres`)
         engine_version: RDS Engine version (Specify the major version only, to prevent terraform attempting to downgrade minor versions)
         parameters: Map of Parameters for the DB parameter group ({ parameter-name = parameter-value, ... })
+        daily_backup_to_s3: Enable/Disable the daily export
         instance_class: RDS instance class
         allocated_storage: RDS allocated storage
         storage_type: RDS storage type
@@ -444,6 +446,7 @@ variable "infrastructure_rds" {
     engine                            = optional(string, null)
     engine_version                    = optional(string, null)
     parameters                        = optional(map(string), null)
+    daily_backup_to_s3                = optional(bool, null)
     instance_class                    = optional(string, null)
     allocated_storage                 = optional(number, null)
     storage_type                      = optional(string, null)
