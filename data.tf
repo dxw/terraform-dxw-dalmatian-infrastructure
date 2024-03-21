@@ -78,3 +78,16 @@ data "external" "ssm_dhmc_setting" {
     setting_id = "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:servicesetting/ssm/managed-instance/default-ec2-instance-management-role"
   }
 }
+
+data "external" "s3_presigned_url" {
+  for_each = local.enable_cloudformatian_s3_template_store ? local.s3_object_presign : []
+
+  program = ["/bin/bash", "external-data-scripts/s3-object-presign.sh"]
+  query = {
+    s3_path = each.value
+  }
+
+  depends_on = [
+    aws_s3_bucket.cloudformation_custom_stack_template_store,
+  ]
+}

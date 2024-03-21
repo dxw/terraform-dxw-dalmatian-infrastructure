@@ -615,3 +615,30 @@ variable "custom_s3_buckets" {
     cloudfront_infrastructure_ecs_cluster_service_path = optional(string, null)
   }))
 }
+
+variable "enable_cloudformatian_s3_template_store" {
+  description = "Creates an S3 bucket to store custom CloudFormation templates, which can then be referenced in `custom_cloudformation_stacks`. A user with RW access to the bucket is also created."
+  type        = bool
+}
+
+variable "custom_cloudformation_stacks" {
+  description = <<EOT
+    Map of CloudFormation stacks to deploy
+    {
+      stack-name = {
+        s3_template_store_key: The filename of a CloudFormation template that is stored within the S3 bucket, created by the `enable_cloudformatian_s3_template_store`
+        template_body: (Optional - use of s3_template_store_key is preferred) The CloudFormation template body
+        parameters: The CloudFormation template parameters ({ parameter-name = parameter-value, ... })
+        on_failure: What to do on failure, either 'DO_NOTHING', 'ROLLBACK' or 'DELETE'
+        capabilities: A list of capabilities. Valid values: `CAPABILITY_NAMED_IAM`, `CAPABILITY_IAM`, `CAPABILITY_AUTO_EXPAND`
+      }
+    }
+  EOT
+  type = map(object({
+    s3_template_store_key = optional(string, null)
+    template_body         = optional(string, null)
+    parameters            = optional(map(string), null)
+    on_failure            = optional(string, null)
+    capabilities          = optional(list(string), null)
+  }))
+}

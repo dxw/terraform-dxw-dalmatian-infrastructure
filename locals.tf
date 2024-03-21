@@ -14,7 +14,8 @@ locals {
   enable_infrastructure_logs_bucket = (
     local.infrastructure_vpc_flow_logs_s3_with_athena ||
     length(local.infrastructure_ecs_cluster_services) != 0 ||
-    length(local.custom_s3_buckets) != 0
+    length(local.custom_s3_buckets) != 0 ||
+    local.enable_cloudformatian_s3_template_store
   )
   logs_bucket_source_arns = concat(
     local.infrastructure_vpc_flow_logs_s3_with_athena ? ["arn:aws:logs:${local.aws_region}:${local.aws_account_id}:*"] : [],
@@ -193,6 +194,13 @@ locals {
   custom_route53_hosted_zones = var.custom_route53_hosted_zones
 
   custom_s3_buckets = var.custom_s3_buckets
+
+  enable_cloudformatian_s3_template_store = var.enable_cloudformatian_s3_template_store != null ? var.enable_cloudformatian_s3_template_store : false
+  custom_cloudformation_stacks            = var.custom_cloudformation_stacks
+
+  s3_object_presign = local.enable_cloudformatian_s3_template_store ? toset([
+    for k, v in local.custom_cloudformation_stacks : "${aws_s3_bucket.cloudformation_custom_stack_template_store[0].id}/${v["s3_template_store_key"]}" if v["s3_template_store_key"] != null
+  ]) : []
 
   default_tags = {
     Project        = local.project_name,
