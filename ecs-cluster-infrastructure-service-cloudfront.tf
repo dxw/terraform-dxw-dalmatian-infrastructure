@@ -101,6 +101,39 @@ resource "aws_cloudfront_distribution" "infrastructure_ecs_cluster_service_cloud
 
   }
 
+  dynamic "origin" {
+    for_each = {
+      for k, v in local.custom_s3_buckets : k => v if v["cloudfront_infrastructure_ecs_cluster_service"] == each.key
+    }
+
+    content {
+      domain_name              = aws_s3_bucket.custom[origin.key].bucket_regional_domain_name
+      origin_id                = "${origin.key}-custom-bucket"
+      origin_access_control_id = aws_cloudfront_origin_access_control.custom_s3_buckets[origin.key].id
+    }
+  }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = {
+      for k, v in local.custom_s3_buckets : k => v if v["cloudfront_infrastructure_ecs_cluster_service"] == each.key
+    }
+
+    content {
+      path_pattern           = ordered_cache_behavior.value["cloudfront_infrastructure_ecs_cluster_service_path"]
+      allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+      cached_methods         = ["GET", "HEAD", "OPTIONS"]
+      cache_policy_id        = aws_cloudfront_cache_policy.custom_s3_buckets[ordered_cache_behavior.key].id
+      target_origin_id       = "${ordered_cache_behavior.key}-custom-bucket"
+      compress               = true
+      viewer_protocol_policy = "redirect-to-https"
+
+      function_association {
+        event_type   = "viewer-request"
+        function_arn = aws_cloudfront_function.custom_s3_buckets_viewer_request[ordered_cache_behavior.key].arn
+      }
+    }
+  }
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
