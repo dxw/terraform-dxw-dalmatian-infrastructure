@@ -179,6 +179,17 @@ locals {
     "postgres" = 5432
   }
 
+  infrastructure_elasticache_defaults = var.infrastructure_elasticache_defaults
+  infrastructure_elasticache_keys     = length(var.infrastructure_elasticache) > 0 ? keys(values(var.infrastructure_elasticache)[0]) : []
+  infrastructure_elasticache = {
+    for k, v in var.infrastructure_elasticache : k => merge({
+      for elasticache_key in local.infrastructure_elasticache_keys : elasticache_key => try(coalesce(v[elasticache_key], local.infrastructure_elasticache_defaults[elasticache_key]), null)
+    })
+  }
+  elasticache_ports = {
+    "redis" = 6379
+  }
+
   custom_route53_hosted_zones = var.custom_route53_hosted_zones
 
   custom_s3_buckets = var.custom_s3_buckets
