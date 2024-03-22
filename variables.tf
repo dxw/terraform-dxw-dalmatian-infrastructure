@@ -458,6 +458,51 @@ variable "infrastructure_rds" {
   }))
 }
 
+variable "infrastructure_elasticache_defaults" {
+  description = "Default values for ElastiCaches"
+  type = object({
+    type                     = optional(string, null)
+    engine                   = optional(string, null)
+    engine_version           = optional(string, null)
+    parameters               = optional(map(string), null)
+    cluster_node_type        = optional(string, null)
+    cluster_node_count       = optional(number, null)
+    serverless_max_storage   = optional(number, null)
+    serverless_max_ecpu      = optional(number, null)
+    snapshot_retention_limit = optional(number, null)
+  })
+}
+
+variable "infrastructure_elasticache" {
+  description = <<EOT
+    Map of Elasticaches (The key will be the elasticache name). Values in here will override `infrastructure_elasticache_defaults` values if set."
+    {
+      elasticache-name = {
+        type: Choose either `cluster` or `serverless`
+        engine: ElastiCache engine (Only `redis` is currently supported)
+        engine_version: ElastiCache Engine version (For serverless, Specify the major version only)
+        parameters: Map of Parameters for the ElastiCache parameter group ({ parameter-name = parameter-value, ... })
+        cluster_node_type: ElastiCache Cluster node type
+        cluster_node_count: ElastiCache Cluster node count
+        serverless_max_storage: Serverless maximum storage
+        serverless_max_ecpu: Serverless maximum number of ECPUs the cache can consume per second (1000 - 15000000)
+        snapshot_retention_limit: Snapshot retention limit
+      }
+    }
+  EOT
+  type = map(object({
+    type                     = optional(string, null)
+    engine                   = optional(string, null)
+    engine_version           = optional(string, null)
+    parameters               = optional(map(string), null)
+    cluster_node_type        = optional(string, null)
+    cluster_node_count       = optional(number, null)
+    serverless_max_storage   = optional(string, null)
+    serverless_max_ecpu      = optional(number, null)
+    snapshot_retention_limit = optional(number, null)
+  }))
+}
+
 variable "custom_route53_hosted_zones" {
   description = <<EOT
     Map of Route53 Hosted Zone configurations to create
