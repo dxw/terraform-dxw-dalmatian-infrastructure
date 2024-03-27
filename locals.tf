@@ -32,13 +32,15 @@ locals {
     local.enable_cloudformatian_s3_template_store ||
     local.enable_infrastructure_vpc_transfer_s3_bucket ||
     local.infrastructure_ecs_cluster_enable_execute_command_logging ||
-    local.enable_infrastructure_rds_backup_to_s3
+    local.enable_infrastructure_rds_backup_to_s3 ||
+    length(local.custom_lambda_functions) != 0
   )
   logs_bucket_s3_source_arns = concat(
     length(local.infrastructure_ecs_cluster_services) != 0 ? [aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn] : [],
     local.enable_infrastructure_vpc_transfer_s3_bucket ? [aws_s3_bucket.infrastructure_vpc_transfer[0].arn] : [],
     [for k, v in local.custom_s3_buckets : aws_s3_bucket.custom[k].arn],
     local.enable_infrastructure_rds_backup_to_s3 ? [aws_s3_bucket.infrastructure_rds_s3_backups[0].arn] : [],
+    local.enable_lambda_functions_s3_store ? [aws_s3_bucket.lambda_custom_functions_store[0].arn] : []
   )
   logs_bucket_logs_source_arns = concat(
     local.infrastructure_vpc_flow_logs_s3_with_athena ? ["arn:aws:logs:${local.aws_region}:${local.aws_account_id}:*"] : []
@@ -271,6 +273,9 @@ locals {
 
   enable_cloudformatian_s3_template_store = var.enable_cloudformatian_s3_template_store != null ? var.enable_cloudformatian_s3_template_store : false
   custom_cloudformation_stacks            = var.custom_cloudformation_stacks
+
+  custom_lambda_functions          = var.custom_lambda_functions != null ? var.custom_lambda_functions : {}
+  enable_lambda_functions_s3_store = length(local.custom_lambda_functions) > 0
 
   s3_object_presign = local.enable_cloudformatian_s3_template_store ? toset([
     for k, v in local.custom_cloudformation_stacks : "${aws_s3_bucket.cloudformation_custom_stack_template_store[0].id}/${v["s3_template_store_key"]}" if v["s3_template_store_key"] != null
