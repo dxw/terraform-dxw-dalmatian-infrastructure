@@ -66,6 +66,24 @@ data "aws_cloudfront_response_headers_policy" "managed_policy" {
   name = "Managed-${each.value}"
 }
 
+data "aws_s3_object" "lambda_custom_functions" {
+  for_each = {
+    for k, custom_lambda in local.custom_lambda_functions : k => custom_lambda if custom_lambda["s3_function_store_zip_key"] != null
+  }
+
+  bucket = aws_s3_bucket.lambda_custom_functions_store[0].id
+  key    = each.value["s3_function_store_zip_key"]
+}
+
+data "aws_s3_object" "lambda_custom_functions_policy" {
+  for_each = {
+    for k, custom_lambda in local.custom_lambda_functions : k => custom_lambda if custom_lambda["s3_function_store_policy_key"] != null
+  }
+
+  bucket = aws_s3_bucket.lambda_custom_functions_store[0].id
+  key    = each.value["s3_function_store_policy_key"]
+}
+
 # aws_ssm_service_setting doesn't yet have a data source, so we need to use
 # a script to retrieve SSM service settings
 # https://github.com/hashicorp/terraform-provider-aws/issues/25170
