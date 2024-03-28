@@ -198,6 +198,9 @@ locals {
   enable_cloudformatian_s3_template_store = var.enable_cloudformatian_s3_template_store != null ? var.enable_cloudformatian_s3_template_store : false
   custom_cloudformation_stacks            = var.custom_cloudformation_stacks
 
+  enable_lambda_functions_s3_store = var.enable_lambda_functions_s3_store != null ? var.enable_lambda_functions_s3_store : false
+  custom_lambda_functions          = var.custom_lambda_functions != null ? var.custom_lambda_functions : {}
+
   s3_object_presign = local.enable_cloudformatian_s3_template_store ? toset([
     for k, v in local.custom_cloudformation_stacks : "${aws_s3_bucket.cloudformation_custom_stack_template_store[0].id}/${v["s3_template_store_key"]}" if v["s3_template_store_key"] != null
   ]) : []
