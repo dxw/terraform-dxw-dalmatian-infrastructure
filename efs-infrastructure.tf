@@ -22,11 +22,11 @@ resource "aws_efs_file_system" "infrastructure_ecs_cluster" {
 }
 
 resource "aws_efs_mount_target" "infrastructure_ecs_cluster" {
-  for_each = local.enable_infrastructure_ecs_cluster_efs ? local.infrastructure_vpc_network_enable_private ? toset([
-    for subnet in aws_subnet.infrastructure_private : subnet.id
-    ]) : local.infrastructure_vpc_network_enable_public ? toset([
-    for subnet in aws_subnet.infrastructure_public : subnet.id
-  ]) : [] : []
+  for_each = local.enable_infrastructure_ecs_cluster_efs ? local.infrastructure_vpc_network_enable_private ? {
+    for k, subnet in aws_subnet.infrastructure_private : k => subnet.id
+    } : local.infrastructure_vpc_network_enable_public ? {
+    for k, subnet in aws_subnet.infrastructure_public : k => subnet.id
+  } : {} : {}
 
   file_system_id  = aws_efs_file_system.infrastructure_ecs_cluster[0].id
   subnet_id       = each.value
