@@ -5,6 +5,8 @@ data "aws_elb_service_account" "current" {}
 data "aws_route53_zone" "root" {
   count = local.create_infrastructure_route53_delegations ? 1 : 0
 
+  provider = aws.awsroute53root
+
   name = local.route53_root_hosted_zone_domain_name
 }
 
