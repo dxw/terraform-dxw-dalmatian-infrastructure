@@ -17,10 +17,12 @@ locals {
     length(local.custom_s3_buckets) != 0 ||
     local.enable_cloudformatian_s3_template_store
   )
-  logs_bucket_source_arns = concat(
-    local.infrastructure_vpc_flow_logs_s3_with_athena ? ["arn:aws:logs:${local.aws_region}:${local.aws_account_id}:*"] : [],
+  logs_bucket_s3_source_arns = concat(
     length(local.infrastructure_ecs_cluster_services) != 0 ? [aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn] : [],
     [for k, v in local.custom_s3_buckets : aws_s3_bucket.custom[k].arn]
+  )
+  logs_bucket_logs_source_arns = concat(
+    local.infrastructure_vpc_flow_logs_s3_with_athena ? ["arn:aws:logs:${local.aws_region}:${local.aws_account_id}:*"] : []
   )
 
   route53_root_hosted_zone_domain_name      = var.route53_root_hosted_zone_domain_name
