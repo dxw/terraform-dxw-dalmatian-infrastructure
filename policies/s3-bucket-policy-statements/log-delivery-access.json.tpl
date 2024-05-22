@@ -1,4 +1,4 @@
-{
+%{if s3_source_arns != "[]"}{
   "Principal": {
     "Service": "logging.s3.amazonaws.com"
   },
@@ -9,10 +9,28 @@
   "Resource": "${log_bucket_arn}/*",
   "Condition": {
     "ArnLike": {
-      "aws:SourceArn": ${source_arns}
+      "aws:SourceArn": ${s3_source_arns}
     },
     "StringEquals": {
       "aws:SourceAccount": "${account_id}"
+    }
+  }
+}%{if logs_source_arns != "[]"},%{endif}%{endif}
+%{if logs_source_arns != "[]"}{
+  "Effect": "Allow",
+  "Principal": {
+    "Service": "delivery.logs.amazonaws.com"
+  },
+  "Action": [
+      "s3:GetBucketAcl"
+  ],
+  "Resource": "${log_bucket_arn}",
+  "Condition": {
+    "StringEquals": {
+      "aws:SourceAccount": "${account_id}"
+    },
+    "ArnLike": {
+      "aws:SourceArn": ${logs_source_arns}
     }
   }
 },
@@ -21,17 +39,15 @@
   "Principal": {
     "Service": "delivery.logs.amazonaws.com"
   },
-  "Action": [
-      "s3:GetBucketAcl",
-      "s3:ListBucket"
-  ],
-  "Resource": "${log_bucket_arn}",
+  "Action": "s3:PutObject",
+  "Resource": "${log_bucket_arn}/AWSLogs/${account_id}/*",
   "Condition": {
     "StringEquals": {
+      "s3:x-amz-acl": "bucket-owner-full-control",
       "aws:SourceAccount": "${account_id}"
     },
     "ArnLike": {
-      "aws:SourceArn": ${source_arns}
+      "aws:SourceArn": ${logs_source_arns}
     }
   }
-}
+}%{endif}
