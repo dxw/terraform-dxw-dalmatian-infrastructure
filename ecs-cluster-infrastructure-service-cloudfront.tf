@@ -14,13 +14,13 @@ resource "aws_cloudfront_distribution" "infrastructure_ecs_cluster_service_cloud
   }
 
   enabled         = true
-  aliases         = ["${each.key}.${local.infrastructure_route53_domain}"]
+  aliases         = each.value["domain_names"] != null ? each.value["domain_names"] : ["${each.key}.${local.infrastructure_route53_domain}"]
   is_ipv6_enabled = true
   http_version    = "http2and3"
   price_class     = "PriceClass_100"
 
   viewer_certificate {
-    acm_certificate_arn            = local.enable_infrastructure_wildcard_certificate ? aws_acm_certificate_validation.infrastructure_wildcard_us_east_1[0].certificate_arn : null
+    acm_certificate_arn            = each.value["cloudfront_tls_certificate_arn"] != null ? each.value["cloudfront_tls_certificate_arn"] : local.enable_infrastructure_wildcard_certificate ? aws_acm_certificate_validation.infrastructure_wildcard_us_east_1[0].certificate_arn : null
     cloudfront_default_certificate = local.enable_infrastructure_wildcard_certificate ? null : true
     minimum_protocol_version       = local.enable_infrastructure_wildcard_certificate ? "TLSv1.2_2021" : null
     ssl_support_method             = "sni-only"
