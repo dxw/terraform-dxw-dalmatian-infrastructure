@@ -183,7 +183,12 @@ resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header
 
   action {
     type             = "forward"
-    target_group_arn = each.value["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn : each.value["deployment_type"] == "blue-green" ? aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.key].arn : null
+
+    forward {
+      target_group {
+        arn = each.value["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn : each.value["deployment_type"] == "blue-green" ? aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.key].arn : null
+      }
+    }
   }
 
   dynamic "condition" {
