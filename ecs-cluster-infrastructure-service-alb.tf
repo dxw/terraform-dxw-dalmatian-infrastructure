@@ -152,8 +152,32 @@ resource "aws_alb_listener" "infrastructure_ecs_cluster_service_https" {
   }
 }
 
+resource "aws_alb_listener" "infrastructure_ecs_cluster_service_https_custom" {
+  for_each = {
+    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["alb_tls_certificate_arn"] != null
+  }
+
+  load_balancer_arn = aws_alb.infrastructure_ecs_cluster_service[0].arn
+  port              = "443"
+  protocol          = "HTTPS"
+  certificate_arn   = each.value["alb_tls_certificate_arn"]
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Misdirected Request"
+      status_code  = "421"
+    }
+  }
+}
+
 resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header" {
-  for_each = local.infrastructure_ecs_cluster_services
+  for_each = {
+    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["domain_names"] == null
+  }
 
   listener_arn = local.enable_infrastructure_wildcard_certificate ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
 
@@ -186,6 +210,45 @@ resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header
   }
 }
 
+resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header_custom" {
+  for_each = {
+    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["domain_names"] != null
+  }
+
+  listener_arn = each.value["alb_tls_certificate_arn"] != null ? aws_alb_listener.infrastructure_ecs_cluster_service_https_custom[each.key].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
+
+  action {
+    type             = "forward"
+    target_group_arn = each.value["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn : each.value["deployment_type"] == "blue-green" ? aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.key].arn : null
+  }
+
+  dynamic "condition" {
+    for_each = each.value["enable_cloudfront"] == true && each.value["cloudfront_bypass_protection_enabled"] == true ? [1] : []
+
+    content {
+      http_header {
+        http_header_name = "X-CloudFront-Secret"
+        values           = [random_password.infrastructure_ecs_cluster_service_cloudfront_bypass_protection_secret[each.key].result]
+      }
+    }
+  }
+
+  condition {
+    dynamic "host_header" {
+      for_each = each.value["domain_names"]
+      content {
+        values = host_header.value
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      action,
+    ]
+  }
+}
+
 resource "aws_alb_listener_rule" "service_alb_host_rule_bypass_exclusions" {
   for_each = {
     for k, v in local.infrastructure_ecs_cluster_services : k => v if(
@@ -195,7 +258,7 @@ resource "aws_alb_listener_rule" "service_alb_host_rule_bypass_exclusions" {
     )
   }
 
-  listener_arn = local.enable_infrastructure_wildcard_certificate ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
+  listener_arn = local.enable_infrastructure_wildcard_certificate ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : each.value["alb_tls_certificate_arn"] != null ? aws_alb_listener.infrastructure_ecs_cluster_service_https_custom[each.key].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
 
   action {
     type             = "forward"

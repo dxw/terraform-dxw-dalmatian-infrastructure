@@ -318,7 +318,9 @@ variable "infrastructure_ecs_cluster_service_defaults" {
       entrypoint          = optional(list(string), null)
       schedule_expression = string
     })), {})
+    domain_names                                  = optional(list(string), null)
     enable_cloudfront                             = optional(bool, null)
+    cloudfront_tls_certificate_arn                = optional(string, null)
     cloudfront_access_logging_enabled             = optional(bool, null)
     cloudfront_bypass_protection_enabled          = optional(bool, null)
     cloudfront_bypass_protection_excluded_domains = optional(list(string), null)
@@ -326,6 +328,7 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     cloudfront_managed_cache_policy               = optional(string, null)
     cloudfront_managed_origin_request_policy      = optional(string, null)
     cloudfront_managed_response_headers_policy    = optional(string, null)
+    alb_tls_certificate_arn                       = optional(string, null)
   })
 }
 
@@ -356,7 +359,9 @@ variable "infrastructure_ecs_cluster_services" {
         container_heath_check_path: Destination for the health check request
         container_heath_grace_period: Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown
         scheduled_tasks: A map of scheduled tasks that use the same image as the service defined eg. { "name" => { "entrypoint" = ["bundle", "exec", "run_jobs"], "schedule_expression" = "cron(* * * * ? *)" } }
+        domain_names: Domain names to assign to CloudFront aliases, and the Application Load Balancer's `host_header` condition
         enable_cloudfront: Enable cloadfront for the service
+        cloudfront_tls_certificate_arn: Certificate ARN to attach to CloudFront - must contain the names provided in `domain_names`
         cloudfront_access_logging_enabled: Enable access logging for the distribution to the infrastructure S3 logs bucket
         cloudfront_bypass_protection_enabled: This adds a secret header at the CloudFront level, which is then checked by the ALB listener rules. Requests are only forwarded if the header matches, preventing requests going directly to the ALB.
         cloudfront_bypass_protection_excluded_domains: A list of domains to exclude from the bypass protection
@@ -364,6 +369,7 @@ variable "infrastructure_ecs_cluster_services" {
         cloudfront_managed_cache_policy: Conditionally specify a CloudFront Managed Cache Policy for the distribution
         cloudfront_managed_origin_request_policy: Conditionally specify a CloudFront Managed Origin Request Policy for the distribution
         cloudfront_managed_response_headers_policy: Conditionally specify a CloudFront Managed Response Headers Policy for the distribution
+        alb_tls_certificate_arn: Certificate ARN to attach to the Application Load Balancer - must contain the names provided in `domain_names`
       }
     }
   EOT
@@ -393,7 +399,9 @@ variable "infrastructure_ecs_cluster_services" {
       entrypoint          = list(string)
       schedule_expression = string
     })), null)
+    domain_names                                  = optional(list(string), null)
     enable_cloudfront                             = optional(bool, null)
+    cloudfront_tls_certificate_arn                = optional(string, null)
     cloudfront_access_logging_enabled             = optional(bool, null)
     cloudfront_bypass_protection_enabled          = optional(bool, null)
     cloudfront_bypass_protection_excluded_domains = optional(list(string), null)
@@ -401,6 +409,7 @@ variable "infrastructure_ecs_cluster_services" {
     cloudfront_managed_cache_policy               = optional(string, null)
     cloudfront_managed_origin_request_policy      = optional(string, null)
     cloudfront_managed_response_headers_policy    = optional(string, null)
+    alb_tls_certificate_arn                       = optional(string, null)
   }))
 }
 
