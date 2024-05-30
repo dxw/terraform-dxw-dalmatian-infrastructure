@@ -234,11 +234,8 @@ resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header
   }
 
   condition {
-    dynamic "host_header" {
-      for_each = each.value["domain_names"]
-      content {
-        values = host_header.value
-      }
+    host_header {
+      values = each.value["domain_names"]
     }
   }
 
