@@ -194,6 +194,16 @@ variable "infrastructure_vpc_network_acl_ingress_custom_rules_public" {
   }))
 }
 
+variable "enable_infrastructure_vpc_transfer_s3_bucket" {
+  description = "Enable VPC transfer S3 bucket. This allows uploading/downloading files from resources within the infrastructure VPC"
+  type        = bool
+}
+
+variable "infrastructure_vpc_transfer_s3_bucket_access_vpc_ids" {
+  description = "Additional VPC ids which are allowed to access the transfer S3 bucket"
+  type        = list(string)
+}
+
 variable "route53_root_hosted_zone_domain_name" {
   description = "Route53 Hosted Zone in which to delegate Infrastructure Route53 Hosted Zones."
   type        = string

@@ -15,10 +15,12 @@ locals {
     local.infrastructure_vpc_flow_logs_s3_with_athena ||
     length(local.infrastructure_ecs_cluster_services) != 0 ||
     length(local.custom_s3_buckets) != 0 ||
-    local.enable_cloudformatian_s3_template_store
+    local.enable_cloudformatian_s3_template_store ||
+    local.enable_infrastructure_vpc_transfer_s3_bucket
   )
   logs_bucket_s3_source_arns = concat(
     length(local.infrastructure_ecs_cluster_services) != 0 ? [aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn] : [],
+    local.enable_infrastructure_vpc_transfer_s3_bucket ? [aws_s3_bucket.infrastructure_vpc_transfer[0].arn] : [],
     [for k, v in local.custom_s3_buckets : aws_s3_bucket.custom[k].arn]
   )
   logs_bucket_logs_source_arns = concat(
@@ -97,6 +99,13 @@ locals {
     date   = "string",
     hour   = "string"
   }
+  enable_infrastructure_vpc_transfer_s3_bucket = var.enable_infrastructure_vpc_transfer_s3_bucket
+  infrastructure_vpc_transfer_s3_bucket_access_vpc_ids = concat(
+    local.infrastructure_vpc ? [aws_vpc.infrastructure[0].id] : [],
+    var.infrastructure_vpc_transfer_s3_bucket_access_vpc_ids
+  )
+  infrastructure_vpc_transfer_ssm_download_command = "aws s3 cp {{ Source }} {{ HostTarget }} {{ Recursive  }}; if [ -n \\\"{{ TargetUID }}\\\" ] && [ -n \\\"{{ TargetGID }}\\\" ]; then chown {{ TargetUID }}:{{ TargetGID }} -R {{ HostTarget }}; fi"
+  infrastructure_vpc_transfer_ssm_upload_command   = "aws s3 cp {{ Source }} {{ S3Target }} {{ Recursive }}"
 
   infrastructure_dockerhub_email    = var.infrastructure_dockerhub_email
   infrastructure_dockerhub_username = var.infrastructure_dockerhub_username

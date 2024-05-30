@@ -220,6 +220,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket.infrastructure_ecs_cluster_service_environment_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket.infrastructure_vpc_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_acl.infrastructure_logs_log_delivery_write](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |
 | [aws_s3_bucket_lifecycle_configuration.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
 | [aws_s3_bucket_lifecycle_configuration.infrastructure_ecs_cluster_service_alb_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
@@ -230,6 +231,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_bucket_logging.infrastructure_ecs_cluster_service_build_pipeline_artifact_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_logging) | resource |
 | [aws_s3_bucket_logging.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_logging) | resource |
 | [aws_s3_bucket_logging.infrastructure_ecs_cluster_service_environment_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_logging) | resource |
+| [aws_s3_bucket_logging.infrastructure_vpc_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_logging) | resource |
 | [aws_s3_bucket_ownership_controls.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_ownership_controls) | resource |
 | [aws_s3_bucket_ownership_controls.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_ownership_controls) | resource |
 | [aws_s3_bucket_policy.cloudformation_custom_stack_template_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
@@ -239,6 +241,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_bucket_policy.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_policy.infrastructure_ecs_cluster_service_environment_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_policy.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
+| [aws_s3_bucket_policy.infrastructure_vpc_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_public_access_block.cloudformation_custom_stack_template_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_public_access_block.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_public_access_block.infrastructure_ecs_cluster_service_alb_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
@@ -246,6 +249,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_bucket_public_access_block.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_public_access_block.infrastructure_ecs_cluster_service_environment_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_public_access_block.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
+| [aws_s3_bucket_public_access_block.infrastructure_vpc_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.cloudformation_custom_stack_template_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.infrastructure_ecs_cluster_service_alb_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
@@ -253,6 +257,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_bucket_server_side_encryption_configuration.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.infrastructure_ecs_cluster_service_environment_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
+| [aws_s3_bucket_server_side_encryption_configuration.infrastructure_vpc_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_versioning.cloudformation_custom_stack_template_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_s3_bucket_versioning.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_s3_bucket_versioning.infrastructure_ecs_cluster_service_alb_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
@@ -260,6 +265,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_bucket_versioning.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_s3_bucket_versioning.infrastructure_ecs_cluster_service_environment_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_s3_bucket_versioning.infrastructure_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
+| [aws_s3_bucket_versioning.infrastructure_vpc_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_s3_object.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
 | [aws_secretsmanager_secret.infrastructure_rds_root_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret_version.infrastructure_rds_root_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
@@ -284,6 +290,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_security_group_rule.infrastructure_rds_ingress_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_sns_topic.infrastructure_ecs_cluster_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
 | [aws_sns_topic_subscription.ecs_cluster_infrastructure_draining_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
+| [aws_ssm_document.infrastructure_vpc_transfer_s3_download](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_document) | resource |
+| [aws_ssm_document.infrastructure_vpc_transfer_s3_upload](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_document) | resource |
 | [aws_subnet.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
@@ -320,6 +328,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_enable_infrastructure_ecs_cluster_efs"></a> [enable\_infrastructure\_ecs\_cluster\_efs](#input\_enable\_infrastructure\_ecs\_cluster\_efs) | Conditionally create and mount EFS to the ECS cluster instances | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster_services_alb_logs"></a> [enable\_infrastructure\_ecs\_cluster\_services\_alb\_logs](#input\_enable\_infrastructure\_ecs\_cluster\_services\_alb\_logs) | Enable Infrastructure ECS cluster services ALB logs | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_route53_hosted_zone"></a> [enable\_infrastructure\_route53\_hosted\_zone](#input\_enable\_infrastructure\_route53\_hosted\_zone) | Creates a Route53 hosted zone, where DNS records will be created for resources launched within this module. | `bool` | n/a | yes |
+| <a name="input_enable_infrastructure_vpc_transfer_s3_bucket"></a> [enable\_infrastructure\_vpc\_transfer\_s3\_bucket](#input\_enable\_infrastructure\_vpc\_transfer\_s3\_bucket) | Enable VPC transfer S3 bucket. This allows uploading/downloading files from resources within the infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name to be used as part of the resource prefix | `string` | n/a | yes |
 | <a name="input_infrastructure_dockerhub_email"></a> [infrastructure\_dockerhub\_email](#input\_infrastructure\_dockerhub\_email) | Dockerhub email | `string` | n/a | yes |
 | <a name="input_infrastructure_dockerhub_token"></a> [infrastructure\_dockerhub\_token](#input\_infrastructure\_dockerhub\_token) | Dockerhub token which has permissions to pull images | `string` | n/a | yes |
@@ -373,6 +382,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_infrastructure_vpc_network_availability_zones"></a> [infrastructure\_vpc\_network\_availability\_zones](#input\_infrastructure\_vpc\_network\_availability\_zones) | A list of availability zone characters (eg. ["a", "b", "c"]) | `list(string)` | n/a | yes |
 | <a name="input_infrastructure_vpc_network_enable_private"></a> [infrastructure\_vpc\_network\_enable\_private](#input\_infrastructure\_vpc\_network\_enable\_private) | Enable private networking on Infrastructure VPC. This will create subnets with a route to a NAT Gateway (If Public networking has been enabled) | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_network_enable_public"></a> [infrastructure\_vpc\_network\_enable\_public](#input\_infrastructure\_vpc\_network\_enable\_public) | Enable public networking on Infrastructure VPC. This will create subnets with a route to an Internet Gateway | `bool` | n/a | yes |
+| <a name="input_infrastructure_vpc_transfer_s3_bucket_access_vpc_ids"></a> [infrastructure\_vpc\_transfer\_s3\_bucket\_access\_vpc\_ids](#input\_infrastructure\_vpc\_transfer\_s3\_bucket\_access\_vpc\_ids) | Additional VPC ids which are allowed to access the transfer S3 bucket | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Project name to be used as a prefix for all resources | `string` | n/a | yes |
 | <a name="input_route53_root_hosted_zone_domain_name"></a> [route53\_root\_hosted\_zone\_domain\_name](#input\_route53\_root\_hosted\_zone\_domain\_name) | Route53 Hosted Zone in which to delegate Infrastructure Route53 Hosted Zones. | `string` | n/a | yes |
 
