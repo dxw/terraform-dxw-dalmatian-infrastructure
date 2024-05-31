@@ -41,8 +41,15 @@ resource "aws_kms_key" "infrastructure" {
       {
         account_id = (local.infrastructure_vpc_flow_logs_s3_with_athena || local.enable_cloudformatian_s3_template_store || contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true)) || length(local.custom_s3_buckets) > 0 && local.infrastructure_kms_encryption ? local.aws_account_id : ""
         region     = local.aws_region
+      })}${local.enable_infrastructure_vpc_transfer_s3_bucket ? "," : ""}
+      ${templatefile("${path.root}/policies/kms-key-policy-statements/vpc-id-and-s3-bucket-allow.json.tpl",
+      {
+        vpc_ids    = jsonencode(local.infrastructure_vpc_transfer_s3_bucket_access_vpc_ids)
+        region     = local.aws_region
+        bucket_arn = aws_s3_bucket.infrastructure_vpc_transfer[0].arn
       }
   )}
+
       ]
       EOT
 }
