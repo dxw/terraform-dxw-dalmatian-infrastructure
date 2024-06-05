@@ -19,6 +19,8 @@ resource "aws_cloudfront_distribution" "infrastructure_ecs_cluster_service_cloud
   http_version    = "http2and3"
   price_class     = "PriceClass_100"
 
+  web_acl_id = each.value["cloudfront_waf_association"] != null ? aws_wafv2_web_acl.infrastructure_ecs_cluster[each.value["cloudfront_waf_association"]].arn : null
+
   viewer_certificate {
     acm_certificate_arn            = each.value["cloudfront_tls_certificate_arn"] != null ? each.value["cloudfront_tls_certificate_arn"] : local.enable_infrastructure_wildcard_certificate ? aws_acm_certificate_validation.infrastructure_wildcard_us_east_1[0].certificate_arn : null
     cloudfront_default_certificate = local.enable_infrastructure_wildcard_certificate ? null : true
