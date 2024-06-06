@@ -113,6 +113,18 @@ resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instanc
   security_group_id        = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
 }
 
+resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instances_egress_rds" {
+  for_each = local.enable_infrastructure_ecs_cluster ? local.infrastructure_rds : {}
+
+  description              = "Allow ${each.value["engine"]} tcp outbound to RDS security group"
+  type                     = "egress"
+  from_port                = local.rds_ports[each.value["engine"]]
+  to_port                  = local.rds_ports[each.value["engine"]]
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.infrastructure_rds[each.key].id
+  security_group_id        = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
+}
+
 resource "aws_iam_role" "infrastructure_ecs_cluster" {
   count = local.enable_infrastructure_ecs_cluster ? 1 : 0
 
