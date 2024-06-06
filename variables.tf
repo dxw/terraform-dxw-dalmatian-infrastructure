@@ -300,6 +300,19 @@ variable "infrastructure_ecs_cluster_autoscaling_time_based_custom" {
   )
 }
 
+variable "infrastructure_ecs_cluster_wafs" {
+  description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
+  type = map(object({
+    ip_deny_list = optional(list(string), null)
+    aws_managed_rules = optional(list(object({
+      name                   = string
+      action                 = string
+      exclude_rules          = optional(list(string), null)
+      excluded_path_patterns = optional(list(string), null)
+    })), null)
+  }))
+}
+
 variable "infrastructure_ecs_cluster_service_defaults" {
   description = "Default values for ECS Cluster Services"
   type = object({
@@ -338,6 +351,7 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     cloudfront_managed_cache_policy               = optional(string, null)
     cloudfront_managed_origin_request_policy      = optional(string, null)
     cloudfront_managed_response_headers_policy    = optional(string, null)
+    cloudfront_waf_association                    = optional(string, null)
     alb_tls_certificate_arn                       = optional(string, null)
   })
 }
@@ -379,6 +393,7 @@ variable "infrastructure_ecs_cluster_services" {
         cloudfront_managed_cache_policy: Conditionally specify a CloudFront Managed Cache Policy for the distribution
         cloudfront_managed_origin_request_policy: Conditionally specify a CloudFront Managed Origin Request Policy for the distribution
         cloudfront_managed_response_headers_policy: Conditionally specify a CloudFront Managed Response Headers Policy for the distribution
+        cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
         alb_tls_certificate_arn: Certificate ARN to attach to the Application Load Balancer - must contain the names provided in `domain_names`
       }
     }
@@ -419,6 +434,7 @@ variable "infrastructure_ecs_cluster_services" {
     cloudfront_managed_cache_policy               = optional(string, null)
     cloudfront_managed_origin_request_policy      = optional(string, null)
     cloudfront_managed_response_headers_policy    = optional(string, null)
+    cloudfront_waf_association                    = optional(string, null)
     alb_tls_certificate_arn                       = optional(string, null)
   }))
 }

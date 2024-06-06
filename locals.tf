@@ -131,6 +131,7 @@ locals {
   infrastructure_ecs_cluster_autoscaling_time_based_custom = {
     for custom in toset(var.infrastructure_ecs_cluster_autoscaling_time_based_custom) : "${custom["min"]}-${custom["max"]} ${custom["cron"]}" => custom
   }
+  infrastructure_ecs_cluster_wafs            = var.infrastructure_ecs_cluster_wafs
   infrastructure_ecs_cluster_enable_ssm_dhmc = local.enable_infrastructure_ecs_cluster ? data.external.ssm_dhmc_setting[0].result.setting_value != "$None" : false
   infrastructure_ecs_cluster_user_data = base64encode(
     templatefile("ec2-userdata/ecs-instance.tpl", {
