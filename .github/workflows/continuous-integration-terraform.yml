@@ -78,7 +78,7 @@ jobs:
           echo "GIT_COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
 
       - name: Generate Terraform docs
-        uses: terraform-docs/gh-actions@v1.1.0
+        uses: terraform-docs/gh-actions@v1.2.0
         if: "!startsWith(env.GITHUB_PR_BRANCH, 'renovate/')"
         with:
           working-dir: .
@@ -88,7 +88,7 @@ jobs:
           fail-on-diff: true
 
       - name: Generate Terraform docs for Renovate
-        uses: terraform-docs/gh-actions@v1.1.0
+        uses: terraform-docs/gh-actions@v1.2.0
         if: "startsWith(env.GITHUB_PR_BRANCH, 'renovate/')"
         with:
           working-dir: .
