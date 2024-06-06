@@ -183,7 +183,7 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
   }
 
   dynamic "load_balancer" {
-    for_each = each.value["deployment_type"] == "rolling" || each.value["deployment_type"] == "blue-green" ? [1] : []
+    for_each = (each.value["deployment_type"] == "rolling" || each.value["deployment_type"] == "blue-green") && each.value["container_port"] != 0 ? [1] : []
 
     content {
       target_group_arn = each.value["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn : each.value["deployment_type"] == "blue-green" ? aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.key].arn : null

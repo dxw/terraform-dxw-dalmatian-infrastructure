@@ -68,7 +68,9 @@ resource "aws_route53_record" "service_loadbalancer_record_alb_global_accelerato
 }
 
 resource "aws_route53_record" "service_record" {
-  for_each = local.enable_infrastructure_route53_hosted_zone ? local.infrastructure_ecs_cluster_services : {}
+  for_each = local.enable_infrastructure_route53_hosted_zone ? {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["container_port"] != 0
+  } : {}
 
   zone_id = aws_route53_zone.infrastructure[0].zone_id
   name    = "${each.key}.${local.infrastructure_route53_domain}."

@@ -176,7 +176,7 @@ resource "aws_alb_listener" "infrastructure_ecs_cluster_service_https_custom" {
 
 resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header" {
   for_each = {
-    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["domain_names"] == null
+    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["domain_names"] == null && service["container_port"] != 0
   }
 
   listener_arn = local.enable_infrastructure_wildcard_certificate ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
@@ -212,7 +212,7 @@ resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header
 
 resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header_custom" {
   for_each = {
-    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["domain_names"] != null
+    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["domain_names"] != null && service["container_port"] != 0
   }
 
   listener_arn = each.value["alb_tls_certificate_arn"] != null ? aws_alb_listener.infrastructure_ecs_cluster_service_https_custom[each.key].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
@@ -251,7 +251,8 @@ resource "aws_alb_listener_rule" "service_alb_host_rule_bypass_exclusions" {
     for k, v in local.infrastructure_ecs_cluster_services : k => v if(
       v["enable_cloudfront"] == true &&
       v["cloudfront_bypass_protection_enabled"] == true &&
-      v["cloudfront_bypass_protection_excluded_domains"] != null
+      v["cloudfront_bypass_protection_excluded_domains"] != null &&
+      v["container_port"] != 0
     )
   }
 
