@@ -279,6 +279,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_https_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_https_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_nfs_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_ingress_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_ingress_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_efs_ingress_nfs_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
