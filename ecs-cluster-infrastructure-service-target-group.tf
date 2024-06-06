@@ -1,6 +1,6 @@
 resource "aws_alb_target_group" "infrastructure_ecs_cluster_service" {
   for_each = {
-    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "rolling"
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "rolling" && v["container_port"] != 0
   }
 
   name = "${local.resource_prefix_hash}-${each.key}"
@@ -27,7 +27,7 @@ resource "aws_alb_target_group" "infrastructure_ecs_cluster_service" {
 
 resource "aws_alb_target_group" "infrastructure_ecs_cluster_service_blue" {
   for_each = {
-    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "blue-green"
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "blue-green" && v["container_port"] != 0
   }
 
   name = "${local.resource_prefix_hash}-b-${each.key}"
@@ -54,7 +54,7 @@ resource "aws_alb_target_group" "infrastructure_ecs_cluster_service_blue" {
 
 resource "aws_alb_target_group" "infrastructure_ecs_cluster_service_green" {
   for_each = {
-    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "blue-green"
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "blue-green" && v["container_port"] != 0
   }
 
   name = "${local.resource_prefix_hash}-g-${each.key}"

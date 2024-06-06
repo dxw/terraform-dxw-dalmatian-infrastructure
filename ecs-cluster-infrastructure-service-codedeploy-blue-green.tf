@@ -110,20 +110,23 @@ resource "aws_codedeploy_deployment_group" "infrastructure_ecs_cluster_service_b
     service_name = each.key
   }
 
-  load_balancer_info {
-    target_group_pair_info {
-      prod_traffic_route {
-        listener_arns = [
-          local.enable_infrastructure_wildcard_certificate ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
-        ]
-      }
+  dynamic "load_balancer_info" {
+    for_each = each.value["container_port"] != 0 ? [1] : []
+    content {
+      target_group_pair_info {
+        prod_traffic_route {
+          listener_arns = [
+            local.enable_infrastructure_wildcard_certificate ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
+          ]
+        }
 
-      target_group {
-        name = aws_alb_target_group.infrastructure_ecs_cluster_service_green[each.key].name
-      }
+        target_group {
+          name = aws_alb_target_group.infrastructure_ecs_cluster_service_green[each.key].name
+        }
 
-      target_group {
-        name = aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.key].name
+        target_group {
+          name = aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.key].name
+        }
       }
     }
   }
