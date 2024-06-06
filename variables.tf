@@ -244,6 +244,19 @@ variable "infrastructure_ecs_cluster_publicly_avaialble" {
   type        = bool
 }
 
+variable "infrastructure_ecs_cluster_custom_security_group_rules" {
+  description = "Map of custom security group rules to add to the ECS Cluster security group (eg. { rule-name = {type = \"egress\", ... }  })"
+  type = map(object({
+    description              = string
+    type                     = string
+    from_port                = number
+    to_port                  = number
+    protocol                 = string
+    source_security_group_id = optional(string, "")
+    cidr_blocks              = optional(list(string), [])
+  }))
+}
+
 variable "infrastructure_ecs_cluster_instance_type" {
   description = "The instance type for EC2 instances launched in the ECS cluster"
   type        = string
