@@ -118,6 +118,7 @@ locals {
   infrastructure_ecs_cluster_ebs_docker_storage_volume_size        = var.infrastructure_ecs_cluster_ebs_docker_storage_volume_size
   infrastructure_ecs_cluster_ebs_docker_storage_volume_type        = var.infrastructure_ecs_cluster_ebs_docker_storage_volume_type
   infrastructure_ecs_cluster_publicly_avaialble                    = var.infrastructure_ecs_cluster_publicly_avaialble && local.infrastructure_vpc_network_enable_public
+  infrastructure_ecs_cluster_custom_security_group_rules           = var.infrastructure_ecs_cluster_custom_security_group_rules
   infrastructure_ecs_cluster_instance_type                         = var.infrastructure_ecs_cluster_instance_type
   infrastructure_ecs_cluster_termination_timeout                   = var.infrastructure_ecs_cluster_termination_timeout
   infrastructure_ecs_cluster_draining_lambda_enabled               = var.infrastructure_ecs_cluster_draining_lambda_enabled && local.enable_infrastructure_ecs_cluster

@@ -113,3 +113,16 @@ resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instanc
   source_security_group_id = aws_security_group.infrastructure_rds[each.key].id
   security_group_id        = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
 }
+
+resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instances_custom" {
+  for_each = local.enable_infrastructure_ecs_cluster ? local.infrastructure_ecs_cluster_custom_security_group_rules : {}
+
+  description              = each.value["description"]
+  type                     = each.value["type"]
+  from_port                = each.value["from_port"]
+  to_port                  = each.value["to_port"]
+  protocol                 = each.value["protocol"]
+  source_security_group_id = each.value["source_security_group_id"] != "" ? each.value["source_security_group_id"] : null
+  cidr_blocks              = length(each.value["cidr_blocks"]) > 0 ? each.value["cidr_blocks"] : null
+  security_group_id        = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
+}
