@@ -182,7 +182,7 @@ resource "aws_cloudwatch_event_target" "infrastructure_ecs_cluster_service_sched
   target_id = "${local.resource_prefix}-${each.value["container_name"]}-${each.value["scheduled_task_name"]}"
   rule      = aws_cloudwatch_event_rule.infrastructure_ecs_cluster_service_scheduled_task[each.key].name
   arn       = aws_ecs_cluster.infrastructure[0].arn
-  role_arn  = aws_iam_role.infrastructure_ecs_cluster_service_scheduled_task[each.value["container_name"]].arn
+  role_arn  = aws_iam_role.infrastructure_ecs_cluster_service_scheduled_task[each.key].arn
   input     = jsonencode({})
 
   ecs_target {
