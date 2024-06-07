@@ -103,6 +103,35 @@ resource "aws_iam_role" "infrastructure_ecs_cluster_service_task" {
   )
 }
 
+resource "aws_iam_policy" "infrastructure_ecs_cluster_service_task_custom" {
+  for_each = merge([
+    for service_name, service in local.infrastructure_ecs_cluster_services : {
+      for custom_policy_name, custom_policy in service["custom_policies"] : "${service_name}_${custom_policy_name}" => {
+        custom_policy      = custom_policy
+        service_name       = service_name
+        custom_policy_name = custom_policy_name
+      }
+    }
+  ]...)
+
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-service-task-execution-${each.value["service_name"]}-custom-${each.value["custom_policy_name"]}"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-cluster-service-task-execution-${each.value["service_name"]}-custom-${each.value["custom_policy_name"]} ${each.value["custom_policy"]["description"]}"
+  policy      = jsonencode(each.value["custom_policy"]["policy"])
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_task_custom" {
+  for_each = merge([
+    for service_name, service in local.infrastructure_ecs_cluster_services : {
+      for custom_policy_name, custom_policy in service["custom_policies"] : "${service_name}_${custom_policy_name}" => {
+        service_name = service_name
+      }
+    }
+  ]...)
+
+  role       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.value["service_name"]].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_custom[each.key].arn
+}
+
 resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
   for_each = local.infrastructure_ecs_cluster_services
 
