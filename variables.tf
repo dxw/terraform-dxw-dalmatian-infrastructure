@@ -343,13 +343,24 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     cloudwatch_logs_retention     = optional(number, null)
     enable_execute_command        = optional(bool, null)
     deregistration_delay          = optional(number, null)
-    container_entrypoint          = optional(list(string), null)
-    container_port                = optional(number, null)
-    container_volumes             = optional(list(map(string)), null)
-    container_extra_hosts         = optional(list(map(string)), null)
-    container_count               = optional(number, null)
-    container_heath_check_path    = optional(string, null)
-    container_heath_grace_period  = optional(number, null)
+    custom_policies = optional(map(object({
+      description = string
+      policy = object({
+        Version = string
+        Statement = list(object({
+          Action   = list(string)
+          Effect   = string
+          Resource = list(string)
+        }))
+      })
+    })), {})
+    container_entrypoint         = optional(list(string), null)
+    container_port               = optional(number, null)
+    container_volumes            = optional(list(map(string)), null)
+    container_extra_hosts        = optional(list(map(string)), null)
+    container_count              = optional(number, null)
+    container_heath_check_path   = optional(string, null)
+    container_heath_grace_period = optional(number, null)
     scheduled_tasks = optional(map(object({
       entrypoint          = optional(list(string), null)
       schedule_expression = string
@@ -388,6 +399,7 @@ variable "infrastructure_ecs_cluster_services" {
         cloudwatch_logs_retention: CloudWatch log retention in days
         enable_execute_command: Enable Amazon ECS Exec to directly interact with containers
         deregistration_delay: Amount time for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused
+        custom_policies: Map of custom policies to attach to the service task role (eg. { policy-name = { description = \"my custom policy\", policy = { Version = \"2012-10-17\", Statement = [] } } })
         container_entrypoint: The container entrypoint
         container_port: The service container port
         container_volumes: List of maps containing volume mappings eg. [ { "name" = "my-volume", "host_path" = "/mnt/efs/my-dir", "container_path" = "/mnt/my-dir" } ]
@@ -426,13 +438,24 @@ variable "infrastructure_ecs_cluster_services" {
     cloudwatch_logs_retention     = optional(number, null)
     enable_execute_command        = optional(bool, null)
     deregistration_delay          = optional(number, null)
-    container_entrypoint          = optional(list(string), null)
-    container_port                = optional(number, null)
-    container_volumes             = optional(list(map(string)), null)
-    container_extra_hosts         = optional(list(map(string)), null)
-    container_count               = optional(number, null)
-    container_heath_check_path    = optional(string, null)
-    container_heath_grace_period  = optional(number, null)
+    custom_policies = optional(map(object({
+      description = string
+      policy = object({
+        Version = string
+        Statement = list(object({
+          Action   = list(string)
+          Effect   = string
+          Resource = list(string)
+        }))
+      })
+    })), {})
+    container_entrypoint         = optional(list(string), null)
+    container_port               = optional(number, null)
+    container_volumes            = optional(list(map(string)), null)
+    container_extra_hosts        = optional(list(map(string)), null)
+    container_count              = optional(number, null)
+    container_heath_check_path   = optional(string, null)
+    container_heath_grace_period = optional(number, null)
     scheduled_tasks = optional(map(object({
       entrypoint          = list(string)
       schedule_expression = string
