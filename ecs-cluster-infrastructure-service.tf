@@ -221,7 +221,7 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
     }
   }
 
-  health_check_grace_period_seconds = each.value["container_heath_grace_period"]
+  health_check_grace_period_seconds = each.value["container_port"] != 0 ? each.value["container_heath_grace_period"] : null
 
   launch_type = "EC2"
 
