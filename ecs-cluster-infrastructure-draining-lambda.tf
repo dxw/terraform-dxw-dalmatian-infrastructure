@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_log_group" "ecs_cluster_infrastructure_draining_lambda_log_group" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled ? 1 : 0
 
-  name              = "/aws/lambda/${local.resource_prefix}-ecs-cluster-infrastructure-draining"
+  name              = "/aws/lambda/${local.resource_prefix_hash}-ecs-cluster-infrastructure-draining"
   kms_key_id        = local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
   retention_in_days = local.infrastructure_ecs_cluster_draining_lambda_log_retention
 }
@@ -26,7 +26,7 @@ resource "aws_iam_policy" "ecs_cluster_infrastructure_draining_lambda" {
     {
       region        = local.aws_region
       account_id    = local.aws_account_id
-      function_name = "${local.resource_prefix}-ecs-cluster-infrastructure-draining"
+      function_name = "${local.resource_prefix_hash}-ecs-cluster-infrastructure-draining"
     }
   )
 }
@@ -100,7 +100,7 @@ resource "aws_lambda_function" "ecs_cluster_infrastructure_draining" {
   count = local.infrastructure_ecs_cluster_draining_lambda_enabled ? 1 : 0
 
   filename         = data.archive_file.ecs_cluster_infrastructure_draining_lambda[0].output_path
-  function_name    = "${local.resource_prefix}-ecs-cluster-infrastructure-draining"
+  function_name    = "${local.resource_prefix_hash}-ecs-cluster-infrastructure-draining"
   description      = "${local.resource_prefix} ECS Cluster Infrastructure Draining"
   handler          = "function.lambda_handler"
   runtime          = "python3.11"
