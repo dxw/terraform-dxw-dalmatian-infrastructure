@@ -128,7 +128,7 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_ta
     }
   ]...)
 
-  role       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.value["service_name"]].name
+  role       = aws_iam_role.infrastructure_ecs_cluster_service_task[each.value["service_name"]].name
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_custom[each.key].arn
 }
 
