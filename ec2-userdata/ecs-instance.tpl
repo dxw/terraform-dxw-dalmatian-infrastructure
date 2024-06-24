@@ -18,7 +18,7 @@ echo 'OPTIONS="--default-ulimit nofile=1024:4096 --storage-opt overlay2.size=${d
 sudo service docker restart
 
 # Install useful packages
-sudo yum update -y
+sudo yum update --security -y
 
 if ! command -v aws &> /dev/null
 then
