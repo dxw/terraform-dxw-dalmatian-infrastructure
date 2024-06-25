@@ -343,6 +343,41 @@ variable "infrastructure_ecs_cluster_asg_cpu_alert_opsgenie" {
   type        = bool
 }
 
+variable "enable_infrastructure_ecs_cluster_pending_task_alert" {
+  description = "Enable the ECS Cluster pending task alert"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_pending_task_metric_lambda_log_retention" {
+  description = "Log retention for the ECS cluster pending task metric Lambda"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_pending_task_alert_evaluation_periods" {
+  description = "Evaluation periods for the ECS cluster's Pending Task alert"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_pending_task_alert_period" {
+  description = "Period (in secods) for the ECS cluster's Pending Task alert"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_pending_task_alert_threshold" {
+  description = "Threshold (Number of pending tasks) for the ECS cluster's Pending Task alert"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_pending_task_alert_slack" {
+  description = "Enable Slack alerts for the ECS cluster's Pending Task alert"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_pending_task_alert_opsgenie" {
+  description = "Enable Opsgenie alerts for the ECS cluster's Pending Task alert"
+  type        = bool
+}
+
 variable "infrastructure_ecs_cluster_wafs" {
   description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
   type = map(object({
