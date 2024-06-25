@@ -11,6 +11,11 @@ locals {
 
   infrastructure_logging_bucket_retention = var.infrastructure_logging_bucket_retention
 
+  infrastructure_slack_sns_topic_name      = "${local.project_name}-cloudwatch-slack-alerts"
+  infrastructure_opsgenie_sns_topic_name   = "${local.project_name}-cloudwatch-opsgenie-alerts"
+  infrastructure_slack_sns_topic_in_use    = local.infrastructure_ecs_cluster_asg_cpu_alert_slack
+  infrastructure_opsgenie_sns_topic_in_use = local.infrastructure_ecs_cluster_asg_cpu_alert_opsgenie
+
   enable_infrastructure_logs_bucket = (
     local.infrastructure_vpc_flow_logs_s3_with_athena ||
     length(local.infrastructure_ecs_cluster_services) != 0 ||
@@ -132,8 +137,14 @@ locals {
   infrastructure_ecs_cluster_autoscaling_time_based_custom = {
     for custom in toset(var.infrastructure_ecs_cluster_autoscaling_time_based_custom) : "${custom["min"]}-${custom["max"]} ${custom["cron"]}" => custom
   }
-  infrastructure_ecs_cluster_wafs            = var.infrastructure_ecs_cluster_wafs
-  infrastructure_ecs_cluster_enable_ssm_dhmc = local.enable_infrastructure_ecs_cluster ? data.external.ssm_dhmc_setting[0].result.setting_value != "$None" : false
+  enable_infrastructure_ecs_cluster_asg_cpu_alert             = var.enable_infrastructure_ecs_cluster_asg_cpu_alert && local.enable_infrastructure_ecs_cluster
+  infrastructure_ecs_cluster_asg_cpu_alert_evaluation_periods = var.infrastructure_ecs_cluster_asg_cpu_alert_evaluation_periods
+  infrastructure_ecs_cluster_asg_cpu_alert_period             = var.infrastructure_ecs_cluster_asg_cpu_alert_period
+  infrastructure_ecs_cluster_asg_cpu_alert_threshold          = var.infrastructure_ecs_cluster_asg_cpu_alert_threshold
+  infrastructure_ecs_cluster_asg_cpu_alert_slack              = var.infrastructure_ecs_cluster_asg_cpu_alert_slack && local.enable_infrastructure_ecs_cluster_asg_cpu_alert
+  infrastructure_ecs_cluster_asg_cpu_alert_opsgenie           = var.infrastructure_ecs_cluster_asg_cpu_alert_opsgenie && local.enable_infrastructure_ecs_cluster_asg_cpu_alert
+  infrastructure_ecs_cluster_wafs                             = var.infrastructure_ecs_cluster_wafs
+  infrastructure_ecs_cluster_enable_ssm_dhmc                  = local.enable_infrastructure_ecs_cluster ? data.external.ssm_dhmc_setting[0].result.setting_value != "$None" : false
   infrastructure_ecs_cluster_user_data = base64encode(
     templatefile("ec2-userdata/ecs-instance.tpl", {
       docker_storage_volume_device_name = local.infrastructure_ecs_cluster_ebs_docker_storage_volume_device_name,

@@ -313,6 +313,36 @@ variable "infrastructure_ecs_cluster_autoscaling_time_based_custom" {
   )
 }
 
+variable "enable_infrastructure_ecs_cluster_asg_cpu_alert" {
+  description = "Enable a CPU alert for the ECS cluster's Autoscaling Group"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_asg_cpu_alert_evaluation_periods" {
+  description = "Evaluation periods for the ECS cluster's Autoscaling Group CPU alert"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_asg_cpu_alert_period" {
+  description = "Period (in secods) for the ECS cluster's Autoscaling Group CPU alert"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_asg_cpu_alert_threshold" {
+  description = "Threshold (CPU%) for the ECS cluster's Autoscaling Group CPU alert"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_asg_cpu_alert_slack" {
+  description = "Enable Slack alerts for the ECS cluster's Autoscaling Group CPU alert"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_asg_cpu_alert_opsgenie" {
+  description = "Enable Opsgenie alerts for the ECS cluster's Autoscaling Group CPU alert"
+  type        = bool
+}
+
 variable "infrastructure_ecs_cluster_wafs" {
   description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
   type = map(object({
