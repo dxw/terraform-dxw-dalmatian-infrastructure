@@ -31,6 +31,18 @@ data "aws_ami" "ecs_cluster_ami" {
   }
 }
 
+data "aws_sns_topic" "infrastructure_slack_sns_topic" {
+  count = local.infrastructure_slack_sns_topic_in_use ? 1 : 0
+
+  name = local.infrastructure_slack_sns_topic_name
+}
+
+data "aws_sns_topic" "infrastructure_opsgenie_sns_topic" {
+  count = local.infrastructure_opsgenie_sns_topic_in_use ? 1 : 0
+
+  name = local.infrastructure_opsgenie_sns_topic_name
+}
+
 data "aws_s3_object" "ecs_cluster_service_buildspec" {
   for_each = {
     for k, service in local.infrastructure_ecs_cluster_services : k => service if service["buildspec_from_github_repo"] == null || service["buildspec_from_github_repo"] == false
