@@ -378,6 +378,41 @@ variable "infrastructure_ecs_cluster_pending_task_alert_opsgenie" {
   type        = bool
 }
 
+variable "enable_infrastructure_ecs_cluster_ecs_asg_diff_alert" {
+  description = "Enable the ECS Cluster Container Instance / ASG instance diff alert"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_ecs_asg_diff_metric_lambda_log_retention" {
+  description = "Log retention for the ECS cluster Container Instance / ASG instance diff metric Lambda"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_ecs_asg_diff_alert_evaluation_periods" {
+  description = "Evaluation periods for the ECS cluster's Container Instance / ASG instance diff alert"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_ecs_asg_diff_alert_period" {
+  description = "Period (in secods) for the ECS cluster's Container Instance / ASG instance diff alert"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_ecs_asg_diff_alert_threshold" {
+  description = "Threshold (Number of pending tasks) for the ECS cluster's Container Instance / ASG instance diff alert"
+  type        = number
+}
+
+variable "infrastructure_ecs_cluster_ecs_asg_diff_alert_slack" {
+  description = "Enable Slack alerts for the ECS cluster's Container Instance / ASG instance diff alert"
+  type        = bool
+}
+
+variable "infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie" {
+  description = "Enable Opsgenie alerts for the ECS cluster's Container Instance / ASG instance diff alert"
+  type        = bool
+}
+
 variable "infrastructure_ecs_cluster_wafs" {
   description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
   type = map(object({

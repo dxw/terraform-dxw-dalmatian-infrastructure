@@ -15,11 +15,13 @@ locals {
   infrastructure_opsgenie_sns_topic_name = "${local.project_name}-cloudwatch-opsgenie-alerts"
   infrastructure_slack_sns_topic_in_use = (
     local.infrastructure_ecs_cluster_asg_cpu_alert_slack ||
-    local.infrastructure_ecs_cluster_pending_task_alert_slack
+    local.infrastructure_ecs_cluster_pending_task_alert_slack ||
+    local.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack
   )
   infrastructure_opsgenie_sns_topic_in_use = (
     local.infrastructure_ecs_cluster_asg_cpu_alert_opsgenie ||
-    local.infrastructure_ecs_cluster_pending_task_alert_opsgenie
+    local.infrastructure_ecs_cluster_pending_task_alert_opsgenie ||
+    local.infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie
   )
 
   enable_infrastructure_logs_bucket = (
@@ -156,6 +158,13 @@ locals {
   infrastructure_ecs_cluster_pending_task_alert_threshold             = var.infrastructure_ecs_cluster_pending_task_alert_threshold
   infrastructure_ecs_cluster_pending_task_alert_slack                 = var.infrastructure_ecs_cluster_pending_task_alert_slack
   infrastructure_ecs_cluster_pending_task_alert_opsgenie              = var.infrastructure_ecs_cluster_pending_task_alert_opsgenie
+  enable_infrastructure_ecs_cluster_ecs_asg_diff_alert                = var.enable_infrastructure_ecs_cluster_ecs_asg_diff_alert && local.enable_infrastructure_ecs_cluster
+  infrastructure_ecs_cluster_ecs_asg_diff_metric_lambda_log_retention = var.infrastructure_ecs_cluster_ecs_asg_diff_metric_lambda_log_retention
+  infrastructure_ecs_cluster_ecs_asg_diff_alert_evaluation_periods    = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_evaluation_periods
+  infrastructure_ecs_cluster_ecs_asg_diff_alert_period                = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_period
+  infrastructure_ecs_cluster_ecs_asg_diff_alert_threshold             = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_threshold
+  infrastructure_ecs_cluster_ecs_asg_diff_alert_slack                 = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack
+  infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie              = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie
   infrastructure_ecs_cluster_wafs                                     = var.infrastructure_ecs_cluster_wafs
   infrastructure_ecs_cluster_enable_ssm_dhmc                          = local.enable_infrastructure_ecs_cluster ? data.external.ssm_dhmc_setting[0].result.setting_value != "$None" : false
   infrastructure_ecs_cluster_user_data = base64encode(
