@@ -39,3 +39,6 @@ cd /mnt/efs
 mkdir -p ${efs_dirs}
 cd ..
 %{~ endif}%{endif}
+
+# Ensure the ecs service has started
+sudo systemctl start ecs
