@@ -41,7 +41,7 @@ resource "aws_db_instance" "infrastructure_rds" {
     for k, v in local.infrastructure_rds : k => v if v["type"] == "instance"
   } : {}
 
-  identifier                  = "${local.resource_prefix_hash}-${each.key}"
+  identifier                  = "${regex("^[0-9]", substr(local.resource_prefix_hash, 0, 1)) != null ? "h" : ""}${local.resource_prefix_hash}-${each.key}"
   engine                      = local.rds_engines[each.value["type"]][each.value["engine"]]
   engine_version              = each.value["engine_version"]
   allow_major_version_upgrade = false
