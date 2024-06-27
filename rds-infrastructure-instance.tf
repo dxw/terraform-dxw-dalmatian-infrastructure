@@ -62,7 +62,7 @@ resource "aws_db_instance" "infrastructure_rds" {
   backup_window             = "22:00-23:59"
   copy_tags_to_snapshot     = true
   skip_final_snapshot       = false
-  final_snapshot_identifier = "${local.resource_prefix_hash}-${each.key}-final"
+  final_snapshot_identifier = "${regex("^[0-9]", substr(local.resource_prefix_hash, 0, 1)) != null ? "h" : ""}${local.resource_prefix_hash}-${each.key}-final"
   backup_retention_period   = 35
 
   monitoring_interval                   = each.value["monitoring_interval"]
