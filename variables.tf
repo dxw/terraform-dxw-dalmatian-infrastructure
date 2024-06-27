@@ -429,14 +429,18 @@ variable "infrastructure_ecs_cluster_wafs" {
 variable "infrastructure_ecs_cluster_service_defaults" {
   description = "Default values for ECS Cluster Services"
   type = object({
-    github_v1_source              = optional(bool, null)
-    github_v1_oauth_token         = optional(string, null)
-    codestar_connection_arn       = optional(string, null)
-    github_owner                  = optional(string, null)
-    github_repo                   = optional(string, null)
-    github_track_revision         = optional(string, null)
-    buildspec                     = optional(string, null)
-    buildspec_from_github_repo    = optional(bool, null)
+    github_v1_source           = optional(bool, null)
+    github_v1_oauth_token      = optional(string, null)
+    codestar_connection_arn    = optional(string, null)
+    github_owner               = optional(string, null)
+    github_repo                = optional(string, null)
+    github_track_revision      = optional(string, null)
+    buildspec                  = optional(string, null)
+    buildspec_from_github_repo = optional(bool, null)
+    codebuild_environment_variables = optional(list(object({
+      name  = string
+      value = string
+    })), [])
     ecr_scan_target_sns_topic_arn = optional(string, null)
     deployment_type               = optional(string, null)
     enable_cloudwatch_logs        = optional(bool, null)
@@ -493,6 +497,7 @@ variable "infrastructure_ecs_cluster_services" {
         github_track_revision: The branch/revision of the GitHub repository to be pulled by the CodePipeline source
         buildspec: The filename of the buildspec to use for the CodePipeline build phase, stored within the 'codepipeline buildspec store' S3 bucket
         buildspec_from_github_repo: Conditionally use the 'buildspec' filename stored within the GitHub repo as the buildspec
+        codebuild_environment_variables: List of codebuild environment variable objects (eg. [{ name = "MY_VAR", value = "foo" },{ name = "MY_OTHER_VAR", value = "bar"}])
         ecr_scan_target_sns_topic_arn: An SNS topic ARN to publish ECR scan results to
         deployment_type: The service deployment type - Can be one of 'rolling' or 'blue-green'
         enable_cloudwatch_logs: Conditionally enable cloudwatch logs for the service
@@ -524,14 +529,18 @@ variable "infrastructure_ecs_cluster_services" {
     }
   EOT
   type = map(object({
-    github_v1_source              = optional(bool, null)
-    github_v1_oauth_token         = optional(string, null)
-    codestar_connection_arn       = optional(string, null)
-    github_owner                  = optional(string, null)
-    github_repo                   = optional(string, null)
-    github_track_revision         = optional(string, null)
-    buildspec                     = optional(string, null)
-    buildspec_from_github_repo    = optional(bool, null)
+    github_v1_source           = optional(bool, null)
+    github_v1_oauth_token      = optional(string, null)
+    codestar_connection_arn    = optional(string, null)
+    github_owner               = optional(string, null)
+    github_repo                = optional(string, null)
+    github_track_revision      = optional(string, null)
+    buildspec                  = optional(string, null)
+    buildspec_from_github_repo = optional(bool, null)
+    codebuild_environment_variables = optional(list(object({
+      name  = string
+      value = string
+    })), [])
     ecr_scan_target_sns_topic_arn = optional(string, null)
     deployment_type               = optional(string, null)
     enable_cloudwatch_logs        = optional(bool, null)
