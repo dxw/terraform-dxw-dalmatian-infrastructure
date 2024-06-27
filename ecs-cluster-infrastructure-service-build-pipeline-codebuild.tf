@@ -157,6 +157,15 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
         value = aws_ecs_task_definition.infrastructure_ecs_cluster_service[each.key].family
       }
     }
+
+    dynamic "environment_variable" {
+      for_each = each.value["codebuild_environment_variables"]
+
+      content {
+        name  = environment_variable.value.name
+        value = environment_variable.value.value
+      }
+    }
   }
 
   source {
