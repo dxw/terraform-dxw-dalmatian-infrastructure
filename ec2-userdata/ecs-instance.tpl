@@ -41,4 +41,4 @@ cd ..
 %{~ endif}%{endif}
 
 # Ensure the ecs service has started
-sudo systemctl start ecs
+sudo systemctl start --no-block ecs
