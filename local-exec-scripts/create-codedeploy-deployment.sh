@@ -60,6 +60,24 @@ DEPLOYMENT_REVISION=$(
   }'
 )
 
+echo "==> Checking current Deployments for '$APPLICATION_NAME' ..."
+CURRENT_DEPLOYMENT="deployment_check"
+while [ -n "$CURRENT_DEPLOYMENT" ]
+do
+  CURRENT_DEPLOYMENT=$(aws deploy list-deployments \
+    --application-name "$APPLICATION_NAME" \
+    --deployment-group-name "$GROUP_NAME" \
+    --include-only-statuses Created InProgress Queued \
+    --output text \
+    | head -n1
+  )
+  if [ -n "$CURRENT_DEPLOYMENT" ]
+  then
+    echo "There is a current deployment In Progress or Queued ($(echo "$CURRENT_DEPLOYMENT" | cut -d' ' -f2)). Waiting before creating a new one ..."
+    sleep 10
+  fi
+done
+
 echo "==> Creating Deployment for '$APPLICATION_NAME' ..."
 DEPLOYMENT_ID=$(
   aws deploy create-deployment \
@@ -73,7 +91,7 @@ DEPLOYMENT_ID=$(
 echo "==> Checking deployment '$DEPLOYMENT_ID' ..."
 DEPLOYMENT_STATUS=$(
   aws deploy get-deployment \
-  --deployment-id $DEPLOYMENT_ID \
+  --deployment-id "$DEPLOYMENT_ID" \
   --output text \
   --query '[deploymentInfo.status]'
 )
@@ -89,7 +107,7 @@ do
   echo "==> Deployment status: $DEPLOYMENT_STATUS..."
   DEPLOYMENT_STATUS=$(
     aws deploy get-deployment \
-    --deployment-id $DEPLOYMENT_ID \
+    --deployment-id "$DEPLOYMENT_ID" \
     --output text \
     --query '[deploymentInfo.status]'
   )
