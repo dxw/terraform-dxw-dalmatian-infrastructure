@@ -146,14 +146,14 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       container_port      = each.value["container_port"] != null ? each.value["container_port"] : 0
       extra_hosts = each.value["container_extra_hosts"] != null ? jsonencode([
         for extra_host in each.value["container_extra_hosts"] : {
-          hostname  = extra_host.value["hostname"],
-          ipAddress = extra_host.value["ip_address"]
+          hostname  = extra_host["hostname"],
+          ipAddress = extra_host["ip_address"]
         }
       ]) : "[]"
       volumes = each.value["container_volumes"] != null ? jsonencode([
         for volume in each.value["container_volumes"] : {
-          sourceVolume  = volume.value["name"],
-          containerPath = volume.value["container_path"]
+          sourceVolume  = volume["name"],
+          containerPath = volume["container_path"]
         }
       ]) : "[]"
       linux_parameters = each.value["enable_execute_command"] == true ? jsonencode({
