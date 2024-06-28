@@ -41,7 +41,7 @@ resource "aws_db_instance" "infrastructure_rds" {
     for k, v in local.infrastructure_rds : k => v if v["type"] == "instance"
   } : {}
 
-  identifier                  = "${regex("^[0-9]", substr(local.resource_prefix_hash, 0, 1)) != null ? "h" : ""}${local.resource_prefix_hash}-${each.key}"
+  identifier                  = "${length(regexall("^[0-9]", substr(local.resource_prefix_hash, 0, 1))) > 0 ? "h" : ""}${local.resource_prefix_hash}-${each.key}"
   engine                      = local.rds_engines[each.value["type"]][each.value["engine"]]
   engine_version              = each.value["engine_version"]
   allow_major_version_upgrade = false
@@ -62,7 +62,7 @@ resource "aws_db_instance" "infrastructure_rds" {
   backup_window             = "22:00-23:59"
   copy_tags_to_snapshot     = true
   skip_final_snapshot       = false
-  final_snapshot_identifier = "${regex("^[0-9]", substr(local.resource_prefix_hash, 0, 1)) != null ? "h" : ""}${local.resource_prefix_hash}-${each.key}-final"
+  final_snapshot_identifier = "${length(regexall("^[0-9]", substr(local.resource_prefix_hash, 0, 1))) > 0 ? "h" : ""}${local.resource_prefix_hash}-${each.key}-final"
   backup_retention_period   = 35
 
   monitoring_interval                   = each.value["monitoring_interval"]
