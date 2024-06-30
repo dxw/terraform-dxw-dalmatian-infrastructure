@@ -5,6 +5,7 @@ resource "aws_wafv2_ip_set" "infrastructure_ecs_cluster_ip_deny_list" {
 
   name               = "${local.resource_prefix}-${each.key}-ip-deny-list"
   description        = "IP addresses to block on ${local.resource_prefix}-${each.key}"
+  provider           = aws.useast1
   scope              = "CLOUDFRONT"
   ip_address_version = "IPV4"
   addresses          = each.value["ip_deny_list"]
