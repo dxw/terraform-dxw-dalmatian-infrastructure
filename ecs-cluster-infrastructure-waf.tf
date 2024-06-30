@@ -11,6 +11,19 @@ resource "aws_wafv2_ip_set" "infrastructure_ecs_cluster_ip_deny_list" {
   addresses          = each.value["ip_deny_list"]
 }
 
+resource "aws_wafv2_ip_set" "infrastructure_ecs_cluster_ip_allow_list" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_wafs : k => v if v["ip_allow_list"] != null
+  }
+
+  name               = "${local.resource_prefix}-${each.key}-ip-allow-list"
+  description        = "IP addresses to allow on ${local.resource_prefix}-${each.key}"
+  provider           = aws.useast1
+  scope              = "CLOUDFRONT"
+  ip_address_version = "IPV4"
+  addresses          = each.value["ip_allow_list"]
+}
+
 resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
   for_each = local.infrastructure_ecs_cluster_wafs
 
@@ -48,13 +61,37 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
       }
     }
   }
+  dynamic "rule" {
+    for_each = each.value["ip_allow_list"] != null ? [1] : []
+
+    content {
+      name     = "CustomDalmatianAllowIPSet"
+      priority = 1 # Always process this rule before any others if it is defined
+
+      action {
+        allow {}
+      }
+
+      statement {
+        ip_set_reference_statement {
+          arn = aws_wafv2_ip_set.infrastructure_ecs_cluster_ip_allow_list[each.key].arn
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-ip-allow"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
 
   dynamic "rule" {
     for_each = each.value["aws_managed_rules"] != null ? each.value["aws_managed_rules"] : []
 
     content {
       name     = rule.value["name"]
-      priority = rule.key + 1
+      priority = rule.key + 2
 
       override_action {
         dynamic "count" {
