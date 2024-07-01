@@ -1,15 +1,54 @@
-resource "aws_wafv2_ip_set" "infrastructure_ecs_cluster_ip_deny_list" {
+resource "aws_wafv2_ip_set" "infrastructure_ecs_cluster_ipv4_deny_list" {
   for_each = {
-    for k, v in local.infrastructure_ecs_cluster_wafs : k => v if v["ip_deny_list"] != null
+    for k, v in local.infrastructure_ecs_cluster_wafs : k => v if v["ipv4_deny_list"] != null
   }
 
-  name               = "${local.resource_prefix}-${each.key}-ip-deny-list"
-  description        = "IP addresses to block on ${local.resource_prefix}-${each.key}"
+  name               = "${local.resource_prefix}-${each.key}-ipv4-deny-list"
+  description        = "IPv4 addresses to block on ${local.resource_prefix}-${each.key}"
+  provider           = aws.useast1
   scope              = "CLOUDFRONT"
   ip_address_version = "IPV4"
-  addresses          = each.value["ip_deny_list"]
+  addresses          = each.value["ipv4_deny_list"]
 }
 
+resource "aws_wafv2_ip_set" "infrastructure_ecs_cluster_ipv4_allow_list" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_wafs : k => v if v["ipv4_allow_list"] != null
+  }
+
+  name               = "${local.resource_prefix}-${each.key}-ip-allow-list"
+  description        = "IP addresses to allow on ${local.resource_prefix}-${each.key}"
+  provider           = aws.useast1
+  scope              = "CLOUDFRONT"
+  ip_address_version = "IPV4"
+  addresses          = each.value["ipv4_allow_list"]
+}
+
+resource "aws_wafv2_ip_set" "infrastructure_ecs_cluster_ipv6_deny_list" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_wafs : k => v if v["ipv6_deny_list"] != null
+  }
+
+  name               = "${local.resource_prefix}-${each.key}-ipv6-deny-list"
+  description        = "IPv6 addresses to block on ${local.resource_prefix}-${each.key}"
+  provider           = aws.useast1
+  scope              = "CLOUDFRONT"
+  ip_address_version = "IPV6"
+  addresses          = each.value["ipv6_deny_list"]
+}
+
+resource "aws_wafv2_ip_set" "infrastructure_ecs_cluster_ipv6_allow_list" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_wafs : k => v if v["ipv6_allow_list"] != null
+  }
+
+  name               = "${local.resource_prefix}-${each.key}-ipv6-allow-list"
+  description        = "IPv6 addresses to allow on ${local.resource_prefix}-${each.key}"
+  provider           = aws.useast1
+  scope              = "CLOUDFRONT"
+  ip_address_version = "IPV6"
+  addresses          = each.value["ipv6_allow_list"]
+}
 resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
   for_each = local.infrastructure_ecs_cluster_wafs
 
@@ -24,10 +63,10 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
   }
 
   dynamic "rule" {
-    for_each = each.value["ip_deny_list"] != null ? [1] : []
+    for_each = each.value["ipv4_deny_list"] != null ? [1] : []
 
     content {
-      name     = "CustomDalmatianBlockIPSet"
+      name     = "CustomDalmatianBlockIPv4Set"
       priority = 0 # Always process this rule before any others if it is defined
 
       action {
@@ -36,24 +75,96 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
 
       statement {
         ip_set_reference_statement {
-          arn = aws_wafv2_ip_set.infrastructure_ecs_cluster_ip_deny_list[each.key].arn
+          arn = aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv4_deny_list[each.key].arn
         }
       }
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "${local.resource_prefix}-${each.key}-ip-deny"
+        metric_name                = "${local.resource_prefix}-${each.key}-ipv4-deny"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+  dynamic "rule" {
+    for_each = each.value["ipv4_allow_list"] != null ? [1] : []
+
+    content {
+      name     = "CustomDalmatianAllowIPv4Set"
+      priority = 1 # Always process this rule before any others if it is defined
+
+      action {
+        allow {}
+      }
+
+      statement {
+        ip_set_reference_statement {
+          arn = aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv4_allow_list[each.key].arn
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-ipv4-allow"
         sampled_requests_enabled   = true
       }
     }
   }
 
   dynamic "rule" {
+    for_each = each.value["ipv6_deny_list"] != null ? [1] : []
+
+    content {
+      name     = "CustomDalmatianBlockIPv6Set"
+      priority = 3 # Always process this rule before any others if it is defined
+
+      action {
+        block {}
+      }
+
+      statement {
+        ip_set_reference_statement {
+          arn = aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv6_deny_list[each.key].arn
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-ipv6-deny"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+  dynamic "rule" {
+    for_each = each.value["ipv6_allow_list"] != null ? [1] : []
+
+    content {
+      name     = "CustomDalmatianAllowIPv6Set"
+      priority = 4 # Always process this rule before any others if it is defined
+
+      action {
+        allow {}
+      }
+
+      statement {
+        ip_set_reference_statement {
+          arn = aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv6_allow_list[each.key].arn
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-ipv6-allow"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+  dynamic "rule" {
     for_each = each.value["aws_managed_rules"] != null ? each.value["aws_managed_rules"] : []
 
     content {
       name     = rule.value["name"]
-      priority = rule.key + 1
+      priority = rule.key + 4
 
       override_action {
         dynamic "count" {

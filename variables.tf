@@ -416,7 +416,10 @@ variable "infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie" {
 variable "infrastructure_ecs_cluster_wafs" {
   description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
   type = map(object({
-    ip_deny_list = optional(list(string), null)
+    ipv4_deny_list  = optional(list(string), null)
+    ipv4_allow_list = optional(list(string), null)
+    ipv6_deny_list  = optional(list(string), null)
+    ipv6_allow_list = optional(list(string), null)
     aws_managed_rules = optional(list(object({
       name                   = string
       action                 = string
