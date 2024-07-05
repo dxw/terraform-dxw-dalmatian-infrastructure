@@ -83,6 +83,22 @@ resource "aws_route53_record" "service_record" {
   }
 }
 
+resource "aws_route53_record" "service_record_ipv6" {
+  for_each = local.enable_infrastructure_route53_hosted_zone ? {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["container_port"] != 0 && v["enable_cloudfront"] == true
+  } : {}
+
+  zone_id = aws_route53_zone.infrastructure[0].zone_id
+  name    = "${each.key}.${local.infrastructure_route53_domain}."
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.infrastructure_ecs_cluster_service_cloudfront[each.key].domain_name
+    zone_id                = aws_cloudfront_distribution.infrastructure_ecs_cluster_service_cloudfront[each.key].hosted_zone_id
+    evaluate_target_health = true
+  }
+}
+
 resource "aws_route53_record" "custom_s3_cloudfront_record" {
   for_each = local.enable_infrastructure_route53_hosted_zone ? {
     for k, v in local.custom_s3_buckets : k => v if v["cloudfront_dedicated_distribution"] == true
