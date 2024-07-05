@@ -71,6 +71,44 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_pass_role_
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_pass_role_ssm_dhmc[0].arn
 }
 
+resource "aws_iam_policy" "infrastructure_ecs_cluster_s3_transfer_bucket_rw" {
+  count = local.enable_infrastructure_vpc_transfer_s3_bucket ? 1 : 0
+
+  name = "${local.resource_prefix}-s3-transfer-bucket-rw"
+  policy = templatefile(
+    "${path.root}/policies/s3-object-rw.json.tpl",
+    {
+      bucket_arn = aws_s3_bucket.infrastructure_vpc_transfer[0].arn
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_s3_transfer_bucket_rw" {
+  count = local.enable_infrastructure_vpc_transfer_s3_bucket ? 1 : 0
+
+  role       = aws_iam_role.infrastructure_ecs_cluster[0].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_s3_transfer_bucket_rw[0].arn
+}
+
+resource "aws_iam_policy" "infrastructure_ecs_cluster_kms_encrypt" {
+  count = local.infrastructure_ecs_cluster_allow_kms_encryption ? 1 : 0
+
+  name = "${local.resource_prefix}-kms-encrypt"
+  policy = templatefile(
+    "${path.root}/policies/kms-encrypt.json.tpl",
+    {
+      kms_key_arn = aws_kms_key.infrastructure[0].arn
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_kms_encrypt" {
+  count = local.infrastructure_ecs_cluster_allow_kms_encryption ? 1 : 0
+
+  role       = aws_iam_role.infrastructure_ecs_cluster[0].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_kms_encrypt[0].arn
+}
+
 resource "aws_iam_instance_profile" "infrastructure_ecs_cluster" {
   count = local.enable_infrastructure_ecs_cluster ? 1 : 0
 
@@ -232,6 +270,8 @@ resource "aws_autoscaling_group" "infrastructure_ecs_cluster" {
     aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ec2_ecs,
     aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ssm_service_setting_rw,
     aws_iam_role_policy_attachment.infrastructure_ecs_cluster_pass_role_ssm_dhmc,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_s3_transfer_bucket_rw,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_kms_encrypt,
   ]
 }
 
