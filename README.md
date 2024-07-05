@@ -128,7 +128,9 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_policy.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_sns_publish](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_pass_role_ssm_dhmc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_s3_transfer_bucket_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_service_blue_green_codedeploy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_service_blue_green_codedeploy_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_service_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -178,7 +180,9 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_sns_publish](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_pass_role_ssm_dhmc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_s3_transfer_bucket_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_blue_green_codedeploy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_blue_green_codedeploy_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
