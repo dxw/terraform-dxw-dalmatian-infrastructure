@@ -413,6 +413,11 @@ variable "infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie" {
   type        = bool
 }
 
+variable "infrastructure_ecs_cluster_enable_debug_mode" {
+  description = "Enable debug mode for ECS and Docker on the Infrastructure ECS. This should only be enabled when debugging (Can cause a lot of logs)"
+  type        = bool
+}
+
 variable "infrastructure_ecs_cluster_wafs" {
   description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
   type = map(object({

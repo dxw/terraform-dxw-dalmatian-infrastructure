@@ -11,10 +11,16 @@ echo ECS_ENGINE_AUTH_TYPE=dockercfg >> /etc/ecs/ecs.config
 echo 'ECS_ENGINE_AUTH_DATA={"https://index.docker.io/v1/": { "auth": "${dockerhub_token}", "email": "${dockerhub_email}"}}' >> /etc/ecs/ecs.config
 # Set low task cleanup - reduces chance of docker thin pool running out of free space
 echo "ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=15m" >> /etc/ecs/ecs.config
+%{~ if log_debug_mode }
+echo "ECS_LOGLEVEL=debug" >> /etc/ecs/ecs.config
+%{~ endif }
 
 # Configure Docker options
 sed -i s/OPTIONS/#OPTIONS/ /etc/sysconfig/docker
 echo 'OPTIONS="--default-ulimit nofile=1024:4096 --storage-opt overlay2.size=${docker_storage_size}G"' >> /etc/sysconfig/docker
+%{~ if log_debug_mode }
+echo '{"debug": true}' >> /etc/docker/daemon.json
+%{~ endif }
 sudo service docker restart
 
 # Install useful packages

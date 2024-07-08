@@ -168,6 +168,7 @@ locals {
   infrastructure_ecs_cluster_ecs_asg_diff_alert_threshold             = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_threshold
   infrastructure_ecs_cluster_ecs_asg_diff_alert_slack                 = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack
   infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie              = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie
+  infrastructure_ecs_cluster_enable_debug_mode                        = var.infrastructure_ecs_cluster_enable_debug_mode
   infrastructure_ecs_cluster_wafs                                     = var.infrastructure_ecs_cluster_wafs
   infrastructure_ecs_cluster_enable_ssm_dhmc                          = local.enable_infrastructure_ecs_cluster ? data.external.ssm_dhmc_setting[0].result.setting_value != "$None" : false
   infrastructure_ecs_cluster_user_data = base64encode(
@@ -180,8 +181,9 @@ locals {
       efs_id = local.enable_infrastructure_ecs_cluster_efs && (
         local.infrastructure_vpc_network_enable_private || local.infrastructure_vpc_network_enable_public
       ) ? aws_efs_file_system.infrastructure_ecs_cluster[0].id : "",
-      region   = local.aws_region,
-      efs_dirs = join(" ", local.ecs_cluster_efs_directories)
+      region         = local.aws_region,
+      efs_dirs       = join(" ", local.ecs_cluster_efs_directories),
+      log_debug_mode = local.infrastructure_ecs_cluster_enable_debug_mode
     })
   )
 
