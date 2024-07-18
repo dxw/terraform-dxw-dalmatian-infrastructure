@@ -29,7 +29,8 @@ locals {
     length(local.infrastructure_ecs_cluster_services) != 0 ||
     length(local.custom_s3_buckets) != 0 ||
     local.enable_cloudformatian_s3_template_store ||
-    local.enable_infrastructure_vpc_transfer_s3_bucket
+    local.enable_infrastructure_vpc_transfer_s3_bucket ||
+    local.infrastructure_ecs_cluster_enable_execute_command_logging
   )
   logs_bucket_s3_source_arns = concat(
     length(local.infrastructure_ecs_cluster_services) != 0 ? [aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn] : [],
@@ -169,6 +170,7 @@ locals {
   infrastructure_ecs_cluster_ecs_asg_diff_alert_slack                 = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack
   infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie              = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie
   infrastructure_ecs_cluster_enable_debug_mode                        = var.infrastructure_ecs_cluster_enable_debug_mode
+  infrastructure_ecs_cluster_enable_execute_command_logging           = var.infrastructure_ecs_cluster_enable_execute_command_logging
   infrastructure_ecs_cluster_wafs                                     = var.infrastructure_ecs_cluster_wafs
   infrastructure_ecs_cluster_enable_ssm_dhmc                          = local.enable_infrastructure_ecs_cluster ? data.external.ssm_dhmc_setting[0].result.setting_value != "$None" : false
   infrastructure_ecs_cluster_user_data = base64encode(

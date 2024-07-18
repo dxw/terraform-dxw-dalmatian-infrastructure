@@ -122,6 +122,48 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_ta
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_ssm_create_channels[each.key].arn
 }
 
+resource "aws_iam_policy" "infrastructure_ecs_cluster_service_task_ecs_exec_log_s3_write" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["enable_execute_command"] == true && local.infrastructure_ecs_cluster_enable_execute_command_logging
+  }
+
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-service-task-${each.key}-ecs-exec-log-s3-write"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-cluster-service-task-${each.key}-ecs-exec-log-s3-write"
+  policy = templatefile("${path.root}/policies/s3-object-write.json.tpl", {
+    bucket_arn = aws_s3_bucket.infrastructure_logs[0].arn
+    path       = "/ecs-exec/*"
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_task_ecs_exec_log_s3_write" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["enable_execute_command"] == true && local.infrastructure_ecs_cluster_enable_execute_command_logging
+  }
+
+  role       = aws_iam_role.infrastructure_ecs_cluster_service_task[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_ecs_exec_log_s3_write[each.key].arn
+}
+
+resource "aws_iam_policy" "infrastructure_ecs_cluster_service_task_ecs_exec_log_kms_decrypt" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["enable_execute_command"] == true && local.infrastructure_kms_encryption && local.infrastructure_ecs_cluster_enable_execute_command_logging
+  }
+
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-service-task-${each.key}-ecs-exec-log-kms-decrypt"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-cluster-service-task-${each.key}-ecs-exec-log-kms-decrypt"
+  policy = templatefile("${path.root}/policies/kms-decrypt.json.tpl", {
+    kms_key_arn = aws_kms_key.infrastructure[0].arn
+  })
+}
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_task_ecs_exec_log_kms_decrypt" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["enable_execute_command"] == true && local.infrastructure_kms_encryption && local.infrastructure_ecs_cluster_enable_execute_command_logging
+  }
+
+  role       = aws_iam_role.infrastructure_ecs_cluster_service_task[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_ecs_exec_log_kms_decrypt[each.key].arn
+}
+
 resource "aws_iam_policy" "infrastructure_ecs_cluster_service_task_custom" {
   for_each = merge([
     for service_name, service in local.infrastructure_ecs_cluster_services : {
