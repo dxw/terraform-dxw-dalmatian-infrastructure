@@ -26,8 +26,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.58.0 |
 | <a name="provider_aws.useast1"></a> [aws.useast1](#provider\_aws.useast1) | 5.58.0 |
 | <a name="provider_external"></a> [external](#provider\_external) | 2.3.3 |
-| <a name="provider_null"></a> [null](#provider\_null) | >= 3.2.2 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.6.0 |
+| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
 
@@ -344,9 +344,9 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv6_allow_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_ip_set) | resource |
 | [aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv6_deny_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_ip_set) | resource |
 | [aws_wafv2_web_acl.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl) | resource |
-| [null_resource.infrastructure_ecs_cluster_service_blue_green_create_codedeploy_deployment](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [random_password.infrastructure_ecs_cluster_service_cloudfront_bypass_protection_secret](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.infrastructure_rds_root](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
+| [terraform_data.infrastructure_ecs_cluster_service_blue_green_create_codedeploy_deployment](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [archive_file.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_pending_task_metric_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |

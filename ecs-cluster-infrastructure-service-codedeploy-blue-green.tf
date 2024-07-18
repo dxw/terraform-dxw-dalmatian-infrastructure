@@ -132,21 +132,21 @@ resource "aws_codedeploy_deployment_group" "infrastructure_ecs_cluster_service_b
   }
 }
 
-resource "null_resource" "infrastructure_ecs_cluster_service_blue_green_create_codedeploy_deployment" {
+resource "terraform_data" "infrastructure_ecs_cluster_service_blue_green_create_codedeploy_deployment" {
   for_each = {
     for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "blue-green"
   }
 
-  triggers = {
-    appspec_sha256 = sha256(templatefile(
+  triggers_replace = [
+    sha256(templatefile(
       "${path.root}/appspecs/ecs.json.tpl",
       {
         task_definition_arn = aws_ecs_task_definition.infrastructure_ecs_cluster_service[each.key].arn
         container_port      = each.value["container_port"] != null ? each.value["container_port"] : 0
         container_name      = each.key
       }
-    ))
-  }
+    )),
+  ]
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
