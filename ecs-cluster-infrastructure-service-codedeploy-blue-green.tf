@@ -173,5 +173,6 @@ resource "terraform_data" "infrastructure_ecs_cluster_service_blue_green_create_
 
 depends_on = [
   aws_codepipeline.infrastructure_ecs_cluster_service,
+  terraform_data.infrastructure_ecs_cluster_service_env_file,
 ]
 }
