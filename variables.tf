@@ -418,6 +418,11 @@ variable "infrastructure_ecs_cluster_enable_debug_mode" {
   type        = bool
 }
 
+variable "infrastructure_ecs_cluster_enable_execute_command_logging" {
+  description = "Enable ECS Exec logging for services within the cluster. This will log to the infrastructure logs S3 bucket"
+  type        = bool
+}
+
 variable "infrastructure_ecs_cluster_wafs" {
   description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
   type = map(object({
