@@ -351,6 +351,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [random_password.infrastructure_ecs_cluster_service_cloudfront_bypass_protection_secret](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.infrastructure_rds_root](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [terraform_data.infrastructure_ecs_cluster_service_blue_green_create_codedeploy_deployment](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.infrastructure_ecs_cluster_service_env_file](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [archive_file.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_pending_task_metric_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |

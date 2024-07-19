@@ -193,6 +193,25 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_ta
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_custom[each.key].arn
 }
 
+
+resource "terraform_data" "infrastructure_ecs_cluster_service_env_file" {
+  for_each = local.infrastructure_ecs_cluster_services
+
+  triggers_replace = [
+    aws_ecs_service.infrastructure_ecs_cluster_service[each.key].name,
+    aws_s3_bucket.infrastructure_ecs_cluster_service_environment_files[0].bucket,
+  ]
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<EOF
+      ${path.root}/local-exec-scripts/create-empty-s3-object.sh \
+      -b "${aws_s3_bucket.infrastructure_ecs_cluster_service_environment_files[0].bucket}" \
+      -k "${each.key}.env"
+    EOF
+  }
+}
+
 resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
   for_each = local.infrastructure_ecs_cluster_services
 
