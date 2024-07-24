@@ -223,6 +223,7 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       image               = aws_ecr_repository.infrastructure_ecs_cluster_service[each.key].repository_url
       entrypoint          = each.value["container_entrypoint"] != null ? jsonencode(each.value["container_entrypoint"]) : "[]"
       environment_file_s3 = "${aws_s3_bucket.infrastructure_ecs_cluster_service_environment_files[0].arn}/${each.key}.env"
+      environment         = jsonencode([])
       container_port      = each.value["container_port"] != null ? each.value["container_port"] : 0
       extra_hosts = each.value["container_extra_hosts"] != null ? jsonencode([
         for extra_host in each.value["container_extra_hosts"] : {
