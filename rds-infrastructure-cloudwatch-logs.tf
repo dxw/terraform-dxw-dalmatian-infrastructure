@@ -10,3 +10,12 @@ resource "aws_cloudwatch_log_group" "infrastructure_rds_exports" {
   retention_in_days = 30
   kms_key_id        = local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].id : null
 }
+
+resource "aws_cloudwatch_log_group" "infrastructure_rds_s3_backups" {
+  for_each = local.enable_infrastructure_rds_backup_to_s3 ? local.infrastructure_rds : {}
+
+  name              = "${local.resource_prefix}-infrastructure-rds-s3-backups-${each.key}"
+  retention_in_days = local.infrastructure_rds_backup_to_s3_retention
+  kms_key_id        = local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
+  skip_destroy      = true
+}

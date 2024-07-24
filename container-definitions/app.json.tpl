@@ -8,6 +8,9 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
+        %{ if awslogs_stream_prefix != "" }
+        "awslogs-stream-prefix": "${awslogs_stream_prefix}",
+        %{ endif }
         "awslogs-group": "${cloudwatch_log_group}",
         "awslogs-region": "${region}"
       }
@@ -30,10 +33,10 @@
     ],
     %{ endif }
     %{ if environment != "[]" }
-    "environment": "${environment},
+    "environment": ${environment},
     %{ endif }
     %{ if secrets != "[]" }
-    "secrets": "${secrets},
+    "secrets": ${secrets},
     %{ endif }
     %{ if environment_file_s3 != "" }
     "environmentFiles": [

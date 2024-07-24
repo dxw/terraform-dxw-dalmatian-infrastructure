@@ -39,8 +39,9 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service_scheduled
       linux_parameters = jsonencode({
         initProcessEnabled = false
       })
-      cloudwatch_log_group = each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.value["container_name"]].name : ""
-      region               = local.aws_region
+      cloudwatch_log_group  = each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.value["container_name"]].name : ""
+      awslogs_stream_prefix = ""
+      region                = local.aws_region
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.value["container_name"]].arn
@@ -123,7 +124,7 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_service_scheduled_task_pas
     "${path.root}/policies/pass-role.json.tpl",
     {
       role_arn = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.value["container_name"]].arn
-      service  = "events.amazonaws.com"
+      service  = "ecs-tasks.amazonaws.com"
     }
   )
 }

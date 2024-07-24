@@ -30,12 +30,14 @@ locals {
     length(local.custom_s3_buckets) != 0 ||
     local.enable_cloudformatian_s3_template_store ||
     local.enable_infrastructure_vpc_transfer_s3_bucket ||
-    local.infrastructure_ecs_cluster_enable_execute_command_logging
+    local.infrastructure_ecs_cluster_enable_execute_command_logging ||
+    local.enable_infrastructure_rds_backup_to_s3
   )
   logs_bucket_s3_source_arns = concat(
     length(local.infrastructure_ecs_cluster_services) != 0 ? [aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn] : [],
     local.enable_infrastructure_vpc_transfer_s3_bucket ? [aws_s3_bucket.infrastructure_vpc_transfer[0].arn] : [],
-    [for k, v in local.custom_s3_buckets : aws_s3_bucket.custom[k].arn]
+    [for k, v in local.custom_s3_buckets : aws_s3_bucket.custom[k].arn],
+    local.enable_infrastructure_rds_backup_to_s3 ? [aws_s3_bucket.infrastructure_rds_s3_backups[0].arn] : [],
   )
   logs_bucket_logs_source_arns = concat(
     local.infrastructure_vpc_flow_logs_s3_with_athena ? ["arn:aws:logs:${local.aws_region}:${local.aws_account_id}:*"] : []
@@ -232,6 +234,17 @@ locals {
     "mysql"    = 3306
     "postgres" = 5432
   }
+  rds_s3_backups_container_entrypoint_file = {
+    "mysql"    = "${path.root}/ecs-entrypoints/rds-s3-backups-mysql.txt.tpl"
+    "postgres" = "${path.root}/ecs-entrypoints/rds-s3-backups-postgres.txt.tpl"
+  }
+  enable_infrastructure_rds_backup_to_s3          = var.enable_infrastructure_rds_backup_to_s3
+  infrastructure_rds_backup_to_s3_cron_expression = var.infrastructure_rds_backup_to_s3_cron_expression
+  infrastructure_rds_backup_to_s3_retention       = var.infrastructure_rds_backup_to_s3_retention
+  enable_infrastructure_rds_tooling_ecs_cluster = anytrue([
+    local.enable_infrastructure_rds_backup_to_s3,
+  ])
+  infrastructure_rds_tooling_ecs_cluster_name = "${local.resource_prefix}-infrastructure-rds-tooling"
 
   infrastructure_elasticache_defaults = var.infrastructure_elasticache_defaults
   infrastructure_elasticache_keys     = length(var.infrastructure_elasticache) > 0 ? keys(values(var.infrastructure_elasticache)[0]) : []
