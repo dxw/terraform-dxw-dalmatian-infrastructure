@@ -32,6 +32,9 @@
     %{ if environment != "[]" }
     "environment": "${environment},
     %{ endif }
+    %{ if secrets != "[]" }
+    "secrets": "${secrets},
+    %{ endif }
     %{ if environment_file_s3 != "" }
     "environmentFiles": [
       {
