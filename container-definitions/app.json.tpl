@@ -29,6 +29,9 @@
       }
     ],
     %{ endif }
+    %{ if environment != "[]" }
+    "environment": "${environment},
+    %{ endif }
     %{ if environment_file_s3 != "" }
     "environmentFiles": [
       {
