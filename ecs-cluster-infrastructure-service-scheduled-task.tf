@@ -22,6 +22,7 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service_scheduled
       entrypoint          = each.value["entrypoint"] != null ? jsonencode(each.value["entrypoint"]) : "[]"
       environment_file_s3 = "${aws_s3_bucket.infrastructure_ecs_cluster_service_environment_files[0].arn}/${each.value["container_name"]}.env"
       environment         = jsonencode([])
+      secrets             = jsonencode([])
       container_port      = 0
       extra_hosts = each.value["extra_hosts"] != null ? jsonencode([
         for extra_host in each.value["extra_hosts"] : {
