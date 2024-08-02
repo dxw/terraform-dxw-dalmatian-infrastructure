@@ -660,6 +660,21 @@ variable "infrastructure_rds" {
   }))
 }
 
+variable "enable_infrastructure_rds_backup_to_s3" {
+  description = "Enable Infrastructure RDS backups to S3. This will create a scheduled Fargate task to take SQL dumps and upload them to S3"
+  type        = bool
+}
+
+variable "infrastructure_rds_backup_to_s3_cron_expression" {
+  description = "Cron expression for when to trigger the SQL backups to S3"
+  type        = string
+}
+
+variable "infrastructure_rds_backup_to_s3_retention" {
+  description = "Retention in days to keep the S3 SQL backups and logs"
+  type        = number
+}
+
 variable "infrastructure_elasticache_defaults" {
   description = "Default values for ElastiCaches"
   type = object({

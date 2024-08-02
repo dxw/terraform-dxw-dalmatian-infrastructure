@@ -241,8 +241,9 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       linux_parameters = each.value["enable_execute_command"] == true ? jsonencode({
         initProcessEnabled = true
       }) : "{}"
-      cloudwatch_log_group = each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.key].name : ""
-      region               = local.aws_region
+      cloudwatch_log_group  = each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.key].name : ""
+      awslogs_stream_prefix = ""
+      region                = local.aws_region
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.key].arn

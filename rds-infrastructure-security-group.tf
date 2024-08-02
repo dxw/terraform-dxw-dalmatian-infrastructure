@@ -18,3 +18,15 @@ resource "aws_security_group_rule" "infrastructure_rds_ingress_tcp" {
   source_security_group_id = local.enable_infrastructure_ecs_cluster ? aws_security_group.infrastructure_ecs_cluster_container_instances[0].id : null
   security_group_id        = aws_security_group.infrastructure_rds[each.key].id
 }
+
+resource "aws_security_group_rule" "infrastructure_rds_s3_backup_task_ingress_tcp" {
+  for_each = (local.infrastructure_vpc_network_enable_public || local.infrastructure_vpc_network_enable_private) && local.enable_infrastructure_rds_backup_to_s3 ? local.infrastructure_rds : {}
+
+  description              = "Allow RDS port tcp ingress from RDS S3 Backup Scheduled task"
+  type                     = "ingress"
+  from_port                = local.rds_ports[each.value["engine"]]
+  to_port                  = local.rds_ports[each.value["engine"]]
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.infrastructure_rds_s3_backups_scheduled_task[each.key].id
+  security_group_id        = aws_security_group.infrastructure_rds[each.key].id
+}
