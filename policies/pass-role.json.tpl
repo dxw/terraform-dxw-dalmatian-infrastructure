@@ -6,12 +6,10 @@
       "Action": [
         "iam:PassRole"
       ],
-      "Resource": "${role_arn}",
+      "Resource": ${role_arns},
       "Condition": {
         "StringEquals": {
-          "iam:PassedToService": [
-            "${service}"
-          ]
+          "iam:PassedToService": ${services}
         }
       }
     }

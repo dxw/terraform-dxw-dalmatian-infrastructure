@@ -74,8 +74,8 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_pass_role_ssm_dhmc" {
   policy = templatefile(
     "${path.root}/policies/pass-role.json.tpl",
     {
-      role_arn = "arn:aws:iam::${local.aws_account_id}:role/${data.external.ssm_dhmc_setting[0].result.setting_value}",
-      service  = "ssm.amazonaws.com"
+      role_arns = jsonencode(["arn:aws:iam::${local.aws_account_id}:role/${data.external.ssm_dhmc_setting[0].result.setting_value}"])
+      services  = jsonencode(["ssm.amazonaws.com"])
     }
   )
 }

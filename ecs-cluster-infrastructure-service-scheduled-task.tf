@@ -123,8 +123,8 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_service_scheduled_task_pas
   policy = templatefile(
     "${path.root}/policies/pass-role.json.tpl",
     {
-      role_arn = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.value["container_name"]].arn
-      service  = "ecs-tasks.amazonaws.com"
+      role_arns = jsonencode([aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.value["container_name"]].arn])
+      services  = jsonencode(["ecs-tasks.amazonaws.com"])
     }
   )
 }
