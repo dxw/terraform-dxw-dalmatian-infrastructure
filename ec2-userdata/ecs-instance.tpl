@@ -34,6 +34,25 @@ fi
 sudo yum install -y \
   jq \
   rsync
+%{~ if syslog_endpoint != "" }
+# Configure Syslog
+sudo yum install -y \
+  rsyslog-gnutls
+
+{
+  echo "\$DefaultNetstreamDriverCAFile /etc/ssl/certs/ca-bundle.crt"
+  echo "\$ActionSendStreamDriver gtls # use gtls netstream driver"
+  echo "\$ActionSendStreamDriverMode 1 # require TLS"
+  echo "\$ActionSendStreamDriverAuthMode x509/name # authenticate by hostname"
+%{~ if syslog_permitted_peer != ""}
+  echo "\$ActionSendStreamDriverPermittedPeer ${syslog_permitted_peer}"
+%{~ endif }
+  echo "*.*     @@${syslog_endpoint}"
+} > /etc/rsyslog.d/syslog-remote.conf
+
+service rsyslog restart
+%{ endif }
+
 %{~ if efs_id != ""}
 # EFS
 sudo mkdir -p /mnt/efs

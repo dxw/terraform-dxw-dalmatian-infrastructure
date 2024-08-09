@@ -140,6 +140,7 @@ resource "aws_ecs_task_definition" "infrastructure_rds_s3_backups_scheduled_task
           s3_bucket_name = aws_s3_bucket.infrastructure_rds_s3_backups[0].bucket
         }
       )])
+      command             = jsonencode([])
       environment_file_s3 = ""
       environment = jsonencode([
         {

@@ -222,6 +222,7 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       container_name      = each.key
       image               = aws_ecr_repository.infrastructure_ecs_cluster_service[each.key].repository_url
       entrypoint          = each.value["container_entrypoint"] != null ? jsonencode(each.value["container_entrypoint"]) : "[]"
+      command             = jsonencode([])
       environment_file_s3 = "${aws_s3_bucket.infrastructure_ecs_cluster_service_environment_files[0].arn}/${each.key}.env"
       environment         = jsonencode([])
       secrets             = jsonencode([])

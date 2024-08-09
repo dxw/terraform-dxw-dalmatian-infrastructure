@@ -1,7 +1,5 @@
 [
   {
-    "essential": true,
-    "memoryReservation": 16,
     "image": "${image}",
     "name": "${container_name}",
     %{ if cloudwatch_log_group != "" }
@@ -52,6 +50,13 @@
     %{ if linux_parameters != "{}" }
     "linuxParameters": ${linux_parameters},
     %{ endif }
-    "entrypoint": ${entrypoint}
+    %{if entrypoint != "[]"}
+    "entrypoint": ${entrypoint},
+    %{ endif }
+    %{if command != "[]"}
+    "command": ${command},
+    %{ endif }
+    "memoryReservation": 16,
+    "essential": true
   }
 ]
