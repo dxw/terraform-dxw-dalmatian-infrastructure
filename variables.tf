@@ -423,6 +423,16 @@ variable "infrastructure_ecs_cluster_enable_execute_command_logging" {
   type        = bool
 }
 
+variable "infrastructure_ecs_cluster_syslog_endpoint" {
+  description = "ECS Infrastructure Syslog endpoint. If specified, rsyslog will be installed on the ECS container instances and configured to send logs to this endpoint. Logspout containers will also be launched to gather and send Docker logs (Application logs from the running ECS services). The port must be included in the URI, eg. 'syslog+tls://example.com:1234'"
+  type        = string
+}
+
+variable "infrastructure_ecs_cluster_syslog_permitted_peer" {
+  description = "Specify the certificate common name (CN) of the remote to ensure syslog communication is restricted to permitted endpoints (eg. '*.example.com')"
+  type        = string
+}
+
 variable "infrastructure_ecs_cluster_wafs" {
   description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
   type = map(object({

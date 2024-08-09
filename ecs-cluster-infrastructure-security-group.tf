@@ -126,3 +126,16 @@ resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instanc
   cidr_blocks              = length(each.value["cidr_blocks"]) > 0 ? each.value["cidr_blocks"] : null
   security_group_id        = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
 }
+
+resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instances_egress_logspout_tcp" {
+  count = local.enable_infrastructure_ecs_cluster && local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+
+  description = "Allow Logspout tcp outbound"
+  type        = "egress"
+  from_port   = local.infrastructure_ecs_cluster_syslog_port
+  to_port     = local.infrastructure_ecs_cluster_syslog_port
+  protocol    = "tcp"
+  # tfsec:ignore:aws-ec2-no-public-egress-sgr
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.infrastructure_ecs_cluster_container_instances[0].id
+}

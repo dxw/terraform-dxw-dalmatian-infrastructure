@@ -175,6 +175,10 @@ locals {
   infrastructure_ecs_cluster_enable_execute_command_logging           = var.infrastructure_ecs_cluster_enable_execute_command_logging
   infrastructure_ecs_cluster_wafs                                     = var.infrastructure_ecs_cluster_wafs
   infrastructure_ecs_cluster_enable_ssm_dhmc                          = local.enable_infrastructure_ecs_cluster ? data.external.ssm_dhmc_setting[0].result.setting_value != "$None" : false
+  infrastructure_ecs_cluster_syslog_endpoint                          = var.infrastructure_ecs_cluster_syslog_endpoint
+  infrastructure_ecs_cluster_syslog_port                              = local.infrastructure_ecs_cluster_syslog_endpoint != "" ? split(":", local.infrastructure_ecs_cluster_syslog_endpoint)[2] : null
+  infrastructure_ecs_cluster_syslog_permitted_peer                    = var.infrastructure_ecs_cluster_syslog_permitted_peer
+  infrastrucutre_ecs_cluster_logspout_enabled                         = local.enable_infrastructure_ecs_cluster && local.infrastructure_ecs_cluster_syslog_endpoint != ""
   infrastructure_ecs_cluster_user_data = base64encode(
     templatefile("ec2-userdata/ecs-instance.tpl", {
       docker_storage_volume_device_name = local.infrastructure_ecs_cluster_ebs_docker_storage_volume_device_name,
@@ -185,9 +189,11 @@ locals {
       efs_id = local.enable_infrastructure_ecs_cluster_efs && (
         local.infrastructure_vpc_network_enable_private || local.infrastructure_vpc_network_enable_public
       ) ? aws_efs_file_system.infrastructure_ecs_cluster[0].id : "",
-      region         = local.aws_region,
-      efs_dirs       = join(" ", local.ecs_cluster_efs_directories),
-      log_debug_mode = local.infrastructure_ecs_cluster_enable_debug_mode
+      region                = local.aws_region,
+      efs_dirs              = join(" ", local.ecs_cluster_efs_directories),
+      syslog_endpoint       = local.infrastructure_ecs_cluster_syslog_endpoint
+      syslog_permitted_peer = local.infrastructure_ecs_cluster_syslog_permitted_peer
+      log_debug_mode        = local.infrastructure_ecs_cluster_enable_debug_mode
     })
   )
 
