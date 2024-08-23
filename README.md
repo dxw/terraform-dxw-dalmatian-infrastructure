@@ -22,9 +22,9 @@ This project creates and manages resources within an AWS account for infrastruct
 | Name | Version |
 |------|---------|
 | <a name="provider_archive"></a> [archive](#provider\_archive) | 2.5.0 |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.63.1 |
-| <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.63.1 |
-| <a name="provider_aws.useast1"></a> [aws.useast1](#provider\_aws.useast1) | 5.63.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.64.0 |
+| <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.64.0 |
+| <a name="provider_aws.useast1"></a> [aws.useast1](#provider\_aws.useast1) | 5.64.0 |
 | <a name="provider_external"></a> [external](#provider\_external) | 2.3.3 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.6.0 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
