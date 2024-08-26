@@ -48,6 +48,27 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_co
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codepipeline_codedeploy[each.key].arn
 }
 
+resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codepipeline_ecs_deploy" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "rolling"
+  }
+
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-service-codepipeline-ecs-deploy-${each.key}"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-service-codepipeline-ecs-deploy${each.key}"
+  policy = templatefile(
+    "${path.root}/policies/codepipeline-ecs-deploy.json.tpl", {}
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_codepipeline_ecs_deploy" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["deployment_type"] == "rolling"
+  }
+
+  role       = aws_iam_role.infrastructure_ecs_cluster_service_codepipeline[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codepipeline_ecs_deploy[each.key].arn
+}
+
 resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codepipeline_kms_encrypt" {
   for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
 
