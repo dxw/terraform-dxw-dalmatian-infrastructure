@@ -24,16 +24,6 @@
       "Effect": "Allow"
     },
     {
-      "Action": [
-        "ecs:DescribeServices",
-        "ecs:UpdateService",
-        "ecs:DescribeTaskDefinition",
-        "ecs:RegisterTaskDefinition"
-      ],
-      "Resource": "*",
-      "Effect": "Allow"
-    },
-    {
       "Action": "iam:PassRole",
       "Effect": "Allow",
       "Resource": [
