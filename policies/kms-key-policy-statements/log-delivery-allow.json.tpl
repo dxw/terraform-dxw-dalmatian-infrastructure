@@ -1,13 +1,22 @@
 %{if account_id != ""}{
+  "Effect": "Allow",
+  "Principal": {
+    "Service": [ "delivery.logs.amazonaws.com" ]
+  },
+  "Action": [
+    "kms:GenerateDataKey*",
+    "kms:Decrypt"
+  ],
+  "Resource": "*"
+},
+{
   "Effect": "Allow", 
   "Principal": {
     "Service": [ "delivery.logs.amazonaws.com" ] 
   },
   "Action": [
     "kms:Encrypt",
-    "kms:Decrypt",
     "kms:ReEncrypt*",
-    "kms:GenerateDataKey*",
     "kms:DescribeKey"
   ],
   "Resource": "*",
