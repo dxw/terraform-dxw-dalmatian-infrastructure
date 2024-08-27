@@ -35,10 +35,11 @@ resource "aws_s3_bucket_policy" "infrastructure_logs" {
       [
       ${templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-tls.json.tpl", { bucket_arn = aws_s3_bucket.infrastructure_logs[0].arn })},
       ${templatefile("${path.root}/policies/s3-bucket-policy-statements/log-delivery-access.json.tpl", {
-      log_bucket_arn   = aws_s3_bucket.infrastructure_logs[0].arn
-      s3_source_arns   = jsonencode(local.logs_bucket_s3_source_arns)
-      logs_source_arns = jsonencode(local.logs_bucket_logs_source_arns)
-      account_id       = local.aws_account_id
+      log_bucket_arn       = aws_s3_bucket.infrastructure_logs[0].arn
+      s3_source_arns       = jsonencode(local.logs_bucket_s3_source_arns)
+      logs_source_arns     = jsonencode(local.logs_bucket_logs_source_arns)
+      vpc_flow_logs_prefix = local.infrastructure_vpc_flow_logs_s3_key_prefix
+      account_id           = local.aws_account_id
 })}
       ]
       EOT

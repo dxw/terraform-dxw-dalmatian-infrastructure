@@ -40,7 +40,7 @@
     "Service": "delivery.logs.amazonaws.com"
   },
   "Action": "s3:PutObject",
-  "Resource": "${log_bucket_arn}/AWSLogs/${account_id}/*",
+  "Resource": "${log_bucket_arn}%{if vpc_flow_logs_prefix != "" }/${vpc_flow_logs_prefix}%{endif}/AWSLogs/${account_id}/*",
   "Condition": {
     "StringEquals": {
       "s3:x-amz-acl": "bucket-owner-full-control",
