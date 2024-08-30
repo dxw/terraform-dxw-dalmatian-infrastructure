@@ -80,36 +80,7 @@ locals {
   infrastructure_vpc_flow_logs_s3_key_prefix                  = trim(var.infrastructure_vpc_flow_logs_s3_key_prefix, "/")
   infrastructure_vpc_flow_logs_retention                      = var.infrastructure_vpc_flow_logs_retention
   infrastructure_vpc_flow_logs_traffic_type                   = var.infrastructure_vpc_flow_logs_traffic_type
-  infrastructure_vpc_flow_logs_glue_table_columns = [
-    { name = "version", type = "int" },
-    { name = "account_id", type = "string" },
-    { name = "interface_id", type = "string" },
-    { name = "srcaddr", type = "string" },
-    { name = "dstaddr", type = "string" },
-    { name = "srcport", type = "int" },
-    { name = "dstport", type = "int" },
-    { name = "protocol", type = "bigint" },
-    { name = "packets", type = "bigint" },
-    { name = "bytes", type = "bigint" },
-    { name = "start", type = "bigint" },
-    { name = "`end`", type = "bigint" },
-    { name = "action", type = "string" },
-    { name = "log_status", type = "string" },
-    { name = "vpc_id", type = "string" },
-    { name = "subnet_id", type = "string" },
-    { name = "instance_id", type = "string" },
-    { name = "tcp_flags", type = "int" },
-    { name = "type", type = "string" },
-    { name = "pkt_srcaddr", type = "string" },
-    { name = "pkt_dstaddr", type = "string" },
-    { name = "az_id", type = "string" },
-    { name = "sublocation_type", type = "string" },
-    { name = "sublocation_id", type = "string" },
-    { name = "pkt_src_aws_service", type = "string" },
-    { name = "pkt_dst_aws_service", type = "string" },
-    { name = "flow_direction", type = "string" },
-    { name = "traffic_path", type = "int" },
-  ]
+  infrastructure_vpc_flow_logs_glue_table_columns             = jsondecode(templatefile("${path.root}/glue-table-schemas/vpc-flow-logs.json.tpl", {}))
   infrastructure_vpc_flow_logs_glue_table_partition_keys = [
     { name = "year", type = "int" },
     { name = "month", type = "int" },
@@ -212,45 +183,11 @@ locals {
       for service_key in local.infrastructure_ecs_cluster_services_keys : service_key => try(coalesce(v[service_key], local.infrastructure_ecs_cluster_service_defaults[service_key]), null)
     })
   }
-  infrastructure_ecs_cluster_services_alb_enable_global_accelerator = var.infrastructure_ecs_cluster_services_alb_enable_global_accelerator && length(local.infrastructure_ecs_cluster_services) > 0
-  infrastructure_ecs_cluster_services_alb_ip_allow_list             = var.infrastructure_ecs_cluster_services_alb_ip_allow_list
-  enable_infrastructure_ecs_cluster_services_alb_logs               = var.enable_infrastructure_ecs_cluster_services_alb_logs && length(local.infrastructure_ecs_cluster_services) > 0
-  infrastructure_ecs_cluster_services_alb_logs_retention            = var.infrastructure_ecs_cluster_services_alb_logs_retention
-  infrastructure_ecs_cluster_service_cloudfront_logs_glue_table_columns = [
-    { name = "date", type = "date" },
-    { name = "time", type = "string" },
-    { name = "x-edge-location", type = "string" },
-    { name = "bytes", type = "bigint" },
-    { name = "client_ip", type = "string" },
-    { name = "method", type = "string" },
-    { name = "host", type = "string" },
-    { name = "uri", type = "string" },
-    { name = "status", type = "int" },
-    { name = "referrer", type = "string" },
-    { name = "user_agent", type = "string" },
-    { name = "query_string", type = "string" },
-    { name = "cookie", type = "string" },
-    { name = "result_type", type = "string" },
-    { name = "request_id", type = "string" },
-    { name = "host_header", type = "string" },
-    { name = "request_protocol", type = "string" },
-    { name = "request_bytes", type = "string" },
-    { name = "time_taken", type = "float" },
-    { name = "x_forwarded_for", type = "string" },
-    { name = "ssl_protocol", type = "string" },
-    { name = "ssl_cipher", type = "string" },
-    { name = "response_result_type", type = "string" },
-    { name = "http_version", type = "string" },
-    { name = "fle_status", type = "string" },
-    { name = "fle_encrypted_fields", type = "int" },
-    { name = "client_port", type = "int" },
-    { name = "time_to_first_byte", type = "float" },
-    { name = "x_edge_detailed_result_type", type = "string" },
-    { name = "sc_content_type", type = "string" },
-    { name = "sc_content_len", type = "bigint" },
-    { name = "sc_range_start", type = "bigint" },
-    { name = "sc_range_end", type = "bigint" },
-  ]
+  infrastructure_ecs_cluster_services_alb_enable_global_accelerator     = var.infrastructure_ecs_cluster_services_alb_enable_global_accelerator && length(local.infrastructure_ecs_cluster_services) > 0
+  infrastructure_ecs_cluster_services_alb_ip_allow_list                 = var.infrastructure_ecs_cluster_services_alb_ip_allow_list
+  enable_infrastructure_ecs_cluster_services_alb_logs                   = var.enable_infrastructure_ecs_cluster_services_alb_logs && length(local.infrastructure_ecs_cluster_services) > 0
+  infrastructure_ecs_cluster_services_alb_logs_retention                = var.infrastructure_ecs_cluster_services_alb_logs_retention
+  infrastructure_ecs_cluster_service_cloudfront_logs_glue_table_columns = jsondecode(templatefile("${path.root}/glue-table-schemas/cloudfront-logs.json.tpl", {}))
 
   infrastructure_rds_defaults = var.infrastructure_rds_defaults
   infrastructure_rds_keys     = length(var.infrastructure_rds) > 0 ? keys(values(var.infrastructure_rds)[0]) : []
