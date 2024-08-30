@@ -80,41 +80,42 @@ locals {
   infrastructure_vpc_flow_logs_s3_key_prefix                  = trim(var.infrastructure_vpc_flow_logs_s3_key_prefix, "/")
   infrastructure_vpc_flow_logs_retention                      = var.infrastructure_vpc_flow_logs_retention
   infrastructure_vpc_flow_logs_traffic_type                   = var.infrastructure_vpc_flow_logs_traffic_type
-  infrastructure_vpc_flow_logs_glue_table_columns = {
-    version             = "int",
-    account_id          = "string",
-    interface_id        = "string",
-    srcaddr             = "string",
-    dstaddr             = "string",
-    srcport             = "int",
-    dstport             = "int",
-    protocol            = "bigint",
-    packets             = "bigint",
-    bytes               = "bigint",
-    start               = "bigint",
-    "`end`"             = "bigint",
-    action              = "string",
-    log_status          = "string",
-    vpc_id              = "string",
-    subnet_id           = "string",
-    instance_id         = "string",
-    tcp_flags           = "int",
-    type                = "string",
-    pkt_srcaddr         = "string",
-    pkt_dstaddr         = "string",
-    az_id               = "string",
-    sublocation_type    = "string",
-    sublocation_id      = "string",
-    pkt_src_aws_service = "string",
-    pkt_dst_aws_service = "string",
-    flow_direction      = "string",
-    traffic_path        = "int",
-  }
-  infrastructure_vpc_flow_logs_glue_table_partition_keys = {
-    region = "string",
-    date   = "string",
-    hour   = "string"
-  }
+  infrastructure_vpc_flow_logs_glue_table_columns = [
+    { name = "version", type = "int" },
+    { name = "account_id", type = "string" },
+    { name = "interface_id", type = "string" },
+    { name = "srcaddr", type = "string" },
+    { name = "dstaddr", type = "string" },
+    { name = "srcport", type = "int" },
+    { name = "dstport", type = "int" },
+    { name = "protocol", type = "bigint" },
+    { name = "packets", type = "bigint" },
+    { name = "bytes", type = "bigint" },
+    { name = "start", type = "bigint" },
+    { name = "`end`", type = "bigint" },
+    { name = "action", type = "string" },
+    { name = "log_status", type = "string" },
+    { name = "vpc_id", type = "string" },
+    { name = "subnet_id", type = "string" },
+    { name = "instance_id", type = "string" },
+    { name = "tcp_flags", type = "int" },
+    { name = "type", type = "string" },
+    { name = "pkt_srcaddr", type = "string" },
+    { name = "pkt_dstaddr", type = "string" },
+    { name = "az_id", type = "string" },
+    { name = "sublocation_type", type = "string" },
+    { name = "sublocation_id", type = "string" },
+    { name = "pkt_src_aws_service", type = "string" },
+    { name = "pkt_dst_aws_service", type = "string" },
+    { name = "flow_direction", type = "string" },
+    { name = "traffic_path", type = "int" },
+  ]
+  infrastructure_vpc_flow_logs_glue_table_partition_keys = [
+    { name = "year", type = "int" },
+    { name = "month", type = "int" },
+    { name = "day", type = "int" },
+    { name = "hour", type = "int" },
+  ]
   enable_infrastructure_vpc_transfer_s3_bucket = var.enable_infrastructure_vpc_transfer_s3_bucket
   infrastructure_vpc_transfer_s3_bucket_access_vpc_ids = concat(
     local.infrastructure_vpc ? [aws_vpc.infrastructure[0].id] : [],
