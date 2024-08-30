@@ -14,8 +14,8 @@ resource "aws_glue_catalog_table" "infrastructure_vpc_flow_logs" {
   dynamic "partition_keys" {
     for_each = local.infrastructure_vpc_flow_logs_glue_table_partition_keys
     content {
-      name = partition_keys.key
-      type = partition_keys.value
+      name = partition_keys.value["name"]
+      type = partition_keys.value["type"]
     }
   }
 
@@ -24,15 +24,19 @@ resource "aws_glue_catalog_table" "infrastructure_vpc_flow_logs" {
     EXTERNAL                    = "TRUE"
     "skip.header.line.count"    = "1"
     "projection.enabled"        = "true"
-    "projection.region.type"    = "enum"
-    "projection.region.values"  = local.aws_region
-    "projection.day.type"       = "date"
-    "projection.day.range"      = "2023/01/01,NOW"
-    "projection.day.format"     = "yyyy/MM/dd"
+    "projection.year.type"      = "integer"
+    "projection.year.digits"    = "4"
+    "projection.year.range"     = "2014,2050"
+    "projection.month.type"     = "integer"
+    "projection.month.range"    = "00,12"
+    "projection.month.digits"   = "2"
+    "projection.day.type"       = "integer"
+    "projection.day.range"      = "00,31"
+    "projection.day.digits"     = "2"
     "projection.hour.type"      = "integer"
     "projection.hour.range"     = "00,23"
     "projection.hour.digits"    = "2"
-    "storage.location.template" = "s3://${aws_s3_bucket.infrastructure_logs[0].id}/${local.infrastructure_vpc_flow_logs_s3_key_prefix}/AWSLogs/${local.aws_account_id}/vpcflowlogs/$${region}/$${day}/$${hour}"
+    "storage.location.template" = "s3://${aws_s3_bucket.infrastructure_logs[0].id}/${local.infrastructure_vpc_flow_logs_s3_key_prefix}/AWSLogs/${local.aws_account_id}/vpcflowlogs/${local.aws_region}/$${year}/$${month}/$${day}/$${hour}"
   }
 
   storage_descriptor {
@@ -50,8 +54,8 @@ resource "aws_glue_catalog_table" "infrastructure_vpc_flow_logs" {
     dynamic "columns" {
       for_each = local.infrastructure_vpc_flow_logs_glue_table_columns
       content {
-        name = columns.key
-        type = columns.value
+        name = columns.value["name"]
+        type = columns.value["type"]
       }
     }
   }
