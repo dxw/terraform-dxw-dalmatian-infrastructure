@@ -21,6 +21,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
         }
       ])
       linux_parameters      = jsonencode({})
+      syslog_address        = ""
+      syslog_tag            = ""
       cloudwatch_log_group  = ""
       awslogs_stream_prefix = ""
       region                = local.aws_region

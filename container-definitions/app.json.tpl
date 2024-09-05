@@ -2,6 +2,15 @@
   {
     "image": "${image}",
     "name": "${container_name}",
+    %{ if syslog_address != "" }
+    "logConfiguration": {
+      "logDriver": "syslog",
+      "options": {
+        "syslog-address": "${syslog_address}",
+        "tag": "${syslog_tag}"
+      }
+    },
+    %{else}
     %{ if cloudwatch_log_group != "" }
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -17,6 +26,7 @@
     "logConfiguration": {
       "logDriver": "json-file"
     },
+    %{ endif }
     %{ endif }
     %{ if volumes != "[]" }
     "mountPoints": ${volumes},

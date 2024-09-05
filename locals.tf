@@ -151,6 +151,7 @@ locals {
   infrastructure_ecs_cluster_enable_execute_command_logging           = var.infrastructure_ecs_cluster_enable_execute_command_logging
   infrastructure_ecs_cluster_wafs                                     = var.infrastructure_ecs_cluster_wafs
   infrastructure_ecs_cluster_syslog_endpoint                          = var.infrastructure_ecs_cluster_syslog_endpoint
+  infrastructure_ecs_cluster_syslog_docker_address                    = length(split("syslog", local.infrastructure_ecs_cluster_syslog_endpoint)) > 1 ? "tcp${split("syslog", local.infrastructure_ecs_cluster_syslog_endpoint)[1]}" : ""
   infrastructure_ecs_cluster_syslog_port                              = local.infrastructure_ecs_cluster_syslog_endpoint != "" ? split(":", local.infrastructure_ecs_cluster_syslog_endpoint)[2] : null
   infrastructure_ecs_cluster_syslog_permitted_peer                    = var.infrastructure_ecs_cluster_syslog_permitted_peer
   infrastrucutre_ecs_cluster_logspout_enabled                         = local.enable_infrastructure_ecs_cluster && local.infrastructure_ecs_cluster_syslog_endpoint != ""
