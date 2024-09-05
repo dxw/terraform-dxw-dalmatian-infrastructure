@@ -8,7 +8,7 @@ resource "aws_athena_workgroup" "infrastructure_vpc_flow_logs" {
     publish_cloudwatch_metrics_enabled = true
 
     result_configuration {
-      output_location = "s3://${aws_s3_bucket.infrastructure_logs[0].bucket}/${local.infrastructure_vpc_flow_logs_s3_key_prefix}-athena-output"
+      output_location = "s3://${aws_s3_bucket.infrastructure_logs[0].bucket}/${local.logs_bucket_athena_result_output_dir}/${local.infrastructure_vpc_flow_logs_s3_key_prefix}-vpcflowlogs"
 
       encryption_configuration {
         encryption_option = local.infrastructure_kms_encryption ? "SSE_KMS" : "SSE_S3"

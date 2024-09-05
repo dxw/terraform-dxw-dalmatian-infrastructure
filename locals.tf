@@ -42,6 +42,7 @@ locals {
   logs_bucket_logs_source_arns = concat(
     local.infrastructure_vpc_flow_logs_s3_with_athena ? ["arn:aws:logs:${local.aws_region}:${local.aws_account_id}:*"] : []
   )
+  logs_bucket_athena_result_output_dir = "athena-result-output"
 
   route53_root_hosted_zone_domain_name      = var.route53_root_hosted_zone_domain_name
   aws_profile_name_route53_root             = var.aws_profile_name_route53_root
