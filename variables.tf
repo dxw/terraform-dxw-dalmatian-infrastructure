@@ -204,6 +204,24 @@ variable "infrastructure_vpc_transfer_s3_bucket_access_vpc_ids" {
   type        = list(string)
 }
 
+variable "enable_infrastructure_bastion_host" {
+  description = "Enable Infrastructure Bastion host. This launches a t3.micro AL2023 instance within the VPC that can be accessed via Session Manager"
+  type        = bool
+}
+
+variable "infrastructure_bastion_host_custom_security_group_rules" {
+  description = "Map of custom security group rules to add to the Infrastructure EC2 Bastion Host security group (eg. { rule-name = {type = \"egress\", ... }  })"
+  type = map(object({
+    description              = string
+    type                     = string
+    from_port                = number
+    to_port                  = number
+    protocol                 = string
+    source_security_group_id = optional(string, "")
+    cidr_blocks              = optional(list(string), [])
+  }))
+}
+
 variable "route53_root_hosted_zone_domain_name" {
   description = "Route53 Hosted Zone in which to delegate Infrastructure Route53 Hosted Zones."
   type        = string

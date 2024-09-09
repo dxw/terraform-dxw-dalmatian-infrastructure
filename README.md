@@ -258,6 +258,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_task_s3_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_task_s3_write](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_user.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
+| [aws_instance.infrastructure_bastion](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_internet_gateway.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
 | [aws_kms_alias.custom_s3_buckets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_alias.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
@@ -371,12 +372,19 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_object.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
 | [aws_secretsmanager_secret.infrastructure_rds_root_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret_version.infrastructure_rds_root_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
+| [aws_security_group.infrastructure_ec2_bastion_host](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.infrastructure_ecs_cluster_container_instances](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.infrastructure_ecs_cluster_efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.infrastructure_ecs_cluster_service_alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.infrastructure_elasticache](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.infrastructure_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.infrastructure_rds_s3_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group_rule.infrastructure_ec2_bastion_host_custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ec2_bastion_host_egress_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ec2_bastion_host_egress_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ec2_bastion_host_egress_https_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ec2_bastion_host_egress_https_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.infrastructure_ec2_bastion_host_egress_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ecs_cluster_container_instances_egress_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
@@ -421,6 +429,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [archive_file.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_pending_task_metric_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
+| [aws_ami.bastion_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_ami.ecs_cluster_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_cloudfront_cache_policy.managed_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/cloudfront_cache_policy) | data source |
@@ -447,6 +456,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_ecs_cluster_efs_performance_mode"></a> [ecs\_cluster\_efs\_performance\_mode](#input\_ecs\_cluster\_efs\_performance\_mode) | ECS cluser EFS performance mode | `string` | n/a | yes |
 | <a name="input_ecs_cluster_efs_throughput_mode"></a> [ecs\_cluster\_efs\_throughput\_mode](#input\_ecs\_cluster\_efs\_throughput\_mode) | ECS cluser EFS throughput mode | `string` | n/a | yes |
 | <a name="input_enable_cloudformatian_s3_template_store"></a> [enable\_cloudformatian\_s3\_template\_store](#input\_enable\_cloudformatian\_s3\_template\_store) | Creates an S3 bucket to store custom CloudFormation templates, which can then be referenced in `custom_cloudformation_stacks`. A user with RW access to the bucket is also created. | `bool` | n/a | yes |
+| <a name="input_enable_infrastructure_bastion_host"></a> [enable\_infrastructure\_bastion\_host](#input\_enable\_infrastructure\_bastion\_host) | Enable Infrastructure Bastion host. This launches a t3.micro AL2023 instance within the VPC that can be accessed via Session Manager | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster"></a> [enable\_infrastructure\_ecs\_cluster](#input\_enable\_infrastructure\_ecs\_cluster) | Enable creation of infrastructure ECS cluster, to place ECS services | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster_asg_cpu_alert"></a> [enable\_infrastructure\_ecs\_cluster\_asg\_cpu\_alert](#input\_enable\_infrastructure\_ecs\_cluster\_asg\_cpu\_alert) | Enable a CPU alert for the ECS cluster's Autoscaling Group | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster_ecs_asg_diff_alert"></a> [enable\_infrastructure\_ecs\_cluster\_ecs\_asg\_diff\_alert](#input\_enable\_infrastructure\_ecs\_cluster\_ecs\_asg\_diff\_alert) | Enable the ECS Cluster Container Instance / ASG instance diff alert | `bool` | n/a | yes |
@@ -457,6 +467,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_enable_infrastructure_route53_hosted_zone"></a> [enable\_infrastructure\_route53\_hosted\_zone](#input\_enable\_infrastructure\_route53\_hosted\_zone) | Creates a Route53 hosted zone, where DNS records will be created for resources launched within this module. | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_vpc_transfer_s3_bucket"></a> [enable\_infrastructure\_vpc\_transfer\_s3\_bucket](#input\_enable\_infrastructure\_vpc\_transfer\_s3\_bucket) | Enable VPC transfer S3 bucket. This allows uploading/downloading files from resources within the infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name to be used as part of the resource prefix | `string` | n/a | yes |
+| <a name="input_infrastructure_bastion_host_custom_security_group_rules"></a> [infrastructure\_bastion\_host\_custom\_security\_group\_rules](#input\_infrastructure\_bastion\_host\_custom\_security\_group\_rules) | Map of custom security group rules to add to the Infrastructure EC2 Bastion Host security group (eg. { rule-name = {type = "egress", ... }  }) | <pre>map(object({<br>    description              = string<br>    type                     = string<br>    from_port                = number<br>    to_port                  = number<br>    protocol                 = string<br>    source_security_group_id = optional(string, "")<br>    cidr_blocks              = optional(list(string), [])<br>  }))</pre> | n/a | yes |
 | <a name="input_infrastructure_dockerhub_email"></a> [infrastructure\_dockerhub\_email](#input\_infrastructure\_dockerhub\_email) | Dockerhub email | `string` | n/a | yes |
 | <a name="input_infrastructure_dockerhub_token"></a> [infrastructure\_dockerhub\_token](#input\_infrastructure\_dockerhub\_token) | Dockerhub token which has permissions to pull images | `string` | n/a | yes |
 | <a name="input_infrastructure_dockerhub_username"></a> [infrastructure\_dockerhub\_username](#input\_infrastructure\_dockerhub\_username) | Dockerhub username | `string` | n/a | yes |
