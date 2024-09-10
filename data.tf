@@ -31,6 +31,27 @@ data "aws_ami" "ecs_cluster_ami" {
   }
 }
 
+data "aws_ami" "bastion_ami" {
+  count = local.enable_infrastructure_bastion_host ? 1 : 0
+
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name = "name"
+    values = [
+      "al2023-ami-2023*"
+    ]
+  }
+
+  filter {
+    name = "architecture"
+    values = [
+      "x86_64"
+    ]
+  }
+}
+
 data "aws_sns_topic" "infrastructure_slack_sns_topic" {
   count = local.infrastructure_slack_sns_topic_in_use ? 1 : 0
 

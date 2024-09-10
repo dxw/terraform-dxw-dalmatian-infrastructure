@@ -96,6 +96,9 @@ locals {
   infrastructure_vpc_transfer_ssm_download_command = "aws s3 cp {{ Source }} {{ HostTarget }} {{ Recursive  }}; if [ -n \\\"{{ TargetUID }}\\\" ] && [ -n \\\"{{ TargetGID }}\\\" ]; then chown {{ TargetUID }}:{{ TargetGID }} -R {{ HostTarget }}; fi"
   infrastructure_vpc_transfer_ssm_upload_command   = "aws s3 cp {{ Source }} {{ S3Target }} {{ Recursive }}"
 
+  enable_infrastructure_bastion_host                      = var.enable_infrastructure_bastion_host
+  infrastructure_bastion_host_custom_security_group_rules = var.infrastructure_bastion_host_custom_security_group_rules
+
   infrastructure_dockerhub_email    = var.infrastructure_dockerhub_email
   infrastructure_dockerhub_username = var.infrastructure_dockerhub_username
   infrastructure_dockerhub_token    = var.infrastructure_dockerhub_token
