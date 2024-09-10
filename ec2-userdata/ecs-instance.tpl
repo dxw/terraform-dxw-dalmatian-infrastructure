@@ -11,6 +11,9 @@ echo ECS_ENGINE_AUTH_TYPE=dockercfg >> /etc/ecs/ecs.config
 echo 'ECS_ENGINE_AUTH_DATA={"https://index.docker.io/v1/": { "auth": "${dockerhub_token}", "email": "${dockerhub_email}"}}' >> /etc/ecs/ecs.config
 # Set low task cleanup - reduces chance of docker thin pool running out of free space
 echo "ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=15m" >> /etc/ecs/ecs.config
+# Set ECS logging drivers
+# Optional: ["json-file","syslog","awslogs","fluentd","gelf","journald","splunk","awsfirelens"]
+echo 'ECS_AVAILABLE_LOGGING_DRIVERS=["json-file","syslog","awslogs"]' >> /etc/ecs/ecs.config
 %{~ if log_debug_mode }
 echo "ECS_LOGLEVEL=debug" >> /etc/ecs/ecs.config
 %{~ endif }
