@@ -1,5 +1,5 @@
 resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   family = "${local.resource_prefix}-ecs-infrastructure-logsput"
   container_definitions = templatefile(
@@ -8,7 +8,7 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
       container_name      = "logspout"
       image               = aws_ecr_repository.infrastructure_ecs_cluster_logspout[0].repository_url
       entrypoint          = jsonencode([])
-      command             = jsonencode([local.infrastructure_ecs_cluster_syslog_endpoint])
+      command             = jsonencode([local.infrastructure_ecs_cluster_logspout_command])
       environment_file_s3 = ""
       environment         = jsonencode([])
       secrets             = jsonencode([])
@@ -38,7 +38,7 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
 }
 
 resource "aws_ecs_service" "infrastructure_ecs_cluster_logspout" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   name                = "logsput"
   cluster             = aws_ecs_cluster.infrastructure[0].name

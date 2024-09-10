@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "infrastructure_ecs_cluster_logspout" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   name = "${local.resource_prefix}-ecs-cluster-logspout"
 

@@ -128,7 +128,7 @@ resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instanc
 }
 
 resource "aws_security_group_rule" "infrastructure_ecs_cluster_container_instances_egress_logspout_tcp" {
-  count = local.enable_infrastructure_ecs_cluster && local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.enable_infrastructure_ecs_cluster && local.infrastructure_ecs_cluster_syslog_port != null ? 1 : 0
 
   description = "Allow Logspout tcp outbound"
   type        = "egress"
