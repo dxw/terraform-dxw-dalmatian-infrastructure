@@ -1,5 +1,5 @@
 resource "aws_iam_role" "infrastructure_ecs_cluster_logspout_image_codebuild" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-logspout-image-codebuild"), 0, 6)}"
   description = "${local.resource_prefix}-ecs-cluster-logspout-image-codebuild"
@@ -10,7 +10,7 @@ resource "aws_iam_role" "infrastructure_ecs_cluster_logspout_image_codebuild" {
 }
 
 resource "aws_iam_policy" "infrastructure_ecs_cluster_logspout_image_codebuild_cloudwatch_rw" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-logspout-image-codebuild-cloudwatch-rw"), 0, 6)}"
   description = "${local.resource_prefix}-ecs-cluster-logspout-image-codebuild-cloudwatch-rw"
@@ -18,14 +18,14 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_logspout_image_codebuild_c
 }
 
 resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_logspout_image_codebuild_cloudwatch_rw" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   role       = aws_iam_role.infrastructure_ecs_cluster_logspout_image_codebuild[0].name
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_logspout_image_codebuild_cloudwatch_rw[0].arn
 }
 
 resource "aws_iam_policy" "infrastructure_ecs_cluster_logspout_image_codebuild_allow_builds" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-logspout-image-codebuild-allow-builds"), 0, 6)}"
   description = "${local.resource_prefix}-ecs-cluster-logspout-image-codebuild-allow-builds"
@@ -33,14 +33,14 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_logspout_image_codebuild_a
 }
 
 resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_logspout_image_codebuild_allow_builds" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   role       = aws_iam_role.infrastructure_ecs_cluster_logspout_image_codebuild[0].name
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_logspout_image_codebuild_allow_builds[0].arn
 }
 
 resource "aws_iam_policy" "infrastructure_ecs_cluster_logspout_image_codebuild_ecr_push" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-logspout-image-codebuild-ecr-push"), 0, 6)}"
   description = "${local.resource_prefix}-ecs-cluster-logspout-image-codebuild-ecr-push"
@@ -51,14 +51,14 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_logspout_image_codebuild_e
 }
 
 resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_logspout_image_codebuild_ecr_push" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   role       = aws_iam_role.infrastructure_ecs_cluster_logspout_image_codebuild[0].name
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_logspout_image_codebuild_ecr_push[0].arn
 }
 
 resource "aws_codebuild_project" "infrastructure_ecs_cluster_logspout_image_build" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   name          = "${local.resource_prefix}-ecs-cluster-logspout-image-build"
   description   = "${local.resource_prefix} ECS Cluster Logspout Image Build"
@@ -109,7 +109,7 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_logspout_image_buil
 }
 
 resource "terraform_data" "infrastructure_ecs_cluster_logspout_image_build_trigger_codebuild" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   triggers_replace = [
     md5(templatefile("${path.root}/buildspecs/dalmatian-logspout.yml", {})),
@@ -129,7 +129,7 @@ resource "terraform_data" "infrastructure_ecs_cluster_logspout_image_build_trigg
 }
 
 resource "aws_cloudwatch_event_rule" "infrastructure_ecs_cluster_logspout_image_build_trigger_codebuild" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   name                = "${local.resource_prefix_hash}-ecs-cluster-logspout-image-build-trigger-codebuild"
   description         = "${local.resource_prefix} ECS Cluster Logspout Image Build Trigger CodeBuild"
@@ -137,7 +137,7 @@ resource "aws_cloudwatch_event_rule" "infrastructure_ecs_cluster_logspout_image_
 }
 
 resource "aws_cloudwatch_event_target" "infrastructure_ecs_cluster_logspout_image_build_trigger_codebuild" {
-  count = local.infrastrucutre_ecs_cluster_logspout_enabled ? 1 : 0
+  count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
   target_id = "${local.resource_prefix_hash}-ecs-cluster-image-build-trigger-codebuild"
   rule      = aws_cloudwatch_event_rule.infrastructure_ecs_cluster_logspout_image_build_trigger_codebuild[0].name

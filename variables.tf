@@ -451,6 +451,11 @@ variable "infrastructure_ecs_cluster_syslog_permitted_peer" {
   type        = string
 }
 
+variable "infrastructure_ecs_cluster_logspout_command" {
+  description = "If provided, a logspout container will be launched on each container instance with the given command. If specified, container logs will no longer automatically be sent to CloudWatch, or to the given `infrastructure_ecs_cluster_syslog_endpoint`"
+  type        = list(string)
+}
+
 variable "infrastructure_ecs_cluster_wafs" {
   description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
   type = map(object({

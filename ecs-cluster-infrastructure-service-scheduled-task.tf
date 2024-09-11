@@ -40,9 +40,9 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service_scheduled
       linux_parameters = jsonencode({
         initProcessEnabled = false
       })
-      syslog_address        = local.infrastructure_ecs_cluster_syslog_docker_address
+      syslog_address        = !local.infrastructure_ecs_cluster_logspout_enabled ? local.infrastructure_ecs_cluster_syslog_docker_address : ""
       syslog_tag            = "${local.resource_prefix}-${each.key}-{{.ID}}"
-      cloudwatch_log_group  = each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.value["container_name"]].name : ""
+      cloudwatch_log_group  = !local.infrastructure_ecs_cluster_logspout_enabled ? each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.value["container_name"]].name : "" : ""
       awslogs_stream_prefix = ""
       region                = local.aws_region
     }
