@@ -560,7 +560,7 @@ variable "infrastructure_ecs_cluster_services" {
         container_heath_grace_period: Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown
         scheduled_tasks: A map of scheduled tasks that use the same image as the service defined eg. { "name" => { "entrypoint" = ["bundle", "exec", "run_jobs"], "schedule_expression" = "cron(* * * * ? *)" } }
         domain_names: Domain names to assign to CloudFront aliases, and the Application Load Balancer's `host_header` condition
-        enable_cloudfront: Enable cloadfront for the service
+        enable_cloudfront: Enable CloudFront for the service
         cloudfront_tls_certificate_arn: Certificate ARN to attach to CloudFront - must contain the names provided in `domain_names`
         cloudfront_access_logging_enabled: Enable access logging for the distribution to the infrastructure S3 logs bucket
         cloudfront_bypass_protection_enabled: This adds a secret header at the CloudFront level, which is then checked by the ALB listener rules. Requests are only forwarded if the header matches, preventing requests going directly to the ALB.
