@@ -39,6 +39,11 @@
         "containerPort": ${container_port}
       }
     ],
+    %{ if enable_nginx_frontend },
+    "healthCheck": {
+      "command": ["CMD-SHELL", "curl -f localhost:${container_port} || exit 1]
+    },
+    {% endif }
     %{ endif }
     %{ if environment != "[]" }
     "environment": ${environment},
@@ -67,14 +72,6 @@
     "command": ${command},
     %{ endif }
     "memoryReservation": 16,
-    %{ if enable_nginx_frontend }
-    "dependsOn": [
-      {
-        "containerName": "${container_name}-nginx",
-        "condition": "HEALTHY"
-      }
-    ],
-    %{ endif }
     "essential": true
   }
   %{ if enable_nginx_frontend },
@@ -124,7 +121,13 @@
     "essential": true.
     "healthCheck": {
       "command": ["CMD-SHELL", "service", "nginx", "status"]
-    }
+    },
+    "dependsOn": [
+      {
+        "containerName": "${container_name}",
+        "condition": "HEALTHY"
+      }
+    ]
   }
   %{ endif }
 ]
