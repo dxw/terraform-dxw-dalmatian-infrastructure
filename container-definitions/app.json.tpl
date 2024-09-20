@@ -39,7 +39,7 @@
         "containerPort": ${container_port}
       }
     ],
-    %{ if enable_nginx_frontend },
+    %{ if enable_sidecar_container },
     "healthCheck": {
       "command": ["CMD-SHELL", "curl -f localhost:${container_port} || exit 1]
     },
@@ -74,10 +74,10 @@
     "memoryReservation": 16,
     "essential": true
   }
-  %{ if enable_nginx_frontend },
+  {% if enable_sidecar_container },
   {
-    "image": "nginx:${nginx_image_tag}",
-    "name": "${container_name}-nginx",
+    "image": "${sidecar_image}",
+    "name": "${sidecar_container_name}",
     %{ if syslog_address != "" }
     "logConfiguration": {
       "logDriver": "syslog",
@@ -111,17 +111,14 @@
         "containerPort": 8080
       }
     ],
-    %{ if nginx_environment != "[]" }
-    "environment": ${nginx_environment},
+    %{ if sidecar_environment != "[]" }
+    "environment": ${sidecar_environment},
     %{ endif }
-    %{if nginx_entrypoint != "[]"}
-    "entrypoint": ${nginx_entrypoint},
+    %{if sidecar_entrypoint != "[]"}
+    "entrypoint": ${sidecar_entrypoint},
     %{ endif }
     "memoryReservation": 16,
-    "essential": true.
-    "healthCheck": {
-      "command": ["CMD-SHELL", "service", "nginx", "status"]
-    },
+    "essential": true,
     "dependsOn": [
       {
         "containerName": "${container_name}",
@@ -129,5 +126,5 @@
       }
     ]
   }
-  %{ endif }
+  {% endif }
 ]
