@@ -249,6 +249,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       region                = local.aws_region
       enable_nginx_frontend = each.value["enable_nginx_frontend"]
       nginx_image_tag       = each.value["nginx_image_tag"]
+      nginx_environment     = "[]"
+      nginx_entrypoint      = "[]"
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.key].arn

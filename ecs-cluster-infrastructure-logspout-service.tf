@@ -26,6 +26,10 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
       cloudwatch_log_group  = ""
       awslogs_stream_prefix = ""
       region                = local.aws_region
+      enable_nginx_frontend = false
+      nginx_image_tag       = ""
+      nginx_environment     = "[]"
+      nginx_entrypoint      = "[]"
     }
   )
 

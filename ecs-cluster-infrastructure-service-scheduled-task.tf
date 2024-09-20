@@ -45,6 +45,10 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service_scheduled
       cloudwatch_log_group  = !local.infrastructure_ecs_cluster_logspout_enabled ? each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.value["container_name"]].name : "" : ""
       awslogs_stream_prefix = ""
       region                = local.aws_region
+      enable_nginx_frontend = false
+      nginx_image_tag       = ""
+      nginx_environment     = "[]"
+      nginx_entrypoint      = "[]"
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.value["container_name"]].arn
