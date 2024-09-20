@@ -168,12 +168,17 @@ resource "aws_ecs_task_definition" "infrastructure_rds_s3_backups_scheduled_task
       linux_parameters = jsonencode({
         initProcessEnabled = false
       })
-      security_options      = jsonencode([])
-      syslog_address        = ""
-      syslog_tag            = ""
-      cloudwatch_log_group  = aws_cloudwatch_log_group.infrastructure_rds_s3_backups[each.key].name
-      awslogs_stream_prefix = "${local.resource_prefix}-rds-s3-backups-${each.key}"
-      region                = local.aws_region
+      security_options         = jsonencode([])
+      syslog_address           = ""
+      syslog_tag               = ""
+      cloudwatch_log_group     = aws_cloudwatch_log_group.infrastructure_rds_s3_backups[each.key].name
+      awslogs_stream_prefix    = "${local.resource_prefix}-rds-s3-backups-${each.key}"
+      region                   = local.aws_region
+      enable_sidecar_container = false
+      sidecar_container_name   = ""
+      sidecar_image            = ""
+      sidecar_environment      = "[]"
+      sidecar_entrypoint       = "[]"
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_rds_s3_backups_task_execution[each.key].arn
