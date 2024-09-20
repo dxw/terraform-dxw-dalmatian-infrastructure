@@ -558,6 +558,8 @@ variable "infrastructure_ecs_cluster_services" {
         container_count: Number of containers to launch for the service
         container_heath_check_path: Destination for the health check request
         container_heath_grace_period: Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown
+        enable_nginx_frontend: Launch an nginx sidecar container that will act as a proxy for all incoming traffic
+        nginx_image_tag: A specific Docker tag to use for the nginx container (eg. 1.27.1)
         scheduled_tasks: A map of scheduled tasks that use the same image as the service defined eg. { "name" => { "entrypoint" = ["bundle", "exec", "run_jobs"], "schedule_expression" = "cron(* * * * ? *)" } }
         domain_names: Domain names to assign to CloudFront aliases, and the Application Load Balancer's `host_header` condition
         enable_cloudfront: Enable CloudFront for the service
@@ -611,6 +613,8 @@ variable "infrastructure_ecs_cluster_services" {
     container_count              = optional(number, null)
     container_heath_check_path   = optional(string, null)
     container_heath_grace_period = optional(number, null)
+    enable_nginx_frontend        = optional(bool, false)
+    nginx_image_tag              = optional(string, "stable")
     scheduled_tasks = optional(map(object({
       entrypoint          = list(string)
       schedule_expression = string

@@ -247,6 +247,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       cloudwatch_log_group  = !local.infrastructure_ecs_cluster_logspout_enabled ? each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.key].name : "" : ""
       awslogs_stream_prefix = ""
       region                = local.aws_region
+      enable_nginx_frontend = each.value["enable_nginx_frontend"]
+      nginx_image_tag       = each.value["nginx_image_tag"]
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.key].arn
