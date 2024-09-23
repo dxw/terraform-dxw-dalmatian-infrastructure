@@ -10,7 +10,7 @@
         "tag": "${syslog_tag}"
       }
     },
-    %{else}
+    %{ else }
     %{ if cloudwatch_log_group != "" }
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -43,7 +43,7 @@
     "healthCheck": {
       "command": ["CMD-SHELL", "curl -f localhost:${container_port} || exit 1]
     },
-    {% endif }
+    %{ endif }
     %{ endif }
     %{ if environment != "[]" }
     "environment": ${environment},
@@ -65,10 +65,10 @@
     %{ if linux_parameters != "{}" }
     "linuxParameters": ${linux_parameters},
     %{ endif }
-    %{if entrypoint != "[]"}
+    %{ if entrypoint != "[]" }
     "entrypoint": ${entrypoint},
     %{ endif }
-    %{if command != "[]"}
+    %{ if command != "[]" }
     "command": ${command},
     %{ endif }
     "memoryReservation": 16,
@@ -86,7 +86,7 @@
         "tag": "${syslog_tag}"
       }
     },
-    %{else}
+    %{ else }
     %{ if cloudwatch_log_group != "" }
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -103,7 +103,6 @@
       "logDriver": "json-file"
     },
     %{ endif }
-    %{ endif }
     "portMappings": [
       {
         "hostPort": 0,
@@ -114,7 +113,7 @@
     %{ if sidecar_environment != "[]" }
     "environment": ${sidecar_environment},
     %{ endif }
-    %{if sidecar_entrypoint != "[]"}
+    %{ if sidecar_entrypoint != "[]" }
     "entrypoint": ${sidecar_entrypoint},
     %{ endif }
     "memoryReservation": 16,
@@ -126,5 +125,5 @@
       }
     ]
   }
-  {% endif }
+  %{ endif }
 ]
