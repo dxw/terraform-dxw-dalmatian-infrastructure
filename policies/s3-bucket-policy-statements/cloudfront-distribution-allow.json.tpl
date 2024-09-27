@@ -1,3 +1,4 @@
+%{ if cloudfront_distribution_arns != "[]" ~}
 {
   "Effect": "Allow",
   "Principal": {
@@ -11,3 +12,4 @@
     }
   }
 }
+%{~ endif }
