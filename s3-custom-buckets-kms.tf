@@ -24,7 +24,7 @@ resource "aws_kms_key" "custom_s3_buckets" {
           each.value["cloudfront_infrastructure_ecs_cluster_service"] != null ? [aws_cloudfront_distribution.infrastructure_ecs_cluster_service_cloudfront[each.value["cloudfront_infrastructure_ecs_cluster_service"]].arn] : []
         )))
       }
-  )}
+  )}${length(each.value["custom_kms_key_policy_statements"]) != 0 ? ",${trim(jsonencode(each.value["custom_kms_key_policy_statements"]), "[]")}" : ""}
       ]
       EOT
 }
