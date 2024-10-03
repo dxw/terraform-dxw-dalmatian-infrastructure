@@ -857,29 +857,7 @@ variable "custom_s3_buckets" {
       }
     }
   EOT
-  type = map(object({
-    create_dedicated_kms_key = optional(bool, null)
-    custom_kms_key_policy_statements = optional(list(object({
-      Effect    = string,
-      Principal = map(any),
-      Action    = list(string),
-      Resource  = string,
-      Condition = optional(map(any), {})
-    })), [])
-    transition_to_ia_days                              = optional(number, null)
-    transition_to_glacier_days                         = optional(number, null)
-    cloudfront_dedicated_distribution                  = optional(bool, null)
-    cloudfront_s3_root                                 = optional(string, null)
-    cloudfront_infrastructure_ecs_cluster_service      = optional(string, null)
-    cloudfront_infrastructure_ecs_cluster_service_path = optional(string, null)
-    custom_bucket_policy_statements = optional(list(object({
-      Effect    = string,
-      Principal = map(any),
-      Action    = list(string),
-      Resource  = string,
-      Condition = optional(map(any), {})
-    })), [])
-  }))
+  type        = map(any)
 }
 
 variable "enable_cloudformatian_s3_template_store" {
