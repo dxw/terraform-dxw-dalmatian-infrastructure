@@ -846,39 +846,27 @@ variable "custom_s3_buckets" {
     {
       bucket-name = {
         create_dedicated_kms_key: Conditionally create a KMS key specifically for this bucket's server side encryption (rather than using the Infrastructure's KMS key). It's recommended to use this if the S3 bucket will be accessed from external AWS accounts.
-        custom_kms_key_policy_statements: Conditionally add a list of user-defined key policy statements
+        custom_kms_key_policy_statements: Conditionally add a string of comma delimited user-defined bucket policy statements (eg. '{"Effect": ...},{"Effect": ...}')
         transition_to_ia_days: Conditionally transition objects to 'Standard Infrequent Access' storage in N days
         transition_to_glacier_days: Conditionally transition objects to 'Glacier' storage in N days
         cloudfront_dedicated_distribution: Conditionally create a CloudFront distribution to serve objects from the S3 bucket.
         cloudfront_s3_root: Sets the S3 document root when being served from CloudFront. By default this will be '/'. If `cloudfront_infrastructure_ecs_cluster_service_path` has been set, this helps by modifying the request from `/sub-directory-path` to `/` by use of a CloudFront function.
         cloudfront_infrastructure_ecs_cluster_service: Conditionally create an Origin on a CloudFront distribution that is serving the given Infrastructure ECS Cluster Service name
         cloudfront_infrastructure_ecs_cluster_service_path: If `cloudfront_infrastructure_ecs_cluster_service`, set this to the path that objects will be served from.
-        custom_bucket_policy_statements: Conditionally add a list of user-defined bucket policy statements
+        custom_bucket_policy_statements: Conditionally add a string of comma delimited user-defined key policy statements (eg. '{"Effect": ...},{"Effect": ...}'
       }
     }
   EOT
   type = map(object({
-    create_dedicated_kms_key = optional(bool, null)
-    custom_kms_key_policy_statements = optional(list(object({
-      Effect    = string,
-      Principal = map(any),
-      Action    = list(string),
-      Resource  = string,
-      Condition = optional(map(any), {})
-    })), [])
+    create_dedicated_kms_key                           = optional(bool, null)
+    custom_kms_key_policy_statements                   = optional(string, null)
     transition_to_ia_days                              = optional(number, null)
     transition_to_glacier_days                         = optional(number, null)
     cloudfront_dedicated_distribution                  = optional(bool, null)
     cloudfront_s3_root                                 = optional(string, null)
     cloudfront_infrastructure_ecs_cluster_service      = optional(string, null)
     cloudfront_infrastructure_ecs_cluster_service_path = optional(string, null)
-    custom_bucket_policy_statements = optional(list(object({
-      Effect    = string,
-      Principal = map(any),
-      Action    = list(string),
-      Resource  = string,
-      Condition = optional(map(any), {})
-    })), [])
+    custom_bucket_policy_statements                    = optional(string, null)
   }))
 }
 

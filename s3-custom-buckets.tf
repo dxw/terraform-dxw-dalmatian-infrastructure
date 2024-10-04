@@ -27,7 +27,7 @@ resource "aws_s3_bucket_policy" "custom" {
           [for k, v in local.custom_s3_buckets : aws_cloudfront_distribution.infrastructure_ecs_cluster_service_cloudfront[v["cloudfront_infrastructure_ecs_cluster_service"]].arn if v["cloudfront_infrastructure_ecs_cluster_service"] != null]
         )))
       }
-  )}${length(each.value["custom_bucket_policy_statements"]) != 0 ? ",${trim(jsonencode(each.value["custom_bucket_policy_statements"]), "[]")}" : ""}
+  )}${each.value["custom_bucket_policy_statements"] != null ? ",${each.value["custom_bucket_policy_statements"]}" : ""}
       ]
       EOT
 }
