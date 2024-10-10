@@ -21,6 +21,7 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
         }
       ])
       linux_parameters      = jsonencode({})
+      security_options      = jsonencode([])
       syslog_address        = ""
       syslog_tag            = ""
       cloudwatch_log_group  = ""
