@@ -24,3 +24,9 @@ provider "aws" {
     tags = local.default_tags
   }
 }
+
+provider "datadog" {
+  api_key  = local.infrastructure_datadog_api_key
+  vaildate = local.infrastructure_datadog_api_key != ""
+  api_url  = local.infrastructure_datadog_api_url
+}

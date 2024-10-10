@@ -60,6 +60,9 @@
     %{ if linux_parameters != "{}" }
     "linuxParameters": ${linux_parameters},
     %{ endif }
+    %{ if security_options != "[]" }
+    "dockerSecurityOptions": ${security_options},
+    %{ endif }
     %{if entrypoint != "[]"}
     "entrypoint": ${entrypoint},
     %{ endif }
