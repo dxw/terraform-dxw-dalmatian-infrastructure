@@ -52,6 +52,27 @@ locals {
 
   enable_infrastructure_wildcard_certificate = local.enable_infrastructure_route53_hosted_zone && length(local.infrastructure_ecs_cluster_services) > 0
 
+  infrastructure_datadog_api_key = var.infrastructure_datadog_api_key
+  infrastructure_datadog_app_key = var.infrastructure_datadog_app_key
+  infrastructure_datadog_region  = var.infrastructure_datadog_region
+  infrastructure_datadog_api_url = local.infrastructure_datadog_region != "" ? {
+    "US1"     = "https://api.datadoghq.com/",
+    "US3"     = "https://api.us3.datadoghq.com/",
+    "US5"     = "https://api.us5.datadoghq.com/",
+    "EU1"     = "https://api.datadoghq.eu/",
+    "US1-FED" = "https://api.ddog-gov.com/",
+    "AP1"     = "https://api.ap1.datadoghq.com/"
+  }[local.infrastructure_datadog_region] : "https://api.datadoghq.com/"
+  infrastructure_datadog_site = local.infrastructure_datadog_region != "" ? {
+    "US1"     = "datadoghq.com",
+    "US3"     = "us3.datadoghq.com",
+    "US5"     = "us5.datadoghq.com",
+    "EU1"     = "datadoghq.eu",
+    "US1-FED" = "ddog-gov.com",
+    "AP1"     = "ap1.datadoghq.com"
+  }[local.infrastructure_datadog_region] : "datadoghq.com"
+  enable_infrastructure_ecs_cluster_datadog_agent = local.enable_infrastructure_ecs_cluster && var.enable_infrastructure_ecs_cluster_datadog_agent
+
   infrastructure_vpc                                          = var.infrastructure_vpc
   infrastructure_vpc_cidr_block                               = var.infrastructure_vpc_cidr_block
   infrastructure_vpc_enable_dns_support                       = var.infrastructure_vpc_enable_dns_support

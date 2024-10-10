@@ -18,6 +18,28 @@ variable "aws_region" {
   type        = string
 }
 
+variable "infrastructure_datadog_api_key" {
+  description = "Datadog API key"
+  type        = string
+  sensitive   = true
+}
+
+variable "infrastructure_datadog_app_key" {
+  description = "Datadog App key"
+  type        = string
+  sensitive   = true
+}
+
+variable "infrastructure_datadog_region" {
+  description = "Datadog region"
+  type        = string
+}
+
+variable "enable_infrastructure_ecs_cluster_datadog_agent" {
+  description = "Conditionally launch Datadog agent containers on the ECS cluster"
+  type        = bool
+}
+
 variable "infrastructure_dockerhub_email" {
   description = "Dockerhub email"
   type        = string

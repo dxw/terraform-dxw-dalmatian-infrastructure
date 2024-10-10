@@ -168,6 +168,7 @@ resource "aws_ecs_task_definition" "infrastructure_rds_s3_backups_scheduled_task
       linux_parameters = jsonencode({
         initProcessEnabled = false
       })
+      security_options      = jsonencode([])
       syslog_address        = ""
       syslog_tag            = ""
       cloudwatch_log_group  = aws_cloudwatch_log_group.infrastructure_rds_s3_backups[each.key].name

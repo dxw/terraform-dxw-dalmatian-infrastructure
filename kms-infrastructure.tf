@@ -29,6 +29,11 @@ resource "aws_kms_key" "infrastructure" {
       {
         log_group_arn = local.enable_infrastructure_ecs_cluster_pending_task_alert && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:/aws/lambda/${local.resource_prefix_hash}-ecs-cluster-infrastructure-pending-task-metric" : ""
       }
+      )}${local.enable_infrastructure_ecs_cluster_datadog_agent && local.infrastructure_kms_encryption ? "," : ""}
+      ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudwatch-logs-allow.json.tpl",
+      {
+        log_group_arn = local.enable_infrastructure_ecs_cluster_datadog_agent && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:${local.resource_prefix_hash}-infrastructure-ecs-cluster-datadog-agent-logs" : ""
+      }
       )}${local.enable_infrastructure_ecs_cluster_ecs_asg_diff_alert && local.infrastructure_kms_encryption ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudwatch-logs-allow.json.tpl",
       {
