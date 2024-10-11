@@ -13,6 +13,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.5 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.4.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.30.0 |
+| <a name="requirement_datadog"></a> [datadog](#requirement\_datadog) | >= 3.46.0 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | >= 2.3.2 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.2.2 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.6.0 |
@@ -25,8 +26,9 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 5.70.0 |
 | <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.70.0 |
 | <a name="provider_aws.useast1"></a> [aws.useast1](#provider\_aws.useast1) | 5.70.0 |
+| <a name="provider_datadog"></a> [datadog](#provider\_datadog) | 3.46.0 |
 | <a name="provider_external"></a> [external](#provider\_external) | 2.3.4 |
-| <a name="provider_random"></a> [random](#provider\_random) | >= 3.6.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
@@ -62,6 +64,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudfront_origin_access_control.custom_s3_buckets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_control) | resource |
 | [aws_cloudwatch_event_rule.ecs_cluster_infrastructure_ecs_asg_diff_metric_1_min_cron](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_rule.ecs_cluster_infrastructure_pending_task_metric_1_min_cron](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
+| [aws_cloudwatch_event_rule.infrastructure_ecs_cluster_datadog_agent_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_rule.infrastructure_ecs_cluster_logspout_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_rule.infrastructure_ecs_cluster_service_ecr_scan](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_rule.infrastructure_ecs_cluster_service_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
@@ -70,6 +73,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_event_target.ecr_scan_event_target](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.ecs_cluster_infrastructure_ecs_asg_diff_metric_1_min_cron](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.ecs_cluster_infrastructure_pending_task_metric_1_min_cron](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
+| [aws_cloudwatch_event_target.infrastructure_ecs_cluster_datadog_agent_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.infrastructure_ecs_cluster_logspout_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.infrastructure_ecs_cluster_service_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.infrastructure_rds_s3_backups_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
@@ -77,6 +81,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_draining_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_pending_task_metric_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.infrastructure_ecs_cluster_datadog_agent](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_rds_exports](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_rds_s3_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
@@ -84,6 +89,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_metric_alarm.infrastructure_ecs_cluster_asg_cpu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.infrastructure_ecs_cluster_ecs_asg_diff](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.infrastructure_ecs_cluster_pending_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
+| [aws_codebuild_project.infrastructure_ecs_cluster_datadog_agent_image_build](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
 | [aws_codebuild_project.infrastructure_ecs_cluster_logspout_image_build](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
 | [aws_codebuild_project.infrastructure_ecs_cluster_service_build](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
 | [aws_codebuild_project.infrastructure_rds_s3_backups_image_build](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
@@ -96,13 +102,16 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_db_parameter_group.infrastructure_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group) | resource |
 | [aws_db_subnet_group.infrastructure_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_subnet_group) | resource |
 | [aws_default_network_acl.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_network_acl) | resource |
+| [aws_ecr_repository.infrastructure_ecs_cluster_datadog_agent](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.infrastructure_ecs_cluster_logspout](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.infrastructure_rds_s3_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecs_cluster.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster.infrastrucutre_rds_tooling](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
+| [aws_ecs_service.infrastructure_ecs_cluster_datadog_agent](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_service.infrastructure_ecs_cluster_logspout](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_service.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
+| [aws_ecs_task_definition.infrastructure_ecs_cluster_datadog_agent](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_ecs_task_definition.infrastructure_ecs_cluster_logspout](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_ecs_task_definition.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_ecs_task_definition.infrastructure_ecs_cluster_service_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
@@ -145,6 +154,12 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_policy.ecs_cluster_infrastructure_pending_task_metric_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_sns_publish](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_datadog_agent_image_codebuild_allow_builds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_datadog_agent_image_codebuild_cloudwatch_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_datadog_agent_image_codebuild_ecr_push](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_datadog_agent_task_execution_cloudwatch_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_datadog_agent_task_execution_ecr_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.infrastructure_ecs_cluster_datadog_agent_task_execution_get_secret_value](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_ecs_cluster_logspout_image_codebuild_allow_builds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -189,6 +204,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role.ecs_cluster_infrastructure_pending_task_metric_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_ecs_cluster_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.infrastructure_ecs_cluster_datadog_agent_image_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.infrastructure_ecs_cluster_datadog_agent_task_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_ecs_cluster_logspout_image_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_ecs_cluster_service_blue_green_codedeploy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_ecs_cluster_service_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -218,6 +235,12 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_pending_task_metric_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_autoscaling_lifecycle_termination_sns_publish](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_datadog_agent_image_codebuild_allow_builds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_datadog_agent_image_codebuild_cloudwatch_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_datadog_agent_image_codebuild_ecr_push](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_datadog_agent_task_execution_cloudwatch_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_datadog_agent_task_execution_ecr_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_datadog_agent_task_execution_get_secret_value](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_ec2_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_ecs_cluster_logspout_image_codebuild_allow_builds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -370,7 +393,9 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_s3_bucket_versioning.infrastructure_rds_s3_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_s3_bucket_versioning.infrastructure_vpc_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 | [aws_s3_object.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
+| [aws_secretsmanager_secret.infrastructure_ecs_cluster_datadog_agent_api_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret.infrastructure_rds_root_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret_version.infrastructure_ecs_cluster_datadog_agent_api_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_secretsmanager_secret_version.infrastructure_rds_root_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_security_group.infrastructure_ec2_bastion_host](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.infrastructure_ecs_cluster_container_instances](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
@@ -420,8 +445,10 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv6_allow_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_ip_set) | resource |
 | [aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv6_deny_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_ip_set) | resource |
 | [aws_wafv2_web_acl.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl) | resource |
+| [datadog_service_definition_yaml.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/service_definition_yaml) | resource |
 | [random_password.infrastructure_ecs_cluster_service_cloudfront_bypass_protection_secret](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.infrastructure_rds_root](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
+| [terraform_data.infrastructure_ecs_cluster_datadog_agent_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.infrastructure_ecs_cluster_logspout_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.infrastructure_ecs_cluster_service_blue_green_create_codedeploy_deployment](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.infrastructure_ecs_cluster_service_env_file](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
@@ -459,6 +486,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_enable_infrastructure_bastion_host"></a> [enable\_infrastructure\_bastion\_host](#input\_enable\_infrastructure\_bastion\_host) | Enable Infrastructure Bastion host. This launches a t3.micro AL2023 instance within the VPC that can be accessed via Session Manager | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster"></a> [enable\_infrastructure\_ecs\_cluster](#input\_enable\_infrastructure\_ecs\_cluster) | Enable creation of infrastructure ECS cluster, to place ECS services | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster_asg_cpu_alert"></a> [enable\_infrastructure\_ecs\_cluster\_asg\_cpu\_alert](#input\_enable\_infrastructure\_ecs\_cluster\_asg\_cpu\_alert) | Enable a CPU alert for the ECS cluster's Autoscaling Group | `bool` | n/a | yes |
+| <a name="input_enable_infrastructure_ecs_cluster_datadog_agent"></a> [enable\_infrastructure\_ecs\_cluster\_datadog\_agent](#input\_enable\_infrastructure\_ecs\_cluster\_datadog\_agent) | Conditionally launch Datadog agent containers on the ECS cluster | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster_ecs_asg_diff_alert"></a> [enable\_infrastructure\_ecs\_cluster\_ecs\_asg\_diff\_alert](#input\_enable\_infrastructure\_ecs\_cluster\_ecs\_asg\_diff\_alert) | Enable the ECS Cluster Container Instance / ASG instance diff alert | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster_efs"></a> [enable\_infrastructure\_ecs\_cluster\_efs](#input\_enable\_infrastructure\_ecs\_cluster\_efs) | Conditionally create and mount EFS to the ECS cluster instances | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_ecs_cluster_pending_task_alert"></a> [enable\_infrastructure\_ecs\_cluster\_pending\_task\_alert](#input\_enable\_infrastructure\_ecs\_cluster\_pending\_task\_alert) | Enable the ECS Cluster pending task alert | `bool` | n/a | yes |
@@ -468,6 +496,9 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_enable_infrastructure_vpc_transfer_s3_bucket"></a> [enable\_infrastructure\_vpc\_transfer\_s3\_bucket](#input\_enable\_infrastructure\_vpc\_transfer\_s3\_bucket) | Enable VPC transfer S3 bucket. This allows uploading/downloading files from resources within the infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name to be used as part of the resource prefix | `string` | n/a | yes |
 | <a name="input_infrastructure_bastion_host_custom_security_group_rules"></a> [infrastructure\_bastion\_host\_custom\_security\_group\_rules](#input\_infrastructure\_bastion\_host\_custom\_security\_group\_rules) | Map of custom security group rules to add to the Infrastructure EC2 Bastion Host security group (eg. { rule-name = {type = "egress", ... }  }) | <pre>map(object({<br/>    description              = string<br/>    type                     = string<br/>    from_port                = number<br/>    to_port                  = number<br/>    protocol                 = string<br/>    source_security_group_id = optional(string, "")<br/>    cidr_blocks              = optional(list(string), [])<br/>  }))</pre> | n/a | yes |
+| <a name="input_infrastructure_datadog_api_key"></a> [infrastructure\_datadog\_api\_key](#input\_infrastructure\_datadog\_api\_key) | Datadog API key | `string` | n/a | yes |
+| <a name="input_infrastructure_datadog_app_key"></a> [infrastructure\_datadog\_app\_key](#input\_infrastructure\_datadog\_app\_key) | Datadog App key | `string` | n/a | yes |
+| <a name="input_infrastructure_datadog_region"></a> [infrastructure\_datadog\_region](#input\_infrastructure\_datadog\_region) | Datadog region | `string` | n/a | yes |
 | <a name="input_infrastructure_dockerhub_email"></a> [infrastructure\_dockerhub\_email](#input\_infrastructure\_dockerhub\_email) | Dockerhub email | `string` | n/a | yes |
 | <a name="input_infrastructure_dockerhub_token"></a> [infrastructure\_dockerhub\_token](#input\_infrastructure\_dockerhub\_token) | Dockerhub token which has permissions to pull images | `string` | n/a | yes |
 | <a name="input_infrastructure_dockerhub_username"></a> [infrastructure\_dockerhub\_username](#input\_infrastructure\_dockerhub\_username) | Dockerhub username | `string` | n/a | yes |
