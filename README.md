@@ -26,6 +26,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 5.70.0 |
 | <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.70.0 |
 | <a name="provider_aws.useast1"></a> [aws.useast1](#provider\_aws.useast1) | 5.70.0 |
+| <a name="provider_datadog"></a> [datadog](#provider\_datadog) | 3.46.0 |
 | <a name="provider_external"></a> [external](#provider\_external) | 2.3.4 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
@@ -444,6 +445,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv6_allow_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_ip_set) | resource |
 | [aws_wafv2_ip_set.infrastructure_ecs_cluster_ipv6_deny_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_ip_set) | resource |
 | [aws_wafv2_web_acl.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl) | resource |
+| [datadog_service_definition_yaml.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/service_definition_yaml) | resource |
 | [random_password.infrastructure_ecs_cluster_service_cloudfront_bypass_protection_secret](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.infrastructure_rds_root](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [terraform_data.infrastructure_ecs_cluster_datadog_agent_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
