@@ -79,7 +79,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "custom" {
   bucket = aws_s3_bucket.custom[each.key].id
 
   dynamic "rule" {
-    for_each = local.infrastructure_kms_encryption || each.value["create_dedicated_kms_key"] == true ? [1] : []
+    for_each = (local.infrastructure_kms_encryption || each.value["create_dedicated_kms_key"] == true) && each.value["use_aes256_encryption"] != true ? [1] : []
 
     content {
       apply_server_side_encryption_by_default {
@@ -90,7 +90,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "custom" {
   }
 
   dynamic "rule" {
-    for_each = local.infrastructure_kms_encryption || each.value["create_dedicated_kms_key"] == true ? [] : [1]
+    for_each = (local.infrastructure_kms_encryption || each.value["create_dedicated_kms_key"] == true) && each.value["use_aes256_encryption"] != true ? [] : [1]
 
     content {
       apply_server_side_encryption_by_default {
