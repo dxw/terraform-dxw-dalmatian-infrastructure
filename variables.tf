@@ -869,6 +869,7 @@ variable "custom_s3_buckets" {
       bucket-name = {
         create_dedicated_kms_key: Conditionally create a KMS key specifically for this bucket's server side encryption (rather than using the Infrastructure's KMS key). It's recommended to use this if the S3 bucket will be accessed from external AWS accounts.
         custom_kms_key_policy_statements: Conditionally add a string of comma delimited user-defined bucket policy statements (eg. '{"Effect": ...},{"Effect": ...}')
+        use_aes256_encryption: Conditionally enforce using AES256 encryption, rather than the infrastructure KMS key. Also overrides `create_dedicated_kms_key`
         transition_to_ia_days: Conditionally transition objects to 'Standard Infrequent Access' storage in N days
         transition_to_glacier_days: Conditionally transition objects to 'Glacier' storage in N days
         cloudfront_dedicated_distribution: Conditionally create a CloudFront distribution to serve objects from the S3 bucket.
@@ -882,6 +883,7 @@ variable "custom_s3_buckets" {
   type = map(object({
     create_dedicated_kms_key                           = optional(bool, null)
     custom_kms_key_policy_statements                   = optional(string, null)
+    use_aes256_encryption                              = optional(bool, null)
     transition_to_ia_days                              = optional(number, null)
     transition_to_glacier_days                         = optional(number, null)
     cloudfront_dedicated_distribution                  = optional(bool, null)
