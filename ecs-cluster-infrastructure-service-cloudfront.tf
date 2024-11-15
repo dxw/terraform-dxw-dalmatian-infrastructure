@@ -14,7 +14,7 @@ resource "aws_cloudfront_distribution" "infrastructure_ecs_cluster_service_cloud
   }
 
   enabled         = true
-  aliases         = each.value["domain_names"] != null ? each.value["domain_names"] : ["${each.key}.${local.infrastructure_route53_domain}"]
+  aliases         = each.value["domain_names"] != null ? length(each.value["domain_names"]) > 0 ? each.value["domain_names"] : ["${each.key}.${local.infrastructure_route53_domain}"] : ["${each.key}.${local.infrastructure_route53_domain}"]
   is_ipv6_enabled = true
   http_version    = "http2and3"
   price_class     = "PriceClass_100"
