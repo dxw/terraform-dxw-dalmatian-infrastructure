@@ -190,7 +190,7 @@ resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header
 
 resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header_custom" {
   for_each = {
-    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["domain_names"] != null ? length(service["domain_names"]) > 0 : service["container_port"] != 0
+    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["domain_names"] != null ? length(service["domain_names"]) > 0 && service["container_port"] != 0 : false
   }
 
   listener_arn = each.value["alb_tls_certificate_arn"] != null ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
