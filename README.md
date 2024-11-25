@@ -63,6 +63,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudfront_function.custom_s3_buckets_viewer_request](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_function) | resource |
 | [aws_cloudfront_origin_access_control.custom_s3_buckets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_control) | resource |
 | [aws_cloudwatch_event_rule.ecs_cluster_infrastructure_ecs_asg_diff_metric_1_min_cron](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
+| [aws_cloudwatch_event_rule.ecs_cluster_infrastructure_instance_refresh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_rule.ecs_cluster_infrastructure_pending_task_metric_1_min_cron](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_rule.infrastructure_ecs_cluster_datadog_agent_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_rule.infrastructure_ecs_cluster_logspout_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
@@ -72,6 +73,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_event_rule.infrastructure_rds_s3_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_target.ecr_scan_event_target](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.ecs_cluster_infrastructure_ecs_asg_diff_metric_1_min_cron](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
+| [aws_cloudwatch_event_target.ecs_cluster_infrastructure_instance_refresh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.ecs_cluster_infrastructure_pending_task_metric_1_min_cron](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.infrastructure_ecs_cluster_datadog_agent_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.infrastructure_ecs_cluster_logspout_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
@@ -80,6 +82,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_event_target.infrastructure_rds_s3_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_draining_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.ecs_cluster_infrastructure_instance_refresh_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_pending_task_metric_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_ecs_cluster_datadog_agent](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
@@ -148,6 +151,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_policy.ecs_cluster_infrastructure_ecs_asg_diff_metric_ecs_describe_cluster_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_cluster_infrastructure_ecs_asg_diff_metric_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.ecs_cluster_infrastructure_instance_refresh_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.ecs_cluster_infrastructure_instance_refresh_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_cluster_infrastructure_pending_task_metric_cloudwatch_put_metric_data_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_cluster_infrastructure_pending_task_metric_ecs_describe_cluster_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_cluster_infrastructure_pending_task_metric_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -201,6 +206,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_policy.infrastructure_rds_s3_backups_task_s3_write](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.ecs_cluster_infrastructure_instance_refresh_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.ecs_cluster_infrastructure_pending_task_metric_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_ecs_cluster_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -229,6 +235,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_ecs_asg_diff_metric_asg_describe_asg_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_ecs_asg_diff_metric_ecs_describe_cluster_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_instance_refresh_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_instance_refresh_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_pending_task_cloudwatch_metric_put_metric_data_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_pending_task_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_pending_task_metric_ecs_describe_cluster_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -289,9 +297,11 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_kms_key.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
 | [aws_lambda_function.ecs_cluster_infrastructure_draining](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_function.ecs_cluster_infrastructure_ecs_asg_diff_metric](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
+| [aws_lambda_function.ecs_cluster_infrastructure_instance_refresh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_function.ecs_cluster_infrastructure_pending_task_metric](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_permission.ecs_cluster_infrastructure_draining_allow_sns_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_lambda_permission.ecs_cluster_infrastructure_ecs_asg_diff_metric_allow_cloudwatch_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
+| [aws_lambda_permission.ecs_cluster_infrastructure_instance_refresh_allow_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_lambda_permission.ecs_cluster_infrastructure_pending_task_metric_allow_cloudwatch_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_launch_template.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) | resource |
 | [aws_lb_listener_certificate.service_shared_alb_certificate](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_certificate) | resource |
@@ -455,6 +465,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [terraform_data.infrastructure_rds_s3_backups_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [archive_file.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
+| [archive_file.ecs_cluster_infrastructure_instance_refresh_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_pending_task_metric_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_ami.bastion_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_ami.ecs_cluster_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
@@ -524,6 +535,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_infrastructure_ecs_cluster_ecs_asg_diff_metric_lambda_log_retention"></a> [infrastructure\_ecs\_cluster\_ecs\_asg\_diff\_metric\_lambda\_log\_retention](#input\_infrastructure\_ecs\_cluster\_ecs\_asg\_diff\_metric\_lambda\_log\_retention) | Log retention for the ECS cluster Container Instance / ASG instance diff metric Lambda | `number` | n/a | yes |
 | <a name="input_infrastructure_ecs_cluster_enable_debug_mode"></a> [infrastructure\_ecs\_cluster\_enable\_debug\_mode](#input\_infrastructure\_ecs\_cluster\_enable\_debug\_mode) | Enable debug mode for ECS and Docker on the Infrastructure ECS. This should only be enabled when debugging (Can cause a lot of logs) | `bool` | n/a | yes |
 | <a name="input_infrastructure_ecs_cluster_enable_execute_command_logging"></a> [infrastructure\_ecs\_cluster\_enable\_execute\_command\_logging](#input\_infrastructure\_ecs\_cluster\_enable\_execute\_command\_logging) | Enable ECS Exec logging for services within the cluster. This will log to the infrastructure logs S3 bucket | `bool` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_instance_refresh_lambda_log_retention"></a> [infrastructure\_ecs\_cluster\_instance\_refresh\_lambda\_log\_retention](#input\_infrastructure\_ecs\_cluster\_instance\_refresh\_lambda\_log\_retention) | Log retention for the ECS cluster instance refresh lambda | `number` | n/a | yes |
+| <a name="input_infrastructure_ecs_cluster_instance_refresh_lambda_schedule_expression"></a> [infrastructure\_ecs\_cluster\_instance\_refresh\_lambda\_schedule\_expression](#input\_infrastructure\_ecs\_cluster\_instance\_refresh\_lambda\_schedule\_expression) | Conditionally launch a lambda to trigger an instance refresh on the ECS ASG, provided a schedule expression | `string` | n/a | yes |
 | <a name="input_infrastructure_ecs_cluster_instance_type"></a> [infrastructure\_ecs\_cluster\_instance\_type](#input\_infrastructure\_ecs\_cluster\_instance\_type) | The instance type for EC2 instances launched in the ECS cluster | `string` | n/a | yes |
 | <a name="input_infrastructure_ecs_cluster_logspout_command"></a> [infrastructure\_ecs\_cluster\_logspout\_command](#input\_infrastructure\_ecs\_cluster\_logspout\_command) | If provided, a logspout container will be launched on each container instance with the given command. If specified, container logs will no longer automatically be sent to CloudWatch, or to the given `infrastructure_ecs_cluster_syslog_endpoint` | `list(string)` | n/a | yes |
 | <a name="input_infrastructure_ecs_cluster_max_instance_lifetime"></a> [infrastructure\_ecs\_cluster\_max\_instance\_lifetime](#input\_infrastructure\_ecs\_cluster\_max\_instance\_lifetime) | Maximum lifetime in seconds of an instance within the ECS cluster | `number` | n/a | yes |

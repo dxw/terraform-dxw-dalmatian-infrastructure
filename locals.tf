@@ -142,9 +142,11 @@ locals {
   infrastructure_ecs_cluster_allow_kms_encryption = local.infrastructure_kms_encryption && anytrue([
     local.enable_infrastructure_vpc_transfer_s3_bucket,
   ])
-  infrastructure_ecs_cluster_max_instance_lifetime      = var.infrastructure_ecs_cluster_max_instance_lifetime
-  infrastructure_ecs_cluster_autoscaling_time_based_max = toset(var.infrastructure_ecs_cluster_autoscaling_time_based_max)
-  infrastructure_ecs_cluster_autoscaling_time_based_min = toset(var.infrastructure_ecs_cluster_autoscaling_time_based_min)
+  infrastructure_ecs_cluster_max_instance_lifetime                       = var.infrastructure_ecs_cluster_max_instance_lifetime
+  infrastructure_ecs_cluster_instance_refresh_lambda_schedule_expression = var.infrastructure_ecs_cluster_instance_refresh_lambda_schedule_expression
+  infrastructure_ecs_cluster_instance_refresh_lambda_log_retention       = var.infrastructure_ecs_cluster_instance_refresh_lambda_log_retention
+  infrastructure_ecs_cluster_autoscaling_time_based_max                  = toset(var.infrastructure_ecs_cluster_autoscaling_time_based_max)
+  infrastructure_ecs_cluster_autoscaling_time_based_min                  = toset(var.infrastructure_ecs_cluster_autoscaling_time_based_min)
   infrastructure_ecs_cluster_autoscaling_time_based_custom = {
     for custom in toset(var.infrastructure_ecs_cluster_autoscaling_time_based_custom) : "${custom["min"]}-${custom["max"]} ${custom["cron"]}" => custom
   }

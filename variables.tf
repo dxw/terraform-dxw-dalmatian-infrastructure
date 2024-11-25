@@ -332,6 +332,16 @@ variable "infrastructure_ecs_cluster_max_instance_lifetime" {
   type        = number
 }
 
+variable "infrastructure_ecs_cluster_instance_refresh_lambda_schedule_expression" {
+  description = "Conditionally launch a lambda to trigger an instance refresh on the ECS ASG, provided a schedule expression"
+  type        = string
+}
+
+variable "infrastructure_ecs_cluster_instance_refresh_lambda_log_retention" {
+  description = "Log retention for the ECS cluster instance refresh lambda"
+  type        = number
+}
+
 variable "infrastructure_ecs_cluster_autoscaling_time_based_max" {
   description = "List of cron expressions to scale the ECS cluster to the configured max size"
   type        = list(string)
