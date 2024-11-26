@@ -38,6 +38,25 @@ resource "aws_iam_role_policy_attachment" "ecs_cluster_infrastructure_instance_r
   policy_arn = aws_iam_policy.ecs_cluster_infrastructure_instance_refresh_lambda[0].arn
 }
 
+resource "aws_iam_policy" "ecs_cluster_infrastructure_instance_refresh_allow_instance_refresh" {
+  count = local.infrastructure_ecs_cluster_instance_refresh_lambda_schedule_expression != "" ? 1 : 0
+
+  name = "${local.resource_prefix}-ecs-cluster-infrastructure-instance-refresh-allow-instance-refresh"
+  policy = templatefile(
+    "${path.root}/policies/asg-instance-refresh.json.tpl",
+    {
+      asg_arns = jsonencode([aws_autoscaling_group.infrastructure_ecs_cluster[0].arn])
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_cluster_infrastructure_instance_refresh_allow_instance_refresh" {
+  count = local.infrastructure_ecs_cluster_instance_refresh_lambda_schedule_expression != "" ? 1 : 0
+
+  role       = aws_iam_role.ecs_cluster_infrastructure_instance_refresh_lambda[0].name
+  policy_arn = aws_iam_policy.ecs_cluster_infrastructure_instance_refresh_allow_instance_refresh[0].arn
+}
+
 resource "aws_iam_policy" "ecs_cluster_infrastructure_instance_refresh_kms_encrypt" {
   count = local.infrastructure_ecs_cluster_instance_refresh_lambda_schedule_expression != "" && local.infrastructure_kms_encryption ? 1 : 0
 
@@ -79,7 +98,7 @@ resource "aws_lambda_function" "ecs_cluster_infrastructure_instance_refresh" {
 
   environment {
     variables = {
-      asgName = local.infrastructure_ecs_cluster_name
+      asgName = aws_autoscaling_group.infrastructure_ecs_cluster[0].name
     }
   }
 
