@@ -590,9 +590,11 @@ variable "infrastructure_ecs_cluster_services" {
         container_count: Number of containers to launch for the service
         container_heath_check_path: Destination for the health check request
         container_heath_grace_period: Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown
+        enable_sidecar_container: Launch a sidecar container that will act as a proxy for all incoming traffic
+        sidecar_image: A specific Docker tag to use for the sidecar container. Defaults to nginx:stable (eg. nginx:1.27.1)
         scheduled_tasks: A map of scheduled tasks that use the same image as the service defined eg. { "name" => { "entrypoint" = ["bundle", "exec", "run_jobs"], "schedule_expression" = "cron(* * * * ? *)" } }
         domain_names: Domain names to assign to CloudFront aliases, and the Application Load Balancer's `host_header` condition
-        enable_cloudfront: Enable cloadfront for the service
+        enable_cloudfront: Enable CloudFront for the service
         cloudfront_tls_certificate_arn: Certificate ARN to attach to CloudFront - must contain the names provided in `domain_names`
         cloudfront_access_logging_enabled: Enable access logging for the distribution to the infrastructure S3 logs bucket
         cloudfront_bypass_protection_enabled: This adds a secret header at the CloudFront level, which is then checked by the ALB listener rules. Requests are only forwarded if the header matches, preventing requests going directly to the ALB.
@@ -643,6 +645,8 @@ variable "infrastructure_ecs_cluster_services" {
     container_count              = optional(number, null)
     container_heath_check_path   = optional(string, null)
     container_heath_grace_period = optional(number, null)
+    enable_sidecar_container     = optional(bool, false)
+    sidecar_image                = optional(string, "nginx:stable")
     scheduled_tasks = optional(map(object({
       entrypoint          = list(string)
       schedule_expression = string
