@@ -127,6 +127,7 @@ locals {
   enable_infrastructure_ecs_cluster                                = var.enable_infrastructure_ecs_cluster && local.infrastructure_vpc
   infrastructure_ecs_cluster_name                                  = "${local.resource_prefix}-infrastructure"
   infrastructure_ecs_cluster_ami_version                           = var.infrastructure_ecs_cluster_ami_version
+  infrastructure_ecs_cluster_ami_name_filter                       = "al2023-ami-ecs-hvm-${local.infrastructure_ecs_cluster_ami_version}"
   infrastructure_ecs_cluster_ebs_docker_storage_volume_device_name = "/dev/xvdcz"
   infrastructure_ecs_cluster_ebs_docker_storage_volume_size        = var.infrastructure_ecs_cluster_ebs_docker_storage_volume_size
   infrastructure_ecs_cluster_ebs_docker_storage_volume_type        = var.infrastructure_ecs_cluster_ebs_docker_storage_volume_type
