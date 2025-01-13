@@ -176,7 +176,7 @@ resource "aws_autoscaling_group" "infrastructure_ecs_cluster" {
 
   launch_template {
     id      = aws_launch_template.infrastructure_ecs_cluster[0].id
-    version = aws_launch_template.infrastructure_ecs_cluster[0].latest_version
+    version = "$Latest"
   }
 
   vpc_zone_identifier = local.infrastructure_ecs_cluster_publicly_avaialble ? [

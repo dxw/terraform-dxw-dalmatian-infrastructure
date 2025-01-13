@@ -19,7 +19,7 @@ data "aws_ami" "ecs_cluster_ami" {
   filter {
     name = "name"
     values = [
-      "al2023-ami-ecs-hvm-${local.infrastructure_ecs_cluster_ami_version}"
+      local.infrastructure_ecs_cluster_ami_name_filter
     ]
   }
 
