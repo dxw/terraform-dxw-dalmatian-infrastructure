@@ -266,6 +266,14 @@ locals {
     "redis" = 6379
   }
 
+  enable_s3_backup_to_azure_blob_storage                           = var.enable_s3_backup_to_azure_blob_storage
+  s3_backup_to_azure_blob_storage_login_type                       = var.s3_backup_to_azure_blob_storage_login_type
+  s3_backup_to_azure_blob_storage_spa_application_id               = var.s3_backup_to_azure_blob_storage_spa_application_id
+  s3_backup_to_azure_blob_storage_spa_client_secret                = var.s3_backup_to_azure_blob_storage_spa_client_secret
+  s3_backup_to_azure_blob_storage_tenant_id                        = var.s3_backup_to_azure_blob_storage_tenant_id
+  s3_backup_to_azure_blob_storage_source_and_targets               = var.s3_backup_to_azure_blob_storage_source_and_targets
+  s3_backup_to_azure_blob_storage_backups_tooling_ecs_cluster_name = "${local.resource_prefix}-s3-azure-blob-storage-backups-tooling"
+
   custom_route53_hosted_zones = var.custom_route53_hosted_zones
 
   custom_s3_buckets = var.custom_s3_buckets

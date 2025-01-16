@@ -71,6 +71,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_event_rule.infrastructure_ecs_cluster_service_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_rule.infrastructure_rds_s3_backups_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_rule.infrastructure_rds_s3_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
+| [aws_cloudwatch_event_rule.s3_azure_blob_storage_backups_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
+| [aws_cloudwatch_event_rule.s3_azure_blob_storage_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_target.ecr_scan_event_target](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.ecs_cluster_infrastructure_ecs_asg_diff_metric_1_min_cron](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.ecs_cluster_infrastructure_instance_refresh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
@@ -80,6 +82,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_event_target.infrastructure_ecs_cluster_service_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.infrastructure_rds_s3_backups_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_event_target.infrastructure_rds_s3_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
+| [aws_cloudwatch_event_target.s3_azure_blob_storage_backups_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
+| [aws_cloudwatch_event_target.s3_azure_blob_storage_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_draining_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_instance_refresh_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
@@ -89,6 +93,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_log_group.infrastructure_rds_exports](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_rds_s3_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.s3_azure_blob_storage_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_metric_alarm.infrastructure_ecs_cluster_asg_cpu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.infrastructure_ecs_cluster_ecs_asg_diff](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.infrastructure_ecs_cluster_pending_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
@@ -96,6 +101,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_codebuild_project.infrastructure_ecs_cluster_logspout_image_build](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
 | [aws_codebuild_project.infrastructure_ecs_cluster_service_build](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
 | [aws_codebuild_project.infrastructure_rds_s3_backups_image_build](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
+| [aws_codebuild_project.s3_azure_blob_storage_backups_image_build](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codebuild_project) | resource |
 | [aws_codedeploy_app.infrastructure_ecs_cluster_service_blue_green](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codedeploy_app) | resource |
 | [aws_codedeploy_deployment_config.infrastructure_ecs_cluster_service_blue_green](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codedeploy_deployment_config) | resource |
 | [aws_codedeploy_deployment_group.infrastructure_ecs_cluster_service_blue_green](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codedeploy_deployment_group) | resource |
@@ -109,8 +115,10 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_ecr_repository.infrastructure_ecs_cluster_logspout](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecr_repository.infrastructure_rds_s3_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
+| [aws_ecr_repository.s3_azure_blob_storage_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_ecs_cluster.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster.infrastrucutre_rds_tooling](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
+| [aws_ecs_cluster.s3_azure_blob_storage_backups_tooling](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_service.infrastructure_ecs_cluster_datadog_agent](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_service.infrastructure_ecs_cluster_logspout](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_service.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
@@ -119,6 +127,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_ecs_task_definition.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_ecs_task_definition.infrastructure_ecs_cluster_service_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_ecs_task_definition.infrastructure_rds_s3_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
+| [aws_ecs_task_definition.s3_azure_blob_storage_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_efs_file_system.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_file_system) | resource |
 | [aws_efs_mount_target.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_mount_target) | resource |
 | [aws_eip.infrastructure_nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eip) | resource |
@@ -206,6 +215,15 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_policy.infrastructure_rds_s3_backups_task_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_rds_s3_backups_task_s3_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.infrastructure_rds_s3_backups_task_s3_write](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_azure_blob_storage_backups_cloudwatch_schedule_ecs_run_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_azure_blob_storage_backups_cloudwatch_schedule_pass_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_azure_blob_storage_backups_image_codebuild_allow_builds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_azure_blob_storage_backups_image_codebuild_cloudwatch_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_azure_blob_storage_backups_image_codebuild_ecr_push](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_azure_blob_storage_backups_task_execution_cloudwatch_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_azure_blob_storage_backups_task_execution_ecr_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_azure_blob_storage_backups_task_kms_decrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.s3_azure_blob_storage_backups_task_s3_read](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.ecs_cluster_infrastructure_instance_refresh_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -227,6 +245,10 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role.infrastructure_rds_s3_backups_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_rds_s3_backups_task_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.s3_azure_blob_storage_backups_cloudwatch_schedule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.s3_azure_blob_storage_backups_image_codebuild](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.s3_azure_blob_storage_backups_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.s3_azure_blob_storage_backups_task_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.infrastructure_vpc_flow_logs_allow_cloudwatch_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_draining_ecs_container_instance_state_update_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ecs_cluster_infrastructure_draining_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -292,6 +314,15 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_task_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_task_s3_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_task_s3_write](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.s3_azure_blob_storage_backups_cloudwatch_schedule_ecs_run_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.s3_azure_blob_storage_backups_cloudwatch_schedule_pass_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.s3_azure_blob_storage_backups_image_codebuild_allow_builds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.s3_azure_blob_storage_backups_image_codebuild_cloudwatch_rw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.s3_azure_blob_storage_backups_image_codebuild_ecr_push](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.s3_azure_blob_storage_backups_task_execution_cloudwatch_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.s3_azure_blob_storage_backups_task_execution_ecr_pull](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.s3_azure_blob_storage_backups_task_kms_decrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.s3_azure_blob_storage_backups_task_s3_read](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_user.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
 | [aws_instance.infrastructure_bastion](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_internet_gateway.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
@@ -418,6 +449,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_security_group.infrastructure_elasticache](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.infrastructure_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.infrastructure_rds_s3_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.s3_azure_blob_storage_backups_scheduled_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group_rule.infrastructure_ec2_bastion_host_custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ec2_bastion_host_egress_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_ec2_bastion_host_egress_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
@@ -447,6 +479,10 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_security_group_rule.infrastructure_rds_s3_backups_scheduled_task_egress_https_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_rds_s3_backups_scheduled_task_egress_https_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.infrastructure_rds_s3_backups_scheduled_task_egress_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.s3_azure_blob_storage_backups_scheduled_task_egress_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.s3_azure_blob_storage_backups_scheduled_task_egress_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.s3_azure_blob_storage_backups_scheduled_task_egress_https_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.s3_azure_blob_storage_backups_scheduled_task_egress_https_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_sns_topic.infrastructure_ecs_cluster_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
 | [aws_sns_topic_subscription.ecs_cluster_infrastructure_draining_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
 | [aws_ssm_document.infrastructure_vpc_transfer_s3_download](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_document) | resource |
@@ -467,6 +503,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [terraform_data.infrastructure_ecs_cluster_service_blue_green_create_codedeploy_deployment](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.infrastructure_ecs_cluster_service_env_file](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.infrastructure_rds_s3_backups_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.s3_azure_blob_storage_backups_image_build_trigger_codebuild](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [archive_file.ecs_cluster_infrastructure_draining_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.ecs_cluster_infrastructure_instance_refresh_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
@@ -509,6 +546,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_enable_infrastructure_rds_backup_to_s3"></a> [enable\_infrastructure\_rds\_backup\_to\_s3](#input\_enable\_infrastructure\_rds\_backup\_to\_s3) | Enable Infrastructure RDS backups to S3. This will create a scheduled Fargate task to take SQL dumps and upload them to S3 | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_route53_hosted_zone"></a> [enable\_infrastructure\_route53\_hosted\_zone](#input\_enable\_infrastructure\_route53\_hosted\_zone) | Creates a Route53 hosted zone, where DNS records will be created for resources launched within this module. | `bool` | n/a | yes |
 | <a name="input_enable_infrastructure_vpc_transfer_s3_bucket"></a> [enable\_infrastructure\_vpc\_transfer\_s3\_bucket](#input\_enable\_infrastructure\_vpc\_transfer\_s3\_bucket) | Enable VPC transfer S3 bucket. This allows uploading/downloading files from resources within the infrastructure VPC | `bool` | n/a | yes |
+| <a name="input_enable_s3_backup_to_azure_blob_storage"></a> [enable\_s3\_backup\_to\_azure\_blob\_storage](#input\_enable\_s3\_backup\_to\_azure\_blob\_storage) | Conditionally create resources to backup S3 buckets to Azure blob storage | `bool` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | The environment name to be used as part of the resource prefix | `string` | n/a | yes |
 | <a name="input_infrastructure_bastion_host_custom_security_group_rules"></a> [infrastructure\_bastion\_host\_custom\_security\_group\_rules](#input\_infrastructure\_bastion\_host\_custom\_security\_group\_rules) | Map of custom security group rules to add to the Infrastructure EC2 Bastion Host security group (eg. { rule-name = {type = "egress", ... }  }) | <pre>map(object({<br/>    description              = string<br/>    type                     = string<br/>    from_port                = number<br/>    to_port                  = number<br/>    protocol                 = string<br/>    source_security_group_id = optional(string, "")<br/>    cidr_blocks              = optional(list(string), [])<br/>  }))</pre> | n/a | yes |
 | <a name="input_infrastructure_datadog_api_key"></a> [infrastructure\_datadog\_api\_key](#input\_infrastructure\_datadog\_api\_key) | Datadog API key | `string` | n/a | yes |
@@ -597,6 +635,11 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_infrastructure_vpc_transfer_s3_bucket_access_vpc_ids"></a> [infrastructure\_vpc\_transfer\_s3\_bucket\_access\_vpc\_ids](#input\_infrastructure\_vpc\_transfer\_s3\_bucket\_access\_vpc\_ids) | Additional VPC ids which are allowed to access the transfer S3 bucket | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Project name to be used as a prefix for all resources | `string` | n/a | yes |
 | <a name="input_route53_root_hosted_zone_domain_name"></a> [route53\_root\_hosted\_zone\_domain\_name](#input\_route53\_root\_hosted\_zone\_domain\_name) | Route53 Hosted Zone in which to delegate Infrastructure Route53 Hosted Zones. | `string` | n/a | yes |
+| <a name="input_s3_backup_to_azure_blob_storage_login_type"></a> [s3\_backup\_to\_azure\_blob\_storage\_login\_type](#input\_s3\_backup\_to\_azure\_blob\_storage\_login\_type) | Azure login type for S3 backups to blob storage | `string` | n/a | yes |
+| <a name="input_s3_backup_to_azure_blob_storage_source_and_targets"></a> [s3\_backup\_to\_azure\_blob\_storage\_source\_and\_targets](#input\_s3\_backup\_to\_azure\_blob\_storage\_source\_and\_targets) | S3 to Azure blob storage backup configuration<br/>  {<br/>    bucket-name = {<br/>      s3\_bucket\_kms\_key\_arn: The KMS Key ARN of the bucket, to add permissions to the Fargate backup container<br/>      blob\_storage\_account\_name: The Azure storage account which holds the blob storage container<br/>      blob\_storage\_container\_name: The Azure blob storage container name<br/>      cron\_expression: AWS cron expression to run the backup Fargate scheduled task<br/>    }<br/>  } | <pre>map(object({<br/>    s3_bucket_kms_key_arn       = string<br/>    blob_storage_account_name   = string<br/>    blob_storage_container_name = string<br/>    cron_expression             = string<br/>  }))</pre> | n/a | yes |
+| <a name="input_s3_backup_to_azure_blob_storage_spa_application_id"></a> [s3\_backup\_to\_azure\_blob\_storage\_spa\_application\_id](#input\_s3\_backup\_to\_azure\_blob\_storage\_spa\_application\_id) | Azure SPA Application ID for S3 backups to blob storage | `string` | n/a | yes |
+| <a name="input_s3_backup_to_azure_blob_storage_spa_client_secret"></a> [s3\_backup\_to\_azure\_blob\_storage\_spa\_client\_secret](#input\_s3\_backup\_to\_azure\_blob\_storage\_spa\_client\_secret) | Azure SPA Client Secret for S3 backups to blob storage | `string` | n/a | yes |
+| <a name="input_s3_backup_to_azure_blob_storage_tenant_id"></a> [s3\_backup\_to\_azure\_blob\_storage\_tenant\_id](#input\_s3\_backup\_to\_azure\_blob\_storage\_tenant\_id) | Azure Tenant ID for S3 backups to blob storage | `string` | n/a | yes |
 
 ## Outputs
 
