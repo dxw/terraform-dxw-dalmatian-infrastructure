@@ -904,6 +904,51 @@ variable "custom_s3_buckets" {
   }))
 }
 
+variable "enable_s3_backup_to_azure_blob_storage" {
+  description = "Conditionally create resources to backup S3 buckets to Azure blob storage"
+  type        = bool
+}
+
+variable "s3_backup_to_azure_blob_storage_login_type" {
+  description = "Azure login type for S3 backups to blob storage"
+  type        = string
+}
+
+variable "s3_backup_to_azure_blob_storage_spa_application_id" {
+  description = "Azure SPA Application ID for S3 backups to blob storage"
+  type        = string
+}
+
+variable "s3_backup_to_azure_blob_storage_spa_client_secret" {
+  description = "Azure SPA Client Secret for S3 backups to blob storage"
+  type        = string
+}
+
+variable "s3_backup_to_azure_blob_storage_tenant_id" {
+  description = "Azure Tenant ID for S3 backups to blob storage"
+  type        = string
+}
+
+variable "s3_backup_to_azure_blob_storage_source_and_targets" {
+  description = <<EOT
+  S3 to Azure blob storage backup configuration
+  {
+    bucket-name = {
+      s3_bucket_kms_key_arn: The KMS Key ARN of the bucket, to add permissions to the Fargate backup container
+      blob_storage_account_name: The Azure storage account which holds the blob storage container
+      blob_storage_container_name: The Azure blob storage container name
+      cron_expression: AWS cron expression to run the backup Fargate scheduled task
+    }
+  }
+  EOT
+  type = map(object({
+    s3_bucket_kms_key_arn       = string
+    blob_storage_account_name   = string
+    blob_storage_container_name = string
+    cron_expression             = string
+  }))
+}
+
 variable "enable_cloudformatian_s3_template_store" {
   description = "Creates an S3 bucket to store custom CloudFormation templates, which can then be referenced in `custom_cloudformation_stacks`. A user with RW access to the bucket is also created."
   type        = bool
