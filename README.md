@@ -137,10 +137,6 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_glue_catalog_database.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_catalog_database) | resource |
 | [aws_glue_catalog_table.infrastructure_ecs_cluster_service_cloudfront_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_catalog_table) | resource |
 | [aws_glue_catalog_table.infrastructure_vpc_flow_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_catalog_table) | resource |
-| [aws_iam_access_key.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_access_key) | resource |
-| [aws_iam_group.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group) | resource |
-| [aws_iam_group_membership.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_membership) | resource |
-| [aws_iam_group_policy.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_policy) | resource |
 | [aws_iam_instance_profile.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
 | [aws_iam_policy.ecs_cluster_infrastructure_draining_ecs_container_instance_state_update_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ecs_cluster_infrastructure_draining_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -292,7 +288,6 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_task_kms_encrypt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_task_s3_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_task_s3_write](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_user.infrastructure_ecs_cluster_service_build_pipeline_buildspec_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
 | [aws_instance.infrastructure_bastion](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_internet_gateway.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
 | [aws_kms_alias.custom_s3_buckets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
