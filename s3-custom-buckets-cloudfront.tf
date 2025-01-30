@@ -3,16 +3,18 @@ resource "aws_cloudfront_distribution" "custom_s3_buckets" {
     for k, v in local.custom_s3_buckets : k => v if v["cloudfront_dedicated_distribution"] == true
   }
 
-  enabled         = true
-  aliases         = ["${each.key}-bucket.${local.infrastructure_route53_domain}"]
+  enabled = true
+  aliases = each.value["cloudfront_decicated_distribution_aliases"] != null ? each.value["cloudfront_decicated_distribution_aliases"] : [
+    "${each.key}-bucket.${local.infrastructure_route53_domain}"
+  ]
   is_ipv6_enabled = true
   http_version    = "http2and3"
   price_class     = "PriceClass_100"
 
   viewer_certificate {
-    acm_certificate_arn            = local.enable_infrastructure_wildcard_certificate ? aws_acm_certificate_validation.infrastructure_wildcard_us_east_1[0].certificate_arn : null
-    cloudfront_default_certificate = local.enable_infrastructure_wildcard_certificate ? null : true
-    minimum_protocol_version       = local.enable_infrastructure_wildcard_certificate ? "TLSv1.2_2021" : null
+    acm_certificate_arn            = each.value["cloudfront_decicated_distribution_tls_certificate_arn"] != null ? each.value["cloudfront_decicated_distribution_tls_certificate_arn"] : local.enable_infrastructure_wildcard_certificate ? aws_acm_certificate_validation.infrastructure_wildcard_us_east_1[0].certificate_arn : null
+    cloudfront_default_certificate = local.enable_infrastructure_wildcard_certificate && each.value["cloudfront_decicated_distribution_tls_certificate_arn"] == null ? null : true
+    minimum_protocol_version       = local.enable_infrastructure_wildcard_certificate || each.value["cloudfront_decicated_distribution_tls_certificate_arn"] != null ? "TLSv1.2_2021" : null
     ssl_support_method             = "sni-only"
   }
 
