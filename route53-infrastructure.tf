@@ -101,7 +101,7 @@ resource "aws_route53_record" "service_record_ipv6" {
 
 resource "aws_route53_record" "custom_s3_cloudfront_record" {
   for_each = local.enable_infrastructure_route53_hosted_zone ? {
-    for k, v in local.custom_s3_buckets : k => v if v["cloudfront_dedicated_distribution"] == true
+    for k, v in local.custom_s3_buckets : k => v if v["cloudfront_dedicated_distribution"] == true && v["cloudfront_decicated_distribution_aliases"] == null
   } : {}
 
   zone_id = aws_route53_zone.infrastructure[0].zone_id
