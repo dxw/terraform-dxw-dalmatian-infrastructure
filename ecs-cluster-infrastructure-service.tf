@@ -242,12 +242,17 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       linux_parameters = each.value["enable_execute_command"] == true ? jsonencode({
         initProcessEnabled = true
       }) : "{}"
-      security_options      = jsonencode([])
-      syslog_address        = !local.infrastructure_ecs_cluster_logspout_enabled ? local.infrastructure_ecs_cluster_syslog_docker_address : ""
-      syslog_tag            = "${local.resource_prefix}-${each.key}-{{.ID}}"
-      cloudwatch_log_group  = !local.infrastructure_ecs_cluster_logspout_enabled ? each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.key].name : "" : ""
-      awslogs_stream_prefix = ""
-      region                = local.aws_region
+      security_options         = jsonencode([])
+      syslog_address           = !local.infrastructure_ecs_cluster_logspout_enabled ? local.infrastructure_ecs_cluster_syslog_docker_address : ""
+      syslog_tag               = "${local.resource_prefix}-${each.key}-{{.ID}}"
+      cloudwatch_log_group     = !local.infrastructure_ecs_cluster_logspout_enabled ? each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.key].name : "" : ""
+      awslogs_stream_prefix    = ""
+      region                   = local.aws_region
+      enable_sidecar_container = each.value["enable_sidecar_container"]
+      sidecar_container_name   = "${each.key}-sidecar"
+      sidecar_image            = each.value["sidecar_image"]
+      sidecar_environment      = "[]"
+      sidecar_entrypoint       = "[]"
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.key].arn

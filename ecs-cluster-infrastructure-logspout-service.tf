@@ -20,13 +20,18 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
           containerPath = "/var/run/docker.sock"
         }
       ])
-      linux_parameters      = jsonencode({})
-      security_options      = jsonencode([])
-      syslog_address        = ""
-      syslog_tag            = ""
-      cloudwatch_log_group  = ""
-      awslogs_stream_prefix = ""
-      region                = local.aws_region
+      linux_parameters         = jsonencode({})
+      security_options         = jsonencode([])
+      syslog_address           = ""
+      syslog_tag               = ""
+      cloudwatch_log_group     = ""
+      awslogs_stream_prefix    = ""
+      region                   = local.aws_region
+      enable_sidecar_container = false
+      sidecar_container_name   = ""
+      sidecar_image            = ""
+      sidecar_environment      = "[]"
+      sidecar_entrypoint       = "[]"
     }
   )
 

@@ -235,12 +235,17 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_datadog_agent" {
           ]
         }
       })
-      security_options      = jsonencode([])
-      syslog_address        = ""
-      syslog_tag            = ""
-      cloudwatch_log_group  = aws_cloudwatch_log_group.infrastructure_ecs_cluster_datadog_agent[0].name
-      awslogs_stream_prefix = ""
-      region                = local.aws_region
+      security_options         = jsonencode([])
+      syslog_address           = ""
+      syslog_tag               = ""
+      cloudwatch_log_group     = aws_cloudwatch_log_group.infrastructure_ecs_cluster_datadog_agent[0].name
+      awslogs_stream_prefix    = ""
+      region                   = local.aws_region
+      enable_sidecar_container = false
+      sidecar_container_name   = ""
+      sidecar_image            = ""
+      sidecar_environment      = "[]"
+      sidecar_entrypoint       = "[]"
     }
   )
 
