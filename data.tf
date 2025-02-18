@@ -82,7 +82,7 @@ data "aws_cloudfront_cache_policy" "managed_policy" {
     for service in local.infrastructure_ecs_cluster_services : service["cloudfront_managed_cache_policy"] if service["cloudfront_managed_cache_policy"] != null
   ])
 
-  name = "Managed-${each.value}"
+  name = startswith(each.value, "Use") ? each.value : "Managed-${each.value}"
 }
 
 data "aws_cloudfront_origin_request_policy" "managed_policy" {
