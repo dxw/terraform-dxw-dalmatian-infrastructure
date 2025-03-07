@@ -934,3 +934,27 @@ variable "custom_cloudformation_stacks" {
     capabilities          = optional(list(string), null)
   }))
 }
+
+variable "custom_resource_tags" {
+  description = <<EOT
+    A hacky way to add custom tags to resources
+    Uses a script to add tags to resources using their ARNs
+    Because Terraform will remove the tags, we may need to add a delay to running the script,
+    which can be specified using var.custom_resource_tags_delay
+    [
+      {
+        arns: Comma deliminated list of ARNs to apply the tags to
+        tags: Map of key/values for the tags
+      }
+    ]
+  EOT
+  type = list(object({
+    arns = string,
+    tags = map(string)
+  }))
+}
+
+variable "custom_resource_tags_delay" {
+  description = "The delay in seconds to wait before running the tag script"
+  type        = number
+}

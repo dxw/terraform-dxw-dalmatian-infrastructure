@@ -283,4 +283,7 @@ locals {
     Environment    = local.environment,
     Prefix         = local.resource_prefix,
   }
+
+  custom_resource_tags       = zipmap([for idx in range(length(var.custom_resource_tags)) : idx], var.custom_resource_tags)
+  custom_resource_tags_delay = var.custom_resource_tags_delay
 }
