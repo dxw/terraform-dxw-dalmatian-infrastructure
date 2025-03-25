@@ -49,7 +49,7 @@ resource "aws_db_instance" "infrastructure_rds" {
   apply_immediately           = true
   maintenance_window          = "Mon:19:00-Mon:22:00"
   instance_class              = each.value["instance_class"]
-  kms_key_id                  = local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
+  kms_key_id                  = each.value["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].arn : local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
   license_model               = local.rds_licenses[each.value["engine"]]
   db_name                     = null
   username                    = "root"

@@ -34,7 +34,7 @@ resource "aws_rds_cluster" "infrastructure_rds" {
   storage_type                   = each.value["storage_type"]
   storage_encrypted              = true
   iops                           = each.value["iops"]
-  kms_key_id                     = local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
+  kms_key_id                     = each.value["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].arn : local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
   enable_global_write_forwarding = null
 
   db_subnet_group_name   = aws_db_subnet_group.infrastructure_rds[each.key].name

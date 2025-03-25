@@ -665,21 +665,23 @@ variable "infrastructure_ecs_cluster_services" {
 variable "infrastructure_rds_defaults" {
   description = "Default values for RDSs"
   type = object({
-    type                              = optional(string, null)
-    engine                            = optional(string, null)
-    engine_version                    = optional(string, null)
-    parameters                        = optional(map(string), null)
-    instance_class                    = optional(string, null)
-    allocated_storage                 = optional(number, null)
-    storage_type                      = optional(string, null)
-    iops                              = optional(number, null)
-    storage_throughput                = optional(number, null)
-    multi_az                          = optional(bool, null)
-    monitoring_interval               = optional(number, null)
-    cloudwatch_logs_export_types      = optional(list(string), null)
-    cluster_instance_count            = optional(number, null)
-    cluster_serverlessv2_min_capacity = optional(number, null)
-    cluster_serverlessv2_max_capacity = optional(number, null)
+    type                                = optional(string, null)
+    engine                              = optional(string, null)
+    engine_version                      = optional(string, null)
+    parameters                          = optional(map(string), null)
+    instance_class                      = optional(string, null)
+    allocated_storage                   = optional(number, null)
+    storage_type                        = optional(string, null)
+    dedicated_kms_key                   = optional(bool, null)
+    dedicated_kms_key_policy_statements = optional(string, null)
+    iops                                = optional(number, null)
+    storage_throughput                  = optional(number, null)
+    multi_az                            = optional(bool, null)
+    monitoring_interval                 = optional(number, null)
+    cloudwatch_logs_export_types        = optional(list(string), null)
+    cluster_instance_count              = optional(number, null)
+    cluster_serverlessv2_min_capacity   = optional(number, null)
+    cluster_serverlessv2_max_capacity   = optional(number, null)
   })
 }
 
@@ -695,6 +697,8 @@ variable "infrastructure_rds" {
         instance_class: RDS instance class
         allocated_storage: RDS allocated storage
         storage_type: RDS storage type
+        dedicated_kms_key: If enabled, will create and use a dedicated KMS key, rather than the infrastructure KMS key
+        dedicated_kms_key_policy_statements: Additional KMS key policies to add to the dedicated KMS key policy
         iops: RDS iops (When `type` is `instance`, this is only required for storage type of `io1` or `gp3` - When `cluster`, this must be a multiple between .5 and 50 of the storage amount for the DB cluster.`)
         storage_throughput: RDS storage throughput (Only required when `storage_type` is `gp3`. Only applicable for `type` of `instance`)
         multi_az: Enable Multi-AZ RDS (Not applicable for `type` of `cluster`. For `cluster - set `storage_type`, `allocated_storage`, `iops` and `instance_class`)
@@ -707,21 +711,23 @@ variable "infrastructure_rds" {
     }
   EOT
   type = map(object({
-    type                              = optional(string, null)
-    engine                            = optional(string, null)
-    engine_version                    = optional(string, null)
-    parameters                        = optional(map(string), null)
-    instance_class                    = optional(string, null)
-    allocated_storage                 = optional(number, null)
-    storage_type                      = optional(string, null)
-    iops                              = optional(number, null)
-    storage_throughput                = optional(number, null)
-    multi_az                          = optional(bool, null)
-    monitoring_interval               = optional(number, null)
-    cloudwatch_logs_export_types      = optional(list(string), null)
-    cluster_instance_count            = optional(number, null)
-    cluster_serverlessv2_min_capacity = optional(number, null)
-    cluster_serverlessv2_max_capacity = optional(number, null)
+    type                                = optional(string, null)
+    engine                              = optional(string, null)
+    engine_version                      = optional(string, null)
+    parameters                          = optional(map(string), null)
+    instance_class                      = optional(string, null)
+    allocated_storage                   = optional(number, null)
+    storage_type                        = optional(string, null)
+    dedicated_kms_key                   = optional(bool, null)
+    dedicated_kms_key_policy_statements = optional(string, null)
+    iops                                = optional(number, null)
+    storage_throughput                  = optional(number, null)
+    multi_az                            = optional(bool, null)
+    monitoring_interval                 = optional(number, null)
+    cloudwatch_logs_export_types        = optional(list(string), null)
+    cluster_instance_count              = optional(number, null)
+    cluster_serverlessv2_min_capacity   = optional(number, null)
+    cluster_serverlessv2_max_capacity   = optional(number, null)
   }))
 }
 
