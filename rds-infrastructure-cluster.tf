@@ -3,7 +3,7 @@ resource "aws_rds_cluster" "infrastructure_rds" {
     for k, v in local.infrastructure_rds : k => v if v["type"] == "cluster"
   }
 
-  cluster_identifier                  = "${local.resource_prefix_hash}-${each.key}"
+  cluster_identifier                  = "${length(regexall("^[0-9]", substr(local.resource_prefix_hash, 0, 1))) > 0 ? "h" : ""}${local.resource_prefix_hash}-${each.key}"
   engine                              = local.rds_engines[each.value["type"]][each.value["engine"]]
   engine_version                      = each.value["engine_version"]
   engine_mode                         = "provisioned"
@@ -27,7 +27,7 @@ resource "aws_rds_cluster" "infrastructure_rds" {
   backtrack_window          = 0
   copy_tags_to_snapshot     = true
   skip_final_snapshot       = false
-  final_snapshot_identifier = "${local.resource_prefix_hash}-${each.key}-final"
+  final_snapshot_identifier = "${length(regexall("^[0-9]", substr(local.resource_prefix_hash, 0, 1))) > 0 ? "h" : ""}${local.resource_prefix_hash}-${each.key}-final"
   backup_retention_period   = 30
 
   allocated_storage              = null
@@ -61,7 +61,7 @@ resource "aws_rds_cluster_instance" "infrastructure_rds" {
     if v["type"] == "cluster"
   ])...)
 
-  identifier                 = "${local.resource_prefix_hash}-${each.key}-${each.value["cluster_instance_num"]}"
+  identifier                 = "${length(regexall("^[0-9]", substr(local.resource_prefix_hash, 0, 1))) > 0 ? "h" : ""}${local.resource_prefix_hash}-${each.key}-${each.value["cluster_instance_num"]}"
   cluster_identifier         = aws_rds_cluster.infrastructure_rds[each.value["cluster_key"]].id
   engine                     = local.rds_engines[each.value["type"]][each.value["engine"]]
   engine_version             = each.value["engine_version"]
