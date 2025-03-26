@@ -56,17 +56,17 @@ resource "aws_kms_key" "infrastructure" {
           for k, v in local.infrastructure_ecs_cluster_services : aws_iam_role.infrastructure_ecs_cluster_service_task_execution[k].arn if v["enable_execute_command"] == true && local.infrastructure_ecs_cluster_enable_execute_command_logging
         ])
       }
-      )}${length(local.infrastructure_rds) > 0 && local.infrastructure_kms_encryption && local.enable_infrastructure_rds_backup_to_s3 ? "," : ""}
+      )}${length(local.infrastructure_rds) > 0 && local.infrastructure_kms_encryption && local.enable_infrastructure_rds_tooling ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/role-allow-encrypt.json.tpl",
       {
         role_arns = jsonencode([
-          for k, v in local.infrastructure_rds : aws_iam_role.infrastructure_rds_s3_backups_task[k].arn if local.enable_infrastructure_rds_backup_to_s3
+          for k, v in local.infrastructure_rds : aws_iam_role.infrastructure_rds_tooling_task[k].arn if local.enable_infrastructure_rds_tooling
         ])
       }
-      )}${length(local.infrastructure_rds) > 0 && local.infrastructure_kms_encryption && local.enable_infrastructure_rds_backup_to_s3 ? "," : ""}
+      )}${length(local.infrastructure_rds) > 0 && local.infrastructure_kms_encryption && local.enable_infrastructure_rds_tooling ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudwatch-logs-allow.json.tpl",
       {
-        log_group_arn = length(local.infrastructure_rds) > 0 && local.infrastructure_kms_encryption && local.enable_infrastructure_rds_backup_to_s3 ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:${local.resource_prefix}-infrastructure-rds-s3-backups-*" : ""
+        log_group_arn = length(local.infrastructure_rds) > 0 && local.infrastructure_kms_encryption && local.enable_infrastructure_rds_tooling ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:${local.resource_prefix}-infrastructure-rds-tooling-*" : ""
       }
       )}${contains([for k, v in local.custom_s3_buckets : (v["cloudfront_dedicated_distribution"] == true || v["cloudfront_infrastructure_ecs_cluster_service"] != null) && v["create_dedicated_kms_key"] == false ? true : false], true) && local.infrastructure_kms_encryption ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudfront-distribution-allow.json.tpl",

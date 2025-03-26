@@ -1,5 +1,5 @@
 resource "aws_ecs_cluster" "infrastrucutre_rds_tooling" {
-  count = local.enable_infrastructure_rds_tooling_ecs_cluster ? 1 : 0
+  count = local.enable_infrastructure_rds_tooling ? 1 : 0
 
   name = local.infrastructure_rds_tooling_ecs_cluster_name
 

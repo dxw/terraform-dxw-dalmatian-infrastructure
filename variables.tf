@@ -742,7 +742,7 @@ variable "infrastructure_rds_backup_to_s3_cron_expression" {
 }
 
 variable "infrastructure_rds_backup_to_s3_retention" {
-  description = "Retention in days to keep the S3 SQL backups and logs"
+  description = "Retention in days to keep the S3 SQL backups"
   type        = number
 }
 
