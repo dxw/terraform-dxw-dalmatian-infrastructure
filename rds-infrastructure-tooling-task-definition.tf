@@ -1,7 +1,7 @@
 resource "aws_ecs_task_definition" "infrastructure_rds_tooling" {
   for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
 
-  family = "${local.resource_prefix}-rds-tooling-${each.key}"
+  family = "${local.resource_prefix}-infrastructure-rds-tooling-${each.key}"
   container_definitions = templatefile(
     "./container-definitions/app.json.tpl",
     {
