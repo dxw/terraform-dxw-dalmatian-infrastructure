@@ -107,6 +107,21 @@ resource "aws_iam_role_policy_attachment" "infrastructure_rds_s3_backups_task_s3
   policy_arn = aws_iam_policy.infrastructure_rds_s3_backups_task_s3_list[each.key].arn
 }
 
+resource "aws_iam_policy" "infrastructure_rds_tooling_task_ssm_create_channels" {
+  for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
+
+  name        = "${local.resource_prefix}-${substr(sha512("rds-tooling-task-${each.key}-ssm-create-channels"), 0, 6)}"
+  description = "${local.resource_prefix}-rds-tooling-task-${each.key}-ssm-create-channels"
+  policy      = templatefile("${path.root}/policies/ssm-create-channels.json.tpl", {})
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_rds_tooling_task_ssm_create_channels" {
+  for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
+
+  role       = aws_iam_role.infrastructure_rds_tooling_task[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_rds_tooling_task_ssm_create_channels[each.key].arn
+}
+
 resource "aws_iam_policy" "infrastructure_rds_tooling_task_kms_encrypt" {
   for_each = local.enable_infrastructure_rds_tooling && local.infrastructure_kms_encryption ? local.infrastructure_rds : {}
 
