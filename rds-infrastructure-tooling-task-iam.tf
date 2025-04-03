@@ -122,6 +122,41 @@ resource "aws_iam_role_policy_attachment" "infrastructure_rds_tooling_task_ssm_c
   policy_arn = aws_iam_policy.infrastructure_rds_tooling_task_ssm_create_channels[each.key].arn
 }
 
+resource "aws_iam_policy" "infrastructure_rds_tooling_task_ecs_exec_log_s3_write" {
+  for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
+
+  name        = "${local.resource_prefix}-${substr(sha512("rds-tooling-task-${each.key}-ecs-exec-log-s3-write"), 0, 6)}"
+  description = "${local.resource_prefix}-rds-tooling-task-${each.key}-ecs-exec-log-s3-write"
+  policy = templatefile("${path.root}/policies/s3-object-write.json.tpl", {
+    bucket_arn = aws_s3_bucket.infrastructure_logs[0].arn
+    path       = "/ecs-exec/*"
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_rds_tooling_task_ecs_exec_log_s3_write" {
+  for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
+
+  role       = aws_iam_role.infrastructure_rds_tooling_task[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_rds_tooling_task_ecs_exec_log_s3_write[each.key].arn
+}
+
+resource "aws_iam_policy" "infrastructure_rds_tooling_task_ecs_exec_log_kms_decrypt" {
+  for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
+
+  name        = "${local.resource_prefix}-${substr(sha512("rds-tooling-task-${each.key}-ecs-exec-log-kms-decrypt"), 0, 6)}"
+  description = "${local.resource_prefix}-rds-tooling-task-${each.key}-ecs-exec-log-kms-decrypt"
+  policy = templatefile("${path.root}/policies/kms-decrypt.json.tpl", {
+    kms_key_arn = aws_kms_key.infrastructure[0].arn
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_rds_tooling_task_ecs_exec_log_kms_decrypt" {
+  for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
+
+  role       = aws_iam_role.infrastructure_rds_tooling_task[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_rds_tooling_task_ecs_exec_log_kms_decrypt[each.key].arn
+}
+
 resource "aws_iam_policy" "infrastructure_rds_tooling_task_kms_encrypt" {
   for_each = local.enable_infrastructure_rds_tooling && local.infrastructure_kms_encryption ? local.infrastructure_rds : {}
 
