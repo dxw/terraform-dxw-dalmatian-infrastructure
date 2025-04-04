@@ -54,7 +54,7 @@ resource "aws_db_instance" "infrastructure_rds" {
   db_name                       = null
   username                      = "root"
   manage_master_user_password   = true
-  master_user_secret_kms_key_id = v["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].key_id : null
+  master_user_secret_kms_key_id = each.value["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].key_id : null
   character_set_name            = null
   timezone                      = null
   deletion_protection           = false
