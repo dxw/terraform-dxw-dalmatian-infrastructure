@@ -15,8 +15,7 @@ resource "aws_rds_cluster" "infrastructure_rds" {
   apply_immediately                   = true
   preferred_maintenance_window        = "mon:19:00-mon:22:00"
   master_username                     = "root"
-  master_password                     = aws_secretsmanager_secret_version.infrastructure_rds_root_password[each.key].secret_string
-  manage_master_user_password         = null
+  manage_master_user_password         = true
   iam_database_authentication_enabled = null
   deletion_protection                 = false
   enable_http_endpoint                = false

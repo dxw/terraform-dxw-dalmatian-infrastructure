@@ -53,7 +53,7 @@ resource "aws_db_instance" "infrastructure_rds" {
   license_model               = local.rds_licenses[each.value["engine"]]
   db_name                     = null
   username                    = "root"
-  password                    = aws_secretsmanager_secret_version.infrastructure_rds_root_password[each.key].secret_string
+  manage_master_user_password = true
   character_set_name          = null
   timezone                    = null
   deletion_protection         = false
