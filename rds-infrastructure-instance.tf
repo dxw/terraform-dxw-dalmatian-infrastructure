@@ -41,23 +41,24 @@ resource "aws_db_instance" "infrastructure_rds" {
     for k, v in local.infrastructure_rds : k => v if v["type"] == "instance"
   } : {}
 
-  identifier                  = "${length(regexall("^[0-9]", substr(local.resource_prefix_hash, 0, 1))) > 0 ? "h" : ""}${local.resource_prefix_hash}-${each.key}"
-  engine                      = local.rds_engines[each.value["type"]][each.value["engine"]]
-  engine_version              = each.value["engine_version"]
-  allow_major_version_upgrade = false
-  auto_minor_version_upgrade  = true
-  apply_immediately           = true
-  maintenance_window          = "Mon:19:00-Mon:22:00"
-  instance_class              = each.value["instance_class"]
-  kms_key_id                  = each.value["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].arn : local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
-  license_model               = local.rds_licenses[each.value["engine"]]
-  db_name                     = null
-  username                    = "root"
-  manage_master_user_password = true
-  character_set_name          = null
-  timezone                    = null
-  deletion_protection         = false
-  delete_automated_backups    = true
+  identifier                    = "${length(regexall("^[0-9]", substr(local.resource_prefix_hash, 0, 1))) > 0 ? "h" : ""}${local.resource_prefix_hash}-${each.key}"
+  engine                        = local.rds_engines[each.value["type"]][each.value["engine"]]
+  engine_version                = each.value["engine_version"]
+  allow_major_version_upgrade   = false
+  auto_minor_version_upgrade    = true
+  apply_immediately             = true
+  maintenance_window            = "Mon:19:00-Mon:22:00"
+  instance_class                = each.value["instance_class"]
+  kms_key_id                    = each.value["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].arn : local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
+  license_model                 = local.rds_licenses[each.value["engine"]]
+  db_name                       = null
+  username                      = "root"
+  manage_master_user_password   = true
+  master_user_secret_kms_key_id = v["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].key_id : null
+  character_set_name            = null
+  timezone                      = null
+  deletion_protection           = false
+  delete_automated_backups      = true
 
   backup_window             = "22:00-23:59"
   copy_tags_to_snapshot     = true
