@@ -66,7 +66,7 @@ resource "aws_cloudwatch_event_target" "infrastructure_rds_s3_backups_scheduled_
   input = jsonencode({
     containerOverrides = [
       {
-        name = "rds-tooling${each.key}",
+        name = "rds-tooling-${each.key}",
         command = ["/bin/bash", "-c", templatefile(
           local.rds_s3_backups_container_entrypoint_file[each.value["engine"]],
           {
