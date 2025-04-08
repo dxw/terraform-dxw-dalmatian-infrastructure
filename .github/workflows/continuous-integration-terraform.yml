@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Get terraform version
         id: get-terraform-version
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.TERRAFORM_DOCS_RENOVATE_WORKFLOW_GITHUB_TOKEN }}
@@ -78,7 +78,7 @@ jobs:
           echo "GIT_COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
 
       - name: Generate Terraform docs
-        uses: terraform-docs/gh-actions@v1.4.0
+        uses: terraform-docs/gh-actions@7f8a667921aee9dd89af0f3c6dfa6160d7ebd8bb # v1.4.0
         if: "!startsWith(env.GITHUB_PR_BRANCH, 'renovate/')"
         with:
           working-dir: .
@@ -88,7 +88,7 @@ jobs:
           fail-on-diff: true
 
       - name: Generate Terraform docs for Renovate
-        uses: terraform-docs/gh-actions@v1.4.0
+        uses: terraform-docs/gh-actions@7f8a667921aee9dd89af0f3c6dfa6160d7ebd8bb # v1.4.0
         if: "startsWith(env.GITHUB_PR_BRANCH, 'renovate/')"
         with:
           working-dir: .
