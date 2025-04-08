@@ -7,7 +7,8 @@ locals {
   resource_prefix      = "${var.project_name}-${var.infrastructure_name}-${var.environment}"
   resource_prefix_hash = format("%.8s", sha512(local.resource_prefix))
 
-  infrastructure_kms_encryption = var.infrastructure_kms_encryption
+  infrastructure_kms_encryption            = var.infrastructure_kms_encryption
+  infrastructure_kms_key_policy_statements = var.infrastructure_kms_key_policy_statements
 
   infrastructure_logging_bucket_retention = var.infrastructure_logging_bucket_retention
 

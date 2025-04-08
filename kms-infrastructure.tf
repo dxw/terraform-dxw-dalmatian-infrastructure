@@ -87,7 +87,7 @@ resource "aws_kms_key" "infrastructure" {
         region     = local.aws_region
         bucket_arn = aws_s3_bucket.infrastructure_vpc_transfer[0].arn
       }
-  )}
+  )}${local.infrastructure_kms_key_policy_statements != null ? ",${local.infrastructure_kms_key_policy_statements}" : ""}
 
       ]
       EOT

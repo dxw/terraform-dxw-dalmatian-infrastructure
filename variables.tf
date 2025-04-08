@@ -60,6 +60,11 @@ variable "infrastructure_kms_encryption" {
   type        = bool
 }
 
+variable "infrastructure_kms_key_policy_statements" {
+  description = "Additional KMS key policy statements for the Infrastructure KMS key"
+  type        = string
+}
+
 variable "infrastructure_logging_bucket_retention" {
   description = "Retention in days for the infrasrtucture S3 logs. This is for the default S3 logs bucket, where all AWS service logs will be delivered"
   type        = number
