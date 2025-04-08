@@ -27,7 +27,7 @@ resource "aws_ecs_task_definition" "infrastructure_rds_tooling" {
       secrets = jsonencode([
         {
           name      = "DB_PASSWORD"
-          valueFrom = each.value["type"] == "instance" ? aws_db_instance.infrastructure_rds[each.key].master_user_secret.secret_arn : each.value["type"] == "cluster" ? aws_rds_cluster.infrastructure_rds[each.key].master_user_secret[0].secret_arn : null
+          valueFrom = each.value["type"] == "instance" ? aws_db_instance.infrastructure_rds[each.key].master_user_secret.secret_arn : each.value["type"] == "cluster" ? "${aws_rds_cluster.infrastructure_rds[each.key].master_user_secret[0].secret_arn}:password::" : null
         }
       ])
       container_port = 0
