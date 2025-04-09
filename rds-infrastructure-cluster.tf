@@ -16,7 +16,7 @@ resource "aws_rds_cluster" "infrastructure_rds" {
   preferred_maintenance_window        = "mon:19:00-mon:22:00"
   master_username                     = "root"
   manage_master_user_password         = true
-  master_user_secret_kms_key_id       = each.value["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].key_id : null
+  master_user_secret_kms_key_id       = each.value["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].key_id : local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].key_id : null
   iam_database_authentication_enabled = null
   deletion_protection                 = false
   enable_http_endpoint                = false

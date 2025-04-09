@@ -61,6 +61,27 @@ resource "aws_iam_role_policy_attachment" "infrastructure_rds_tooling_task_execu
   policy_arn = aws_iam_policy.infrastructure_rds_tooling_task_execution_get_secret_value[each.key].arn
 }
 
+resource "aws_iam_policy" "infrastructure_rds_tooling_task_execution_ecs_get_secret_value_kms_decrypt" {
+  for_each = local.enable_infrastructure_rds_tooling ? {
+    for k, v in local.infrastructure_rds : k => v if local.infrastructure_kms_encryption || v["dedicated_kms_key"] == true
+  } : {}
+
+  name        = "${local.resource_prefix}-${substr(sha512("rds-tooling-task-${each.key}-get-secret-value-kms-decrypt"), 0, 6)}"
+  description = "${local.resource_prefix}-rds-tooling-task-${each.key}-get-secret-value-kms-decrypt"
+  policy = templatefile("${path.root}/policies/kms-decrypt.json.tpl", {
+    kms_key_arn = each.value["dedicated_kms_key"] == true ? aws_kms_key.infrastructure_rds[each.key].arn : aws_kms_key.infrastructure[0].arn
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_rds_tooling_task_execution_ecs_get_secret_value_kms_decrypt" {
+  for_each = local.enable_infrastructure_rds_tooling ? {
+    for k, v in local.infrastructure_rds : k => v if local.infrastructure_kms_encryption || v["dedicated_kms_key"] == true
+  } : {}
+
+  role       = aws_iam_role.infrastructure_rds_tooling_task_execution[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_rds_tooling_task_execution_ecs_get_secret_value_kms_decrypt[each.key].arn
+}
+
 resource "aws_iam_role" "infrastructure_rds_tooling_task" {
   for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
 
