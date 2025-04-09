@@ -10,20 +10,28 @@ resource "aws_ecs_task_definition" "infrastructure_rds_tooling" {
       entrypoint          = jsonencode([])
       command             = jsonencode([])
       environment_file_s3 = ""
-      environment = jsonencode([
-        {
-          name  = "DB_HOST",
-          value = each.value["type"] == "instance" ? aws_db_instance.infrastructure_rds[each.key].address : each.value["type"] == "cluster" ? aws_rds_cluster.infrastructure_rds[each.key].reader_endpoint : null
-        },
-        {
-          name  = "DB_USER",
-          value = "root"
-        },
-        {
-          name  = "DB_PORT",
-          value = tostring(local.rds_ports[each.value["engine"]])
-        }
-      ])
+      environment = jsonencode(
+        concat([
+          {
+            name  = "DB_HOST",
+            value = each.value["type"] == "instance" ? aws_db_instance.infrastructure_rds[each.key].address : each.value["type"] == "cluster" ? aws_rds_cluster.infrastructure_rds[each.key].reader_endpoint : null
+          },
+          {
+            name  = "DB_USER",
+            value = "root"
+          },
+          {
+            name  = "DB_PORT",
+            value = tostring(local.rds_ports[each.value["engine"]])
+          },
+          ],
+          strcontains(local.rds_engines[each.value["type"]][each.value["engine"]], "postgres") ? [
+            {
+              name  = "DEFAULT_DB_NAME"
+              value = "postgres"
+            },
+        ] : [])
+      )
       secrets = jsonencode([
         {
           name      = "DB_PASSWORD"
