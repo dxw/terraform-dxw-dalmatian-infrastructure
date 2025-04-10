@@ -92,12 +92,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   rule {
     id = "all_expire"
 
-    filter {
-      prefix = ""
-    }
-
     expiration {
       days = local.infrastructure_logging_bucket_retention
+    }
+
+    filter {
+      prefix = ""
     }
 
     status = "Enabled"
