@@ -116,6 +116,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "custom" {
       storage_class = "STANDARD_IA"
     }
 
+    filter {
+      prefix = ""
+    }
+
     status = "Disabled"
   }
 
@@ -127,6 +131,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "custom" {
       transition {
         days          = each.value["transition_to_ia_days"]
         storage_class = "STANDARD_IA"
+      }
+
+      filter {
+        prefix = ""
       }
 
       status = "Enabled"
@@ -141,6 +149,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "custom" {
       transition {
         days          = each.value["transition_to_glacier_days"]
         storage_class = "GLACIER"
+      }
+
+      filter {
+        prefix = ""
       }
 
       status = "Enabled"

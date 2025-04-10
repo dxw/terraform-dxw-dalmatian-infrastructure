@@ -94,6 +94,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "infrastructure_ecs_cluster_ser
       storage_class = "GLACIER"
     }
 
+    filter {
+      prefix = ""
+    }
+
     status = "Enabled"
   }
 }
