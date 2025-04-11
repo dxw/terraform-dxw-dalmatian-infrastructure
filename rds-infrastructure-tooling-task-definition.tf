@@ -1,5 +1,5 @@
 resource "aws_ecs_task_definition" "infrastructure_rds_tooling" {
-  for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
+  for_each = local.enable_infrastructure_rds_tooling ? merge(local.infrastructure_rds, length(local.infrastructure_s3_to_azure_backup) > 0 ? { s3toazurebackup = {} } : {}) : {}
 
   family = "${local.resource_prefix}-infrastructure-rds-tooling-${each.key}"
   container_definitions = templatefile(
@@ -11,7 +11,7 @@ resource "aws_ecs_task_definition" "infrastructure_rds_tooling" {
       command             = jsonencode([])
       environment_file_s3 = ""
       environment = jsonencode(
-        concat([
+        concat(each.key != "s3toazurebackup" ? [
           {
             name  = "DB_HOST",
             value = each.value["type"] == "instance" ? aws_db_instance.infrastructure_rds[each.key].address : each.value["type"] == "cluster" ? aws_rds_cluster.infrastructure_rds[each.key].reader_endpoint : null
@@ -24,13 +24,36 @@ resource "aws_ecs_task_definition" "infrastructure_rds_tooling" {
             name  = "DB_PORT",
             value = tostring(local.rds_ports[each.value["engine"]])
           },
-          ],
-          strcontains(local.rds_engines[each.value["type"]][each.value["engine"]], "postgres") ? [
+          ] : [],
+          each.key != "s3toazurebackup" ? strcontains(local.rds_engines[each.value["type"]][each.value["engine"]], "postgres") ? [
             {
               name  = "DEFAULT_DB_NAME"
               value = "postgres"
             },
-        ] : [])
+          ] : [] : [],
+          local.infrastructure_s3_to_azure_backup_azure_tenant_id != "" ? [
+            {
+              name  = "AZCOPY_TENANT_ID"
+              value = local.infrastructure_s3_to_azure_backup_azure_tenant_id
+            },
+          ] : [],
+          local.infrastructure_s3_to_azure_backup_azure_spa_application_id != "" ? [
+            {
+              name  = "AZCOPY_SPA_APPLICATION_ID"
+              value = local.infrastructure_s3_to_azure_backup_azure_spa_application_id
+            },
+            {
+              name  = "AZCOPY_AUTO_LOGIN_TYPE"
+              value = "SPN"
+            },
+          ] : [],
+          local.infrastructure_s3_to_azure_backup_azure_spa_client_secret != "" ? [
+            {
+              name  = "AZCOPY_SPA_CLIENT_SECRET"
+              value = local.infrastructure_s3_to_azure_backup_azure_spa_client_secret
+            },
+          ] : [],
+        )
       )
       secrets = jsonencode([
         {
