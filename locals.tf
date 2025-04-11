@@ -251,7 +251,7 @@ locals {
   enable_infrastructure_rds_backup_to_s3          = var.enable_infrastructure_rds_backup_to_s3
   infrastructure_rds_backup_to_s3_cron_expression = var.infrastructure_rds_backup_to_s3_cron_expression
   infrastructure_rds_backup_to_s3_retention       = var.infrastructure_rds_backup_to_s3_retention
-  enable_infrastructure_rds_tooling               = length(var.infrastructure_rds) > 0
+  enable_infrastructure_rds_tooling               = length(local.infrastructure_rds) > 0 || length(local.infrastructure_s3_to_azure_backup) > 0
   infrastructure_rds_tooling_ecs_cluster_name     = "${local.resource_prefix}-infrastructure-rds-tooling"
 
   infrastructure_elasticache_defaults = var.infrastructure_elasticache_defaults
@@ -271,6 +271,20 @@ locals {
 
   enable_cloudformatian_s3_template_store = var.enable_cloudformatian_s3_template_store != null ? var.enable_cloudformatian_s3_template_store : false
   custom_cloudformation_stacks            = var.custom_cloudformation_stacks
+
+  infrastructure_s3_to_azure_backup = var.infrastructure_s3_to_azure_backup
+  infrastructure_s3_to_azure_backup_command = join(
+    " && ",
+    [
+      for obj in local.infrastructure_s3_to_azure_backup : "s3-to-azure -d \"${obj["s3_bucket_name"]}\" -d \"${obj["azure_container_name"]}\""
+  ])
+  infrastructure_s3_to_azure_backup_command_s3_buckets = toset([
+    for obj in local.infrastructure_s3_to_azure_backup : obj["s3_bucket_name"]
+  ])
+  infrastructure_s3_to_azure_backup_cron_expression          = var.infrastructure_s3_to_azure_backup_cron_expression
+  infrastructure_s3_to_azure_backup_azure_tenant_id          = var.infrastructure_s3_to_azure_backup_azure_tenant_id
+  infrastructure_s3_to_azure_backup_azure_spa_application_id = var.infrastructure_s3_to_azure_backup_azure_spa_application_id
+  infrastructure_s3_to_azure_backup_azure_spa_client_secret  = var.infrastructure_s3_to_azure_backup_azure_spa_client_secret
 
   s3_object_presign = local.enable_cloudformatian_s3_template_store ? toset([
     for k, v in local.custom_cloudformation_stacks : "${aws_s3_bucket.cloudformation_custom_stack_template_store[0].id}/${v["s3_template_store_key"]}" if v["s3_template_store_key"] != null

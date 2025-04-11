@@ -946,6 +946,43 @@ variable "custom_cloudformation_stacks" {
   }))
 }
 
+variable "infrastructure_s3_to_azure_backup" {
+  description = <<EOT
+    List of objects, defining S3 bucket name and Azure container name, along with Azure credentials
+    [
+      {
+        s3_bucket_name: The s3 bucket name (source)
+        azure_container_name: The Azure container name (target)
+      }
+    ]
+  EOT
+  type = list(object({
+    s3_bucket_name       = string
+    azure_container_name = string
+  }))
+}
+
+variable "infrastructure_s3_to_azure_backup_cron_expression" {
+  description = "Cron expression for when to trigger the S3 to Azure backup"
+  type        = string
+}
+
+variable "infrastructure_s3_to_azure_backup_azure_tenant_id" {
+  description = "Azure tenant id for the S3 to Azure backups"
+  type        = string
+}
+
+variable "infrastructure_s3_to_azure_backup_azure_spa_application_id" {
+  description = "Azure service principle app (spa) application id for the S3 to Azure backups"
+  type        = string
+}
+
+variable "infrastructure_s3_to_azure_backup_azure_spa_client_secret" {
+  description = "Azure service principle app (spa) client secret for the S3 to Azure backups"
+  type        = string
+  sensitive   = true
+}
+
 variable "custom_resource_tags" {
   description = <<EOT
     A hacky way to add custom tags to resources

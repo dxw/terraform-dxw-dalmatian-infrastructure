@@ -24,11 +24,11 @@ resource "aws_iam_role_policy_attachment" "infrastructure_rds_s3_backups_cloudwa
   policy_arn = aws_iam_policy.infrastructure_rds_s3_backups_cloudwatch_schedule_ecs_run_task[each.key].arn
 }
 
-resource "aws_iam_policy" "infrastructure_rds_s3_backups_cloudwatch_schedule_pass_role" {
+resource "aws_iam_policy" "infrastructure_rds_s3_backups_cloudwatch_schedule_pass_role_tooling_task_roles" {
   for_each = local.enable_infrastructure_rds_backup_to_s3 ? local.infrastructure_rds : {}
 
-  name        = "${local.resource_prefix}-${substr(sha512("rds-s3-backups-cloudwatch-schedule-${each.key}-pass-role-execution-role"), 0, 6)}"
-  description = "${local.resource_prefix}-rds-s3-backups-cloudwatch-schedule-${each.key}-pass-role-execution-role"
+  name        = "${local.resource_prefix}-${substr(sha512("rds-s3-backups-cloudwatch-schedule-${each.key}-pass-role-tooling-task-roles"), 0, 6)}"
+  description = "${local.resource_prefix}-rds-s3-backups-cloudwatch-schedule-${each.key}-pass-role-tooling-task-roles"
   policy = templatefile(
     "${path.root}/policies/pass-role.json.tpl",
     {
@@ -41,11 +41,11 @@ resource "aws_iam_policy" "infrastructure_rds_s3_backups_cloudwatch_schedule_pas
   )
 }
 
-resource "aws_iam_role_policy_attachment" "infrastructure_rds_s3_backups_cloudwatch_schedule_pass_role" {
+resource "aws_iam_role_policy_attachment" "infrastructure_rds_s3_backups_cloudwatch_schedule_pass_role_tooling_task_roles" {
   for_each = local.enable_infrastructure_rds_backup_to_s3 ? local.infrastructure_rds : {}
 
   role       = aws_iam_role.infrastructure_rds_s3_backups_cloudwatch_schedule[each.key].name
-  policy_arn = aws_iam_policy.infrastructure_rds_s3_backups_cloudwatch_schedule_pass_role[each.key].arn
+  policy_arn = aws_iam_policy.infrastructure_rds_s3_backups_cloudwatch_schedule_pass_role_tooling_task_roles[each.key].arn
 }
 
 resource "aws_cloudwatch_event_rule" "infrastructure_rds_s3_backups_scheduled_task" {
@@ -96,6 +96,6 @@ resource "aws_cloudwatch_event_target" "infrastructure_rds_s3_backups_scheduled_
 
   depends_on = [
     aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_cloudwatch_schedule_ecs_run_task,
-    aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_cloudwatch_schedule_pass_role,
+    aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_cloudwatch_schedule_pass_role_tooling_task_roles,
   ]
 }
