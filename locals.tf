@@ -251,8 +251,8 @@ locals {
   enable_infrastructure_rds_backup_to_s3          = var.enable_infrastructure_rds_backup_to_s3
   infrastructure_rds_backup_to_s3_cron_expression = var.infrastructure_rds_backup_to_s3_cron_expression
   infrastructure_rds_backup_to_s3_retention       = var.infrastructure_rds_backup_to_s3_retention
-  enable_infrastructure_rds_tooling               = length(var.infrastructure_rds) > 0
-  infrastructure_rds_tooling_ecs_cluster_name     = "${local.resource_prefix}-infrastructure-rds-tooling"
+  enable_infrastructure_utilities                 = length(var.infrastructure_rds) > 0
+  infrastructure_utilities_ecs_cluster_name       = "${local.resource_prefix}-infrastructure-utilities"
 
   infrastructure_elasticache_defaults = var.infrastructure_elasticache_defaults
   infrastructure_elasticache_keys     = length(var.infrastructure_elasticache) > 0 ? keys(values(var.infrastructure_elasticache)[0]) : []

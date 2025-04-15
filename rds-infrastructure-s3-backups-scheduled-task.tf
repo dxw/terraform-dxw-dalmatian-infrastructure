@@ -33,8 +33,8 @@ resource "aws_iam_policy" "infrastructure_rds_s3_backups_cloudwatch_schedule_pas
     "${path.root}/policies/pass-role.json.tpl",
     {
       role_arns = jsonencode([
-        aws_iam_role.infrastructure_rds_tooling_task_execution[each.key].arn,
-        aws_iam_role.infrastructure_rds_tooling_task[each.key].arn,
+        aws_iam_role.infrastructure_utilities_task_execution[each.key].arn,
+        aws_iam_role.infrastructure_utilities_task[each.key].arn,
       ])
       services = jsonencode(["ecs-tasks.amazonaws.com"])
     }
@@ -61,12 +61,12 @@ resource "aws_cloudwatch_event_target" "infrastructure_rds_s3_backups_scheduled_
 
   target_id = "${local.resource_prefix}-rds-s3-backups-${each.key}"
   rule      = aws_cloudwatch_event_rule.infrastructure_rds_s3_backups_scheduled_task[each.key].name
-  arn       = aws_ecs_cluster.infrastrucutre_rds_tooling[0].arn
+  arn       = aws_ecs_cluster.infrastrucutre_utilities[0].arn
   role_arn  = aws_iam_role.infrastructure_rds_s3_backups_cloudwatch_schedule[each.key].arn
   input = jsonencode({
     containerOverrides = [
       {
-        name = "rds-tooling-${each.key}",
+        name = "utilities-${each.key}",
         command = ["/bin/bash", "-c", templatefile(
           local.rds_s3_backups_container_entrypoint_file[each.value["engine"]],
           {
@@ -80,7 +80,7 @@ resource "aws_cloudwatch_event_target" "infrastructure_rds_s3_backups_scheduled_
 
   ecs_target {
     task_count          = 1
-    task_definition_arn = aws_ecs_task_definition.infrastructure_rds_tooling[each.key].arn
+    task_definition_arn = aws_ecs_task_definition.infrastructure_utilities[each.key].arn
     launch_type         = "FARGATE"
     platform_version    = "1.4.0"
     propagate_tags      = "TASK_DEFINITION"
@@ -89,7 +89,7 @@ resource "aws_cloudwatch_event_target" "infrastructure_rds_s3_backups_scheduled_
       subnets          = aws_db_subnet_group.infrastructure_rds[each.key].subnet_ids
       assign_public_ip = local.infrastructure_vpc_network_enable_private ? false : local.infrastructure_vpc_network_enable_public ? true : false
       security_groups = [
-        aws_security_group.infrastructure_rds_tooling[each.key].id,
+        aws_security_group.infrastructure_utilities[each.key].id,
       ]
     }
   }

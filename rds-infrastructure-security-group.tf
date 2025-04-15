@@ -19,14 +19,14 @@ resource "aws_security_group_rule" "infrastructure_rds_ingress_tcp" {
   security_group_id        = aws_security_group.infrastructure_rds[each.key].id
 }
 
-resource "aws_security_group_rule" "infrastructure_rds_tooling_task_ingress_tcp" {
-  for_each = (local.infrastructure_vpc_network_enable_public || local.infrastructure_vpc_network_enable_private) && local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
+resource "aws_security_group_rule" "infrastructure_utilities_task_ingress_tcp" {
+  for_each = (local.infrastructure_vpc_network_enable_public || local.infrastructure_vpc_network_enable_private) && local.enable_infrastructure_utilities ? local.infrastructure_rds : {}
 
-  description              = "Allow RDS port tcp ingress from RDS tooling"
+  description              = "Allow RDS port tcp ingress from Utilities"
   type                     = "ingress"
   from_port                = local.rds_ports[each.value["engine"]]
   to_port                  = local.rds_ports[each.value["engine"]]
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.infrastructure_rds_tooling[each.key].id
+  source_security_group_id = aws_security_group.infrastructure_utilities[each.key].id
   security_group_id        = aws_security_group.infrastructure_rds[each.key].id
 }
