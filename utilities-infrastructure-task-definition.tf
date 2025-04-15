@@ -1,12 +1,12 @@
-resource "aws_ecs_task_definition" "infrastructure_rds_tooling" {
-  for_each = local.enable_infrastructure_rds_tooling ? local.infrastructure_rds : {}
+resource "aws_ecs_task_definition" "infrastructure_utilities" {
+  for_each = local.enable_infrastructure_utilities ? local.infrastructure_rds : {}
 
-  family = "${local.resource_prefix}-infrastructure-rds-tooling-${each.key}"
+  family = "${local.resource_prefix}-infrastructure-utilities-${each.key}"
   container_definitions = templatefile(
     "./container-definitions/app.json.tpl",
     {
-      container_name      = "rds-tooling-${each.key}"
-      image               = aws_ecr_repository.infrastructure_rds_tooling[0].repository_url
+      container_name      = "utilities-${each.key}"
+      image               = aws_ecr_repository.infrastructure_utilities[0].repository_url
       entrypoint          = jsonencode([])
       command             = jsonencode([])
       environment_file_s3 = ""
@@ -47,23 +47,23 @@ resource "aws_ecs_task_definition" "infrastructure_rds_tooling" {
       security_options      = jsonencode([])
       syslog_address        = ""
       syslog_tag            = ""
-      cloudwatch_log_group  = aws_cloudwatch_log_group.infrastructure_rds_tooling[each.key].name
-      awslogs_stream_prefix = "rds-tooling"
+      cloudwatch_log_group  = aws_cloudwatch_log_group.infrastructure_utilities[each.key].name
+      awslogs_stream_prefix = "utilities"
       region                = local.aws_region
     }
   )
-  execution_role_arn       = aws_iam_role.infrastructure_rds_tooling_task_execution[each.key].arn
-  task_role_arn            = aws_iam_role.infrastructure_rds_tooling_task[each.key].arn
+  execution_role_arn       = aws_iam_role.infrastructure_utilities_task_execution[each.key].arn
+  task_role_arn            = aws_iam_role.infrastructure_utilities_task[each.key].arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   memory                   = 1024
   cpu                      = 512
 
   depends_on = [
-    aws_iam_role_policy_attachment.infrastructure_rds_tooling_task_execution_ecr_pull,
-    aws_iam_role_policy_attachment.infrastructure_rds_tooling_task_execution_cloudwatch_logs,
+    aws_iam_role_policy_attachment.infrastructure_utilities_task_execution_ecr_pull,
+    aws_iam_role_policy_attachment.infrastructure_utilities_task_execution_cloudwatch_logs,
     aws_iam_role_policy_attachment.infrastructure_rds_s3_backups_task_s3_write,
-    aws_iam_role_policy_attachment.infrastructure_rds_tooling_task_kms_encrypt,
-    terraform_data.infrastructure_rds_tooling_image_build_trigger_codebuild,
+    aws_iam_role_policy_attachment.infrastructure_utilities_task_kms_encrypt,
+    terraform_data.infrastructure_utilities_image_build_trigger_codebuild,
   ]
 }

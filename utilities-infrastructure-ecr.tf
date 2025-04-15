@@ -1,7 +1,7 @@
-resource "aws_ecr_repository" "infrastructure_rds_tooling" {
-  count = local.enable_infrastructure_rds_tooling ? 1 : 0
+resource "aws_ecr_repository" "infrastructure_utilities" {
+  count = local.enable_infrastructure_utilities ? 1 : 0
 
-  name = "${local.resource_prefix}-rds-tooling"
+  name = "${local.resource_prefix}-utilities"
 
   #tfsec:ignore:aws-ecr-enforce-immutable-repository
   image_tag_mutability = "MUTABLE"
@@ -16,10 +16,10 @@ resource "aws_ecr_repository" "infrastructure_rds_tooling" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "infrastructure_rds_tooling" {
-  count = local.enable_infrastructure_rds_tooling ? 1 : 0
+resource "aws_ecr_lifecycle_policy" "infrastructure_utilities" {
+  count = local.enable_infrastructure_utilities ? 1 : 0
 
-  repository = aws_ecr_repository.infrastructure_rds_tooling[0].name
+  repository = aws_ecr_repository.infrastructure_utilities[0].name
   policy = templatefile(
     "${path.module}/policies/ecr-policies/max-images.json.tpl",
     {

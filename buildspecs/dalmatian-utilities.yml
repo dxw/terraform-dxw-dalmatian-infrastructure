@@ -12,12 +12,12 @@ phases:
           echo "Logging into Dockerhub ...";
           echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin;
         fi;
-      - echo Building dalmatian-rds-tooling docker image ...
-      - docker build -t dalmatian-rds-tooling:latest .
+      - echo Building dalmatian-utilities docker image ...
+      - docker build -t dalmatian-utilities:latest .
   build:
     commands:
       - echo Adding ECR repo tag...
-      - docker tag dalmatian-rds-tooling:latest "$REPOSITORY_URI:latest"
+      - docker tag dalmatian-utilities:latest "$REPOSITORY_URI:latest"
   post_build:
     commands:
       - echo Pushing the Docker image...

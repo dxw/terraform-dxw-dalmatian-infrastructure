@@ -1,7 +1,7 @@
-resource "aws_ecs_cluster" "infrastrucutre_rds_tooling" {
-  count = local.enable_infrastructure_rds_tooling ? 1 : 0
+resource "aws_ecs_cluster" "infrastrucutre_utilities" {
+  count = local.enable_infrastructure_utilities ? 1 : 0
 
-  name = local.infrastructure_rds_tooling_ecs_cluster_name
+  name = local.infrastructure_utilities_ecs_cluster_name
 
   setting {
     name  = "containerInsights"
