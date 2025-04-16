@@ -85,7 +85,7 @@ resource "aws_kms_key" "infrastructure" {
       {
         vpc_ids    = jsonencode(local.infrastructure_vpc_transfer_s3_bucket_access_vpc_ids)
         region     = local.aws_region
-        bucket_arn = aws_s3_bucket.infrastructure_vpc_transfer[0].arn
+        bucket_arn = local.enable_infrastructure_vpc_transfer_s3_bucket ? aws_s3_bucket.infrastructure_vpc_transfer[0].arn : ""
       }
   )}${local.infrastructure_kms_key_policy_statements != "" ? ",${local.infrastructure_kms_key_policy_statements}" : ""}
 
