@@ -9,12 +9,12 @@ resource "aws_s3_bucket_ownership_controls" "infrastructure_logs" {
 
   bucket = aws_s3_bucket.infrastructure_logs[0].id
   rule {
-    object_ownership = contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true) ? "BucketOwnerPreferred" : "BucketOwnerEnforced"
+    object_ownership = contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true) || length(local.custom_s3_buckets) > 0 ? "BucketOwnerPreferred" : "BucketOwnerEnforced"
   }
 }
 
 resource "aws_s3_bucket_acl" "infrastructure_logs_log_delivery_write" {
-  count = local.enable_infrastructure_logs_bucket && contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true) ? 1 : 0
+  count = local.enable_infrastructure_logs_bucket && contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true) || length(local.custom_s3_buckets) > 0 ? 1 : 0
 
   bucket = aws_s3_bucket.infrastructure_logs[0].id
   acl    = "log-delivery-write"

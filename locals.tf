@@ -51,7 +51,7 @@ locals {
   create_infrastructure_route53_delegations = local.route53_root_hosted_zone_domain_name != "" && local.aws_profile_name_route53_root != "" && local.enable_infrastructure_route53_hosted_zone
   infrastructure_route53_domain             = "${local.environment}.${var.infrastructure_name}.${local.route53_root_hosted_zone_domain_name}"
 
-  enable_infrastructure_wildcard_certificate = local.enable_infrastructure_route53_hosted_zone && length(local.infrastructure_ecs_cluster_services) > 0
+  enable_infrastructure_wildcard_certificate = local.enable_infrastructure_route53_hosted_zone && (length(local.infrastructure_ecs_cluster_services) > 0 || length(local.custom_s3_buckets) > 0)
 
   infrastructure_datadog_api_key = var.infrastructure_datadog_api_key
   infrastructure_datadog_app_key = var.infrastructure_datadog_app_key

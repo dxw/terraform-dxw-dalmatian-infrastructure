@@ -18,7 +18,7 @@ resource "aws_acm_certificate_validation" "infrastructure_wildcard" {
 
 
 resource "aws_acm_certificate" "infrastructure_wildcard_us_east_1" {
-  count = local.enable_infrastructure_wildcard_certificate && contains([for service in local.infrastructure_ecs_cluster_services : service["enable_cloudfront"]], true) ? 1 : 0
+  count = local.enable_infrastructure_wildcard_certificate && (contains([for service in local.infrastructure_ecs_cluster_services : service["enable_cloudfront"]], true) || length(local.custom_s3_buckets) > 0) ? 1 : 0
 
   provider = aws.useast1
 
@@ -31,7 +31,7 @@ resource "aws_acm_certificate" "infrastructure_wildcard_us_east_1" {
 }
 
 resource "aws_acm_certificate_validation" "infrastructure_wildcard_us_east_1" {
-  count = local.enable_infrastructure_wildcard_certificate && contains([for service in local.infrastructure_ecs_cluster_services : service["enable_cloudfront"]], true) ? 1 : 0
+  count = local.enable_infrastructure_wildcard_certificate && (contains([for service in local.infrastructure_ecs_cluster_services : service["enable_cloudfront"]], true) || length(local.custom_s3_buckets) > 0) ? 1 : 0
 
   provider = aws.useast1
 
