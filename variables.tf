@@ -897,6 +897,7 @@ variable "custom_s3_buckets" {
         cloudfront_decicated_distribution_aliases: Specify custom aliases, rather than using a generated infrastriucture subdomain
         cloudfront_decicated_distribution_tls_certificate_arn: Specify a CloudFront TLS certificate to use rather than the infrastructure wildcard certificate
         cloudfront_s3_root: Sets the S3 document root when being served from CloudFront. By default this will be '/'. If `cloudfront_infrastructure_ecs_cluster_service_path` has been set, this helps by modifying the request from `/sub-directory-path` to `/` by use of a CloudFront function.
+        cloudfront_basic_auth_user_list: Map of username and password's to use as basic auth ({ alex: somepassword, joe: otherpassword })
         cloudfront_infrastructure_ecs_cluster_service: Conditionally create an Origin on a CloudFront distribution that is serving the given Infrastructure ECS Cluster Service name
         cloudfront_infrastructure_ecs_cluster_service_path: If `cloudfront_infrastructure_ecs_cluster_service`, set this to the path that objects will be served from.
         custom_bucket_policy_statements: Conditionally add a string of comma delimited user-defined key policy statements (eg. '{"Effect": ...},{"Effect": ...}'
@@ -913,6 +914,7 @@ variable "custom_s3_buckets" {
     cloudfront_decicated_distribution_aliases             = optional(list(string), null)
     cloudfront_decicated_distribution_tls_certificate_arn = optional(string, null)
     cloudfront_s3_root                                    = optional(string, null)
+    cloudfront_basic_auth_user_list                       = optional(map(string), null)
     cloudfront_infrastructure_ecs_cluster_service         = optional(string, null)
     cloudfront_infrastructure_ecs_cluster_service_path    = optional(string, null)
     custom_bucket_policy_statements                       = optional(string, null)
