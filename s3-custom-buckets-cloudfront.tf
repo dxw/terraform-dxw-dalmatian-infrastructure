@@ -32,7 +32,7 @@ resource "aws_cloudfront_distribution" "custom_s3_buckets" {
     cache_policy_id        = aws_cloudfront_cache_policy.custom_s3_buckets[each.key].id
 
     dynamic "function_association" {
-      for_each = each.value["cloudfront_s3_root"] != null || each.value["cloudfront_basic_auth_user_list"] != null || each.value["cloudfront_infrastructure_ecs_cluster_service_path"] != null ? [1] : []
+      for_each = each.value["cloudfront_s3_root"] != null || each.value["cloudfront_basic_auth_user_list"] != null || each.value["cloudfront_infrastructure_ecs_cluster_service_path"] != null || each.value["cloudfront_s3_root_file"] != null ? [1] : []
 
       content {
         event_type   = "viewer-request"

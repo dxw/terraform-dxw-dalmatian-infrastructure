@@ -914,6 +914,7 @@ variable "custom_s3_buckets" {
     cloudfront_decicated_distribution_aliases             = optional(list(string), null)
     cloudfront_decicated_distribution_tls_certificate_arn = optional(string, null)
     cloudfront_s3_root                                    = optional(string, null)
+    cloudfront_s3_root_file                               = optional(string, null)
     cloudfront_basic_auth_user_list                       = optional(map(string), null)
     cloudfront_infrastructure_ecs_cluster_service         = optional(string, null)
     cloudfront_infrastructure_ecs_cluster_service_path    = optional(string, null)

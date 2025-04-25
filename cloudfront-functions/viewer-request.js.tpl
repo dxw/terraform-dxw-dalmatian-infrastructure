@@ -43,14 +43,19 @@ function basicAuth(request, userList) {
 function handler(event) {
   var req = event.request;
 
+  %{~ if root_file != ""}
+  if (req.uri.slice(-1) == "/") {
+    var newUri = req.uri.concat("", "${root_file}")
+    req.uri = newUri;
+  }
+  %{endif~}
   %{~ if new_root != "/" || trim_request_dirs_num != 0}
   var newRoot = "${new_root}"
   var trimRequestDirsNum = ${trim_request_dirs_num};
   var newUri = pathChroot(req.uri, trimRequestDirsNum, newRoot);
   if (newUri.slice(-1) == "/") {
-    newUri = newUri.concat("", "index.html")
+    req.uri = newUri.concat("", "index.html")
   }
-  req.uri = newUri;
   %{endif~}
   %{~ if basic_auth_user_list != "{}" }
   const userList = JSON.parse('${basic_auth_user_list}');
