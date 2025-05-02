@@ -49,6 +49,11 @@ resource "aws_kms_key" "infrastructure" {
       {
         log_group_arn = length(local.infrastructure_ecs_cluster_services) > 0 && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:${local.resource_prefix}-infrastructure-ecs-cluster-service-logs-*" : ""
       }
+      )}${length(local.custom_lambda_functions) > 0 && local.infrastructure_kms_encryption ? "," : ""}
+      ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudwatch-logs-allow.json.tpl",
+      {
+        log_group_arn = length(local.custom_lambda_functions) > 0 && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:/aws/lambda/${local.resource_prefix}-custom-lambda-*" : ""
+      }
       )}${length(local.infrastructure_ecs_cluster_services) > 0 && local.infrastructure_kms_encryption && local.infrastructure_ecs_cluster_enable_execute_command_logging ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/role-allow-encrypt.json.tpl",
       {

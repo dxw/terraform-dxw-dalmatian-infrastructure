@@ -972,3 +972,31 @@ variable "custom_resource_tags_delay" {
   description = "The delay in seconds to wait before running the tag script"
   type        = number
 }
+
+variable "custom_lambda_functions" {
+  description = <<EOT
+    Map of Lambda functions to deploy
+    {
+      function-name = {
+        function_zip_s3_key: The key of a Zipped Lambda function that is stored within the S3 bucket, created by the `enable_lambda_functions_s3_store`. If a file with the same name, with the `.json` extension is found, this will be used as a policy for the function (eg. `my-function.zip` will use the `my-function.json` as a policy).
+        handler: The function entrypoint in the code
+        runtime: The function runtime
+        memory: Amount of memory in MB your Lambda Function can use at runtime.
+        timeout: Amount of time your Lambda Function has to run in seconds
+        environment_variables: Map of environment variables that are accessible from the function code during execution.
+        log_retention: Days to retain logs
+        launch_in_infrastructure_vpc: Conditionally launch within the infrastructure VPC. This will give access to resources launched within the VPC.
+      }
+    }
+  EOT
+  type = map(object({
+    function_zip_s3_key          = optional(string, null)
+    handler                      = optional(string, null)
+    runtime                      = optional(string, null)
+    memory                       = optional(number, null)
+    timeout                      = optional(number, null)
+    environment_variables        = optional(map(string), null)
+    log_retention                = optional(number, null)
+    launch_in_infrastructure_vpc = optional(bool, null)
+  }))
+}

@@ -27,6 +27,7 @@ resource "aws_iam_policy" "ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda
       region        = local.aws_region
       account_id    = local.aws_account_id
       function_name = "${local.resource_prefix_hash}-ecs-cluster-infrastructure-ecs-asg-diff-metric"
+      vpc           = "false"
     }
   )
 }
