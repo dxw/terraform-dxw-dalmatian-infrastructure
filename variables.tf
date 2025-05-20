@@ -984,18 +984,30 @@ variable "custom_lambda_functions" {
         memory: Amount of memory in MB your Lambda Function can use at runtime.
         timeout: Amount of time your Lambda Function has to run in seconds
         environment_variables: Map of environment variables that are accessible from the function code during execution.
+        custom_policies: Map of custom policies to attach to the Lambda role
         log_retention: Days to retain logs
         launch_in_infrastructure_vpc: Conditionally launch within the infrastructure VPC. This will give access to resources launched within the VPC.
       }
     }
   EOT
   type = map(object({
-    function_zip_s3_key          = optional(string, null)
-    handler                      = optional(string, null)
-    runtime                      = optional(string, null)
-    memory                       = optional(number, null)
-    timeout                      = optional(number, null)
-    environment_variables        = optional(map(string), null)
+    function_zip_s3_key   = optional(string, null)
+    handler               = optional(string, null)
+    runtime               = optional(string, null)
+    memory                = optional(number, null)
+    timeout               = optional(number, null)
+    environment_variables = optional(map(string), null)
+    custom_policies = optional(map(object({
+      description = string
+      policy = object({
+        Version = string
+        Statement = list(object({
+          Action   = list(string)
+          Effect   = string
+          Resource = list(string)
+        }))
+      })
+    })), {})
     log_retention                = optional(number, null)
     launch_in_infrastructure_vpc = optional(bool, null)
   }))

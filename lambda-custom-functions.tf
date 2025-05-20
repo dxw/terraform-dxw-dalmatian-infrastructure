@@ -39,6 +39,35 @@ resource "aws_iam_role_policy_attachment" "lambda_custom_functions" {
   policy_arn = aws_iam_policy.lambda_custom_functions[each.key].arn
 }
 
+resource "aws_iam_policy" "lambda_custom_functions_custom_policies" {
+  for_each = merge([
+    for lambda_name, lambda in local.custom_lambda_functions : {
+      for custom_policy_name, custom_policy in lambda["custom_policies"] : "${lambda_name}_${custom_policy_name}" => {
+        custom_policy      = custom_policy
+        lambda_name        = lambda_name
+        custom_policy_name = custom_policy_name
+      }
+    }
+  ]...)
+
+  name        = "${local.resource_prefix}-${substr(sha512("${each.value["lambda_name"]}-custom-lambda-${each.value["custom_policy_name"]}"), 0, 6)}"
+  description = "${local.resource_prefix}-${each.value["lambda_name"]}-custom-lambda-${each.value["custom_policy_name"]}-${each.value["custom_policy_name"]} ${each.value["custom_policy"]["description"]}"
+  policy      = jsonencode(each.value["custom_policy"]["policy"])
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_custom_functions_custom_policies" {
+  for_each = merge([
+    for lambda_name, lambda in local.custom_lambda_functions : {
+      for custom_policy_name, custom_policy in lambda["custom_policies"] : "${lambda_name}_${custom_policy_name}" => {
+        lambda_name = lambda_name
+      }
+    }
+  ]...)
+
+  role       = aws_iam_role.lambda_custom_functions[each.value["lambda_name"]].name
+  policy_arn = aws_iam_policy.lambda_custom_functions[each.key].arn
+}
+
 data "archive_file" "lambda_custom_functions_default_zip" {
   for_each = local.custom_lambda_functions
 
