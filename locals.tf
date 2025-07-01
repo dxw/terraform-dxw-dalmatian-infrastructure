@@ -100,6 +100,8 @@ locals {
   infrastructure_vpc_network_acl_egress_custom_rules_public   = var.infrastructure_vpc_network_acl_egress_custom_rules_public
   infrastructure_vpc_network_acl_ingress_lockdown_public      = var.infrastructure_vpc_network_acl_ingress_lockdown_public
   infrastructure_vpc_network_acl_ingress_custom_rules_public  = var.infrastructure_vpc_network_acl_ingress_custom_rules_public
+  infrastructure_vpc_egress_domain_filtering_allow_list       = var.infrastructure_vpc_egress_domain_filtering_allow_list
+  infrastructure_vpc_enable_egress_domain_filtering           = length(local.infrastructure_vpc_egress_domain_filtering_allow_list) > 0
   infrastructure_vpc_flow_logs_cloudwatch_logs                = var.infrastructure_vpc_flow_logs_cloudwatch_logs && local.infrastructure_vpc
   infrastructure_vpc_flow_logs_s3_with_athena                 = var.infrastructure_vpc_flow_logs_s3_with_athena && local.infrastructure_vpc
   infrastructure_vpc_flow_logs_s3_key_prefix                  = trim(var.infrastructure_vpc_flow_logs_s3_key_prefix, "/")
