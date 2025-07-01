@@ -83,6 +83,11 @@ resource "aws_kms_key" "infrastructure" {
       {
         log_group_arn = local.enable_s3_to_azure_scheduled_tasks && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:/ecs/${local.resource_prefix}-s3-to-azure" : ""
       }
+      )}${local.enable_infrastructure_vpc_egress_domain_filtering && local.infrastructure_kms_encryption ? "," : ""}
+      ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudwatch-logs-allow.json.tpl",
+      {
+        log_group_arn = local.enable_infrastructure_vpc_egress_domain_filtering && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:/aws/vendedlogs/${local.resource_prefix}-infrastructure-egress-domain-filtering" : ""
+      }
       )}${contains([for k, v in local.custom_s3_buckets : (v["cloudfront_dedicated_distribution"] == true || v["cloudfront_infrastructure_ecs_cluster_service"] != null) && (v["create_dedicated_kms_key"] == false || v["create_dedicated_kms_key"] == null)], true) && local.infrastructure_kms_encryption ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudfront-distribution-allow.json.tpl",
       {

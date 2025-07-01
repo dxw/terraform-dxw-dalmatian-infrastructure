@@ -111,7 +111,34 @@ locals {
   infrastructure_vpc_flow_logs_s3_key_prefix                  = trim(var.infrastructure_vpc_flow_logs_s3_key_prefix, "/")
   infrastructure_vpc_flow_logs_retention                      = var.infrastructure_vpc_flow_logs_retention
   infrastructure_vpc_flow_logs_traffic_type                   = var.infrastructure_vpc_flow_logs_traffic_type
-  infrastructure_vpc_flow_logs_glue_table_columns             = jsondecode(templatefile("${path.root}/glue-table-schemas/vpc-flow-logs.json.tpl", {}))
+  infrastructure_vpc_egress_domain_filtering_allow_list       = var.infrastructure_vpc_egress_domain_filtering_allow_list
+  infrastructure_vpc_egress_domain_filtering_log_retention    = var.infrastructure_vpc_egress_domain_filtering_log_retention
+  enable_infrastructure_vpc_egress_domain_filtering           = length(local.infrastructure_vpc_egress_domain_filtering_allow_list) > 0
+  infrastructure_vpc_egress_domain_filtering_platform_domains = concat(
+    [".amazonaws.com"],
+    local.enable_infrastructure_ecs_cluster_datadog_agent ? [".${local.infrastructure_datadog_site}"] : [],
+    local.infrastructure_ecs_cluster_rsyslog_endpoint != "" ? [local.infrastructure_ecs_cluster_rsyslog_endpoint] : [],
+    local.infrastructure_ecs_cluster_logspout_enabled ? flatten(regexall("://([^:/?\\s]+)", join(" ", local.infrastructure_ecs_cluster_logspout_command))) : [],
+    local.enable_s3_to_azure_scheduled_tasks ? concat(
+      ["registry-1.docker.io", "auth.docker.io", "production.cloudfront.docker.com", "production.cloudflare.docker.com", "login.microsoftonline.com"],
+      flatten([for job in values(local.s3_to_azure_sync_jobs) : regexall("^https://([^:/?]+)", job["destination_url"])])
+    ) : [],
+  )
+  infrastructure_vpc_egress_domain_filtering_domains = sort(distinct(concat(
+    local.infrastructure_vpc_egress_domain_filtering_platform_domains,
+    local.infrastructure_vpc_egress_domain_filtering_allow_list,
+  )))
+  infrastructure_vpc_egress_domain_filtering_availability_zone = element(tolist(local.infrastructure_vpc_network_availability_zones), 0)
+  # The last /24 of the public half, which variable validation keeps clear of the public subnets
+  infrastructure_vpc_egress_domain_filtering_cidr = cidrsubnet(
+    local.infrastructure_vpc_network_public_cidr,
+    local.infrastructure_vpc_network_public_cidr_newbits,
+    pow(2, local.infrastructure_vpc_network_public_cidr_newbits) - 1
+  )
+  infrastructure_vpc_egress_domain_filtering_endpoint_id = local.enable_infrastructure_vpc_egress_domain_filtering ? one([
+    for state in aws_networkfirewall_firewall.infrastructure_egress_domain_filtering[0].firewall_status[0].sync_states : state.attachment[0].endpoint_id
+  ]) : null
+  infrastructure_vpc_flow_logs_glue_table_columns = jsondecode(templatefile("${path.root}/glue-table-schemas/vpc-flow-logs.json.tpl", {}))
   infrastructure_vpc_flow_logs_glue_table_partition_keys = [
     { name = "year", type = "int" },
     { name = "month", type = "int" },

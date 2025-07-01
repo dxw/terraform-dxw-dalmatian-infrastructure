@@ -46,8 +46,9 @@ resource "aws_nat_gateway" "infrastructure" {
   count = local.infrastructure_vpc_network_enable_private && local.infrastructure_vpc_network_enable_public ? 1 : 0
 
   allocation_id = aws_eip.infrastructure_nat[0].id
-  subnet_id     = aws_subnet.infrastructure_public[element(tolist(local.infrastructure_vpc_network_availability_zones), 0)].id
-  depends_on    = [aws_internet_gateway.infrastructure_public]
+  subnet_id     = local.enable_infrastructure_vpc_egress_domain_filtering ? aws_subnet.infrastructure_egress_domain_filtering_nat[0].id : aws_subnet.infrastructure_public[element(tolist(local.infrastructure_vpc_network_availability_zones), 0)].id
+
+  depends_on = [aws_internet_gateway.infrastructure_public]
 }
 
 resource "aws_route" "private_nat_gateway" {
@@ -55,5 +56,6 @@ resource "aws_route" "private_nat_gateway" {
 
   route_table_id         = aws_route_table.infrastructure_private[0].id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.infrastructure[0].id
+  nat_gateway_id         = local.enable_infrastructure_vpc_egress_domain_filtering ? null : aws_nat_gateway.infrastructure[0].id
+  vpc_endpoint_id        = local.enable_infrastructure_vpc_egress_domain_filtering ? local.infrastructure_vpc_egress_domain_filtering_endpoint_id : null
 }

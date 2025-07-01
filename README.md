@@ -110,6 +110,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_log_group.infrastructure_ecs_cluster_datadog_agent](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_ecs_cluster_waf](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.infrastructure_egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_rds_exports](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_s3_to_azure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_utilities](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
@@ -404,6 +405,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_nat_gateway.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway) | resource |
 | [aws_network_acl.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl) | resource |
 | [aws_network_acl.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl) | resource |
+| [aws_network_acl_association.infrastructure_egress_domain_filtering_firewall](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_association) | resource |
+| [aws_network_acl_association.infrastructure_egress_domain_filtering_nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_association) | resource |
 | [aws_network_acl_association.infrastructure_private_subnets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_association) | resource |
 | [aws_network_acl_association.infrastructure_public_subnets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_association) | resource |
 | [aws_network_acl_rule.egress_allow_all_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
@@ -414,9 +417,16 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_network_acl_rule.ingress_allow_all_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
 | [aws_network_acl_rule.ingress_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
 | [aws_network_acl_rule.ingress_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
+| [aws_networkfirewall_firewall.infrastructure_egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_firewall) | resource |
+| [aws_networkfirewall_firewall_policy.infrastructure_egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_firewall_policy) | resource |
+| [aws_networkfirewall_logging_configuration.infrastructure_egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_logging_configuration) | resource |
+| [aws_networkfirewall_rule_group.infrastructure_egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group) | resource |
 | [aws_placement_group.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/placement_group) | resource |
 | [aws_rds_cluster.infrastructure_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster) | resource |
 | [aws_rds_cluster_instance.infrastructure_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_instance) | resource |
+| [aws_route.infrastructure_egress_domain_filtering_firewall_nat_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
+| [aws_route.infrastructure_egress_domain_filtering_nat_internet_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
+| [aws_route.infrastructure_egress_domain_filtering_nat_private_return](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_route.infrustructure_public_internet_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_route.private_nat_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_route53_record.cloudfront_redirects_alias_a](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
@@ -439,8 +449,12 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_route53_record.service_record_ipv6](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_route53_zone.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
 | [aws_route53_zone.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
+| [aws_route_table.infrastructure_egress_domain_filtering_firewall](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
+| [aws_route_table.infrastructure_egress_domain_filtering_nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
 | [aws_route_table.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
 | [aws_route_table.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
+| [aws_route_table_association.infrastructure_egress_domain_filtering_firewall](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
+| [aws_route_table_association.infrastructure_egress_domain_filtering_nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_route_table_association.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_route_table_association.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_s3_bucket.cloudformation_custom_stack_template_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
@@ -565,6 +579,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_sns_topic_subscription.ecs_cluster_infrastructure_draining_autoscaling_lifecycle_termination](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
 | [aws_ssm_document.infrastructure_vpc_transfer_s3_download](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_document) | resource |
 | [aws_ssm_document.infrastructure_vpc_transfer_s3_upload](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_document) | resource |
+| [aws_subnet.infrastructure_egress_domain_filtering_firewall](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
+| [aws_subnet.infrastructure_egress_domain_filtering_nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.infrastructure_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.infrastructure_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
@@ -708,6 +724,8 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_infrastructure_vpc"></a> [infrastructure\_vpc](#input\_infrastructure\_vpc) | Enable infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_assign_generated_ipv6_cidr_block"></a> [infrastructure\_vpc\_assign\_generated\_ipv6\_cidr\_block](#input\_infrastructure\_vpc\_assign\_generated\_ipv6\_cidr\_block) | Assign generated IPv6 CIDR block on infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_cidr_block"></a> [infrastructure\_vpc\_cidr\_block](#input\_infrastructure\_vpc\_cidr\_block) | Infrastructure VPC CIDR block | `string` | n/a | yes |
+| <a name="input_infrastructure_vpc_egress_domain_filtering_allow_list"></a> [infrastructure\_vpc\_egress\_domain\_filtering\_allow\_list](#input\_infrastructure\_vpc\_egress\_domain\_filtering\_allow\_list) | Domains that resources in the private subnets may reach over HTTP and TLS, enforced by an AWS Network Firewall between the private subnets and the NAT gateway. A leading dot (`.example.com`) also allows every subdomain; without one only that exact host is allowed. Domains the platform itself needs (AWS APIs, plus the Datadog, syslog, logspout and S3-to-Azure endpoints when configured) are added automatically. Only HTTP and TLS are filtered; restrict other protocols with the private egress network ACL rules. Leave empty to disable. Needs public and private subnets, and an ECS cluster that is not publicly available. | `list(string)` | `[]` | no |
+| <a name="input_infrastructure_vpc_egress_domain_filtering_log_retention"></a> [infrastructure\_vpc\_egress\_domain\_filtering\_log\_retention](#input\_infrastructure\_vpc\_egress\_domain\_filtering\_log\_retention) | Retention in days of the egress domain filtering alert logs, which record each dropped request and the domain it was for | `number` | `30` | no |
 | <a name="input_infrastructure_vpc_enable_dns_hostnames"></a> [infrastructure\_vpc\_enable\_dns\_hostnames](#input\_infrastructure\_vpc\_enable\_dns\_hostnames) | Enable DNS hostnames on infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_enable_dns_support"></a> [infrastructure\_vpc\_enable\_dns\_support](#input\_infrastructure\_vpc\_enable\_dns\_support) | Enable DNS support on infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_enable_network_address_usage_metrics"></a> [infrastructure\_vpc\_enable\_network\_address\_usage\_metrics](#input\_infrastructure\_vpc\_enable\_network\_address\_usage\_metrics) | Enable network address usage metrics on infrastructure VPC | `bool` | n/a | yes |
