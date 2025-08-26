@@ -494,7 +494,7 @@ variable "infrastructure_ecs_cluster_logspout_command" {
 }
 
 variable "infrastructure_ecs_cluster_wafs" {
-  description = "Map of WAF ACLs to craete, which can be used with service CloudFront distributions"
+  description = "Map of WAF ACLs to create, which can be used with service CloudFront distributions"
   type = map(object({
     ipv4_deny_list  = optional(list(string), null)
     ipv4_allow_list = optional(list(string), null)
@@ -506,7 +506,21 @@ variable "infrastructure_ecs_cluster_wafs" {
       exclude_rules          = optional(list(string), null)
       excluded_path_patterns = optional(list(string), null)
     })), null)
+    rate_limiting = optional(object({
+      enabled               = bool
+      limit                 = optional(number, 1000)
+      evaluation_window_sec = optional(number, 300)
+    }), null)
   }))
+  validation {
+    condition = alltrue([
+      for waf in var.infrastructure_ecs_cluster_wafs :
+      waf.rate_limiting != null && waf.rate_limiting.enabled && waf.rate_limiting.evaluation_window_sec != null ?
+      contains([60, 120, 300, 600], waf.rate_limiting.evaluation_window_sec) :
+      true
+    ])
+    error_message = "Valid values for evaluation_window_sec are 60, 120, 300, and 600."
+  }
 }
 
 variable "infrastructure_ecs_cluster_service_defaults" {
