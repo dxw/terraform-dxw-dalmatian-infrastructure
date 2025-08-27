@@ -84,6 +84,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_instance_refresh_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.ecs_cluster_infrastructure_pending_task_metric_lambda_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_cloudwatch_log_group.egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_ecs_cluster_datadog_agent](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_ecs_cluster_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.infrastructure_rds_exports](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
@@ -335,6 +336,10 @@ This project creates and manages resources within an AWS account for infrastruct
 | [aws_network_acl_rule.ingress_allow_all_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
 | [aws_network_acl_rule.ingress_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
 | [aws_network_acl_rule.ingress_public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule) | resource |
+| [aws_networkfirewall_firewall.egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_firewall) | resource |
+| [aws_networkfirewall_firewall_policy.egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_firewall_policy) | resource |
+| [aws_networkfirewall_logging_configuration.egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_logging_configuration) | resource |
+| [aws_networkfirewall_rule_group.egress_domain_filtering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/networkfirewall_rule_group) | resource |
 | [aws_placement_group.infrastructure_ecs_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/placement_group) | resource |
 | [aws_rds_cluster.infrastructure_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster) | resource |
 | [aws_rds_cluster_instance.infrastructure_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_instance) | resource |
@@ -600,6 +605,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="input_infrastructure_vpc"></a> [infrastructure\_vpc](#input\_infrastructure\_vpc) | Enable infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_assign_generated_ipv6_cidr_block"></a> [infrastructure\_vpc\_assign\_generated\_ipv6\_cidr\_block](#input\_infrastructure\_vpc\_assign\_generated\_ipv6\_cidr\_block) | Assign generated IPv6 CIDR block on infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_cidr_block"></a> [infrastructure\_vpc\_cidr\_block](#input\_infrastructure\_vpc\_cidr\_block) | Infrastructure VPC CIDR block | `string` | n/a | yes |
+| <a name="input_infrastructure_vpc_egress_domain_filtering_allow_list"></a> [infrastructure\_vpc\_egress\_domain\_filtering\_allow\_list](#input\_infrastructure\_vpc\_egress\_domain\_filtering\_allow\_list) | List of domains to allow outbout, using AWS Network firewall. If empty, domain filtering will not be applied | `list(string)` | n/a | yes |
 | <a name="input_infrastructure_vpc_enable_dns_hostnames"></a> [infrastructure\_vpc\_enable\_dns\_hostnames](#input\_infrastructure\_vpc\_enable\_dns\_hostnames) | Enable DNS hostnames on infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_enable_dns_support"></a> [infrastructure\_vpc\_enable\_dns\_support](#input\_infrastructure\_vpc\_enable\_dns\_support) | Enable DNS support on infrastructure VPC | `bool` | n/a | yes |
 | <a name="input_infrastructure_vpc_enable_network_address_usage_metrics"></a> [infrastructure\_vpc\_enable\_network\_address\_usage\_metrics](#input\_infrastructure\_vpc\_enable\_network\_address\_usage\_metrics) | Enable network address usage metrics on infrastructure VPC | `bool` | n/a | yes |
