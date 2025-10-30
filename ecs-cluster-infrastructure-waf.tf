@@ -61,7 +61,11 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
   default_action {
     allow {}
   }
-
+  custom_response_body {
+    key          = "rate_limit_exceeded"
+    content      = "You have exceeded the rate limit for this service. Please try again later."
+    content_type = "TEXT_PLAIN"
+  }
   dynamic "rule" {
     for_each = each.value["ipv4_deny_list"] != null ? [1] : []
 
@@ -253,10 +257,39 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
       }
     }
   }
+  dynamic "rule" {
+    for_each = each.value.rate_limiting != null && each.value.rate_limiting.enabled ? [1] : []
+    content {
+      name     = "RateLimit"
+      priority = 1000 # Ensure this rule is processed last
 
+      action {
+        block {
+          custom_response {
+            response_code            = 429
+            custom_response_body_key = "rate_limit_exceeded"
+          }
+        }
+      }
+      statement {
+        rate_based_statement {
+          limit                 = each.value.rate_limiting.limit
+          aggregate_key_type    = "IP"
+          evaluation_window_sec = each.value.rate_limiting.evaluation_window_sec
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-rate-limit"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
   visibility_config {
     cloudwatch_metrics_enabled = true
     metric_name                = "${local.resource_prefix}-${each.key}"
     sampled_requests_enabled   = true
   }
 }
+
