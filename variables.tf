@@ -914,6 +914,7 @@ variable "custom_s3_buckets" {
         cloudfront_basic_auth_user_list: Map of username and password's to use as basic auth ({ alex: somepassword, joe: otherpassword })
         cloudfront_infrastructure_ecs_cluster_service: Conditionally create an Origin on a CloudFront distribution that is serving the given Infrastructure ECS Cluster Service name
         cloudfront_infrastructure_ecs_cluster_service_path: If `cloudfront_infrastructure_ecs_cluster_service`, set this to the path that objects will be served from.
+        cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
         custom_bucket_policy_statements: Conditionally add a string of comma delimited user-defined key policy statements (eg. '{"Effect": ...},{"Effect": ...}'
       }
     }
@@ -932,6 +933,7 @@ variable "custom_s3_buckets" {
     cloudfront_basic_auth_user_list                       = optional(map(string), null)
     cloudfront_infrastructure_ecs_cluster_service         = optional(string, null)
     cloudfront_infrastructure_ecs_cluster_service_path    = optional(string, null)
+    cloudfront_waf_association                            = optional(string, null)
     custom_bucket_policy_statements                       = optional(string, null)
   }))
 }
