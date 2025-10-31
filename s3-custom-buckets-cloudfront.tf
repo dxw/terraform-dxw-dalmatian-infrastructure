@@ -10,6 +10,7 @@ resource "aws_cloudfront_distribution" "custom_s3_buckets" {
   is_ipv6_enabled = true
   http_version    = "http2and3"
   price_class     = "PriceClass_100"
+  web_acl_id      = each.value["cloudfront_waf_association"] != null ? aws_wafv2_web_acl.infrastructure_ecs_cluster[each.value["cloudfront_waf_association"]].arn : null
 
   viewer_certificate {
     acm_certificate_arn            = each.value["cloudfront_decicated_distribution_tls_certificate_arn"] != null ? each.value["cloudfront_decicated_distribution_tls_certificate_arn"] : local.enable_infrastructure_wildcard_certificate ? aws_acm_certificate_validation.infrastructure_wildcard_us_east_1[0].certificate_arn : null
