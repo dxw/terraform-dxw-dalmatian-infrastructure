@@ -102,7 +102,7 @@ data "aws_cloudfront_response_headers_policy" "managed_policy" {
 }
 
 data "external" "s3_presigned_url" {
-  for_each = local.enable_cloudformatian_s3_template_store ? local.s3_object_presign : []
+  for_each = local.enable_cloudformatian_s3_template_store ? local.s3_object_presign : {}
 
   program = ["/bin/bash", "external-data-scripts/s3-object-presign.sh"]
   query = {
