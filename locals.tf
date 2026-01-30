@@ -251,11 +251,11 @@ locals {
     "mysql"    = "${path.root}/ecs-entrypoints/rds-s3-backups-mysql.txt.tpl"
     "postgres" = "${path.root}/ecs-entrypoints/rds-s3-backups-postgres.txt.tpl"
   }
-  enable_infrastructure_rds_backup_to_s3          = var.enable_infrastructure_rds_backup_to_s3
-  infrastructure_rds_backup_to_s3_cron_expression = var.infrastructure_rds_backup_to_s3_cron_expression
-  infrastructure_rds_backup_to_s3_retention       = var.infrastructure_rds_backup_to_s3_retention
-  enable_infrastructure_utilities                 = length(var.infrastructure_rds) > 0
-  infrastructure_utilities_ecs_cluster_name       = "${local.resource_prefix}-infrastructure-utilities"
+  enable_infrastructure_rds_backup_to_s3                  = var.enable_infrastructure_rds_backup_to_s3
+  infrastructure_rds_backup_to_s3_cron_expression         = var.infrastructure_rds_backup_to_s3_cron_expression
+  infrastructure_rds_backup_to_s3_retention               = var.infrastructure_rds_backup_to_s3_retention
+  enable_infrastructure_utilities                         = length(var.infrastructure_rds) > 0
+  infrastructure_utilities_ecs_cluster_name               = "${local.resource_prefix}-infrastructure-utilities"
   infrastructure_utilities_ecs_cluster_container_insights = var.infrastructure_utilities_ecs_cluster_container_insights
 
   infrastructure_elasticache_defaults = var.infrastructure_elasticache_defaults
