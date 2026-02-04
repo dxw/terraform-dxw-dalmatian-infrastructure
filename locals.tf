@@ -129,6 +129,7 @@ locals {
 
   enable_infrastructure_ecs_cluster                                = var.enable_infrastructure_ecs_cluster && local.infrastructure_vpc
   infrastructure_ecs_cluster_name                                  = "${local.resource_prefix}-infrastructure"
+  infrastructure_ecs_cluster_container_insights                    = var.infrastructure_ecs_cluster_container_insights
   infrastructure_ecs_cluster_ami_version                           = var.infrastructure_ecs_cluster_ami_version
   infrastructure_ecs_cluster_ami_name_filter                       = "al2023-ami-ecs-hvm-${local.infrastructure_ecs_cluster_ami_version}"
   infrastructure_ecs_cluster_ebs_docker_storage_volume_device_name = "/dev/xvdcz"
@@ -250,11 +251,12 @@ locals {
     "mysql"    = "${path.root}/ecs-entrypoints/rds-s3-backups-mysql.txt.tpl"
     "postgres" = "${path.root}/ecs-entrypoints/rds-s3-backups-postgres.txt.tpl"
   }
-  enable_infrastructure_rds_backup_to_s3          = var.enable_infrastructure_rds_backup_to_s3
-  infrastructure_rds_backup_to_s3_cron_expression = var.infrastructure_rds_backup_to_s3_cron_expression
-  infrastructure_rds_backup_to_s3_retention       = var.infrastructure_rds_backup_to_s3_retention
-  enable_infrastructure_utilities                 = length(var.infrastructure_rds) > 0
-  infrastructure_utilities_ecs_cluster_name       = "${local.resource_prefix}-infrastructure-utilities"
+  enable_infrastructure_rds_backup_to_s3                  = var.enable_infrastructure_rds_backup_to_s3
+  infrastructure_rds_backup_to_s3_cron_expression         = var.infrastructure_rds_backup_to_s3_cron_expression
+  infrastructure_rds_backup_to_s3_retention               = var.infrastructure_rds_backup_to_s3_retention
+  enable_infrastructure_utilities                         = length(var.infrastructure_rds) > 0
+  infrastructure_utilities_ecs_cluster_name               = "${local.resource_prefix}-infrastructure-utilities"
+  infrastructure_utilities_ecs_cluster_container_insights = var.infrastructure_utilities_ecs_cluster_container_insights
 
   infrastructure_elasticache_defaults = var.infrastructure_elasticache_defaults
   infrastructure_elasticache_keys     = length(var.infrastructure_elasticache) > 0 ? keys(values(var.infrastructure_elasticache)[0]) : []

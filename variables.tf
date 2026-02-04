@@ -274,6 +274,26 @@ variable "infrastructure_ecs_cluster_ami_version" {
   type        = string
 }
 
+variable "infrastructure_ecs_cluster_container_insights" {
+  description = "Enable Container Insights for the Infrastructure ECS Cluster"
+  type        = string
+  default     = "enabled"
+  validation {
+    condition     = contains(["disabled", "enabled", "enhanced"], var.infrastructure_ecs_cluster_container_insights)
+    error_message = "Valid values for infrastructure_ecs_cluster_container_insights are 'disabled', 'enabled', and 'enhanced'."
+  }
+}
+
+variable "infrastructure_utilities_ecs_cluster_container_insights" {
+  description = "Enable Container Insights for the Utilities ECS Cluster"
+  type        = string
+  default     = "enabled"
+  validation {
+    condition     = contains(["disabled", "enabled", "enhanced"], var.infrastructure_utilities_ecs_cluster_container_insights)
+    error_message = "Valid values for infrastructure_utilities_ecs_cluster_container_insights are 'disabled', 'enabled', and 'enhanced'."
+  }
+}
+
 variable "infrastructure_ecs_cluster_ebs_docker_storage_volume_size" {
   description = "Size of EBS volume for Docker storage on the infrastructure ECS instances"
   type        = number

@@ -5,7 +5,7 @@ resource "aws_ecs_cluster" "infrastrucutre_utilities" {
 
   setting {
     name  = "containerInsights"
-    value = "enabled"
+    value = local.infrastructure_utilities_ecs_cluster_container_insights
   }
 
   dynamic "configuration" {
