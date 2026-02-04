@@ -983,6 +983,13 @@ variable "custom_cloudformation_stacks" {
     on_failure            = optional(string, null)
     capabilities          = optional(list(string), null)
   }))
+
+  validation {
+    condition = alltrue([
+      for k, v in var.custom_cloudformation_stacks : can(regex("^[a-zA-Z0-9-]+$", k))
+    ])
+    error_message = "CloudFormation stack names (keys in custom_cloudformation_stacks) can only contain alphanumeric characters and hyphens."
+  }
 }
 
 variable "custom_resource_tags" {

@@ -279,9 +279,9 @@ locals {
   custom_lambda_functions          = var.custom_lambda_functions != null ? var.custom_lambda_functions : {}
   enable_lambda_functions_s3_store = length(local.custom_lambda_functions) > 0
 
-  s3_object_presign = local.enable_cloudformatian_s3_template_store ? toset([
-    for k, v in local.custom_cloudformation_stacks : "${aws_s3_bucket.cloudformation_custom_stack_template_store[0].id}/${v["s3_template_store_key"]}" if v["s3_template_store_key"] != null
-  ]) : []
+  s3_object_presign = local.enable_cloudformatian_s3_template_store ? {
+    for k, v in local.custom_cloudformation_stacks : k => "${aws_s3_bucket.cloudformation_custom_stack_template_store[0].id}/${v["s3_template_store_key"]}" if v["s3_template_store_key"] != null
+  } : {}
 
   default_tags = {
     Project        = local.project_name,
