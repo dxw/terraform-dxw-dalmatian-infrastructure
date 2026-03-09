@@ -12,22 +12,18 @@ resource "aws_s3_bucket_policy" "infrastructure_ecs_cluster_service_build_pipeli
   policy = templatefile(
     "${path.module}/policies/s3-bucket-policy.json.tpl",
     {
-      statement = <<EOT
-      [
-      ${templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-tls.json.tpl",
-      {
-        bucket_arn = aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn
-      }
-      )}${local.infrastructure_vpc_flow_logs_cloudwatch_logs && local.infrastructure_kms_encryption ? "," : ""}
-      ${templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-kms-encryption.json.tpl",
-      {
-        bucket_arn = local.infrastructure_kms_encryption ? aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn : ""
-      }
-  )}
-      ]
-      EOT
-}
-)
+      statement = "[${join(",", [
+        for s in [
+          templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-tls.json.tpl", {
+            bucket_arn = aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn
+          }),
+          local.infrastructure_kms_encryption ? templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-kms-encryption.json.tpl", {
+            bucket_arn = aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn
+          }) : null
+        ] : s if s != null && s != ""
+      ])}]"
+    }
+  )
 }
 
 resource "aws_s3_bucket_public_access_block" "infrastructure_ecs_cluster_service_build_pipeline_artifact_store" {

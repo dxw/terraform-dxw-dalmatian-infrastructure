@@ -10,17 +10,16 @@ resource "aws_kms_key" "infrastructure_rds" {
   policy = templatefile(
     "${path.root}/policies/kms-key-policy.json.tpl",
     {
-      statement = <<EOT
-      [
-      ${templatefile("${path.root}/policies/kms-key-policy-statements/root-allow-all.json.tpl",
-      {
-        aws_account_id = local.aws_account_id
-      }
-  )}${each.value["dedicated_kms_key_policy_statements"] != null ? ",${each.value["dedicated_kms_key_policy_statements"]}" : ""}
-      ]
-      EOT
-}
-)
+      statement = "[${join(",", [
+        for s in [
+          templatefile("${path.root}/policies/kms-key-policy-statements/root-allow-all.json.tpl", {
+            aws_account_id = local.aws_account_id
+          }),
+          each.value["dedicated_kms_key_policy_statements"]
+        ] : s if s != null && s != ""
+      ])}]"
+    }
+  )
 }
 
 resource "aws_kms_alias" "infrastructure_rds" {

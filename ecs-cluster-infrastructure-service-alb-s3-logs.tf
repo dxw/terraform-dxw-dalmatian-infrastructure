@@ -13,18 +13,18 @@ resource "aws_s3_bucket_policy" "infrastructure_ecs_cluster_service_alb_logs" {
   policy = templatefile(
     "${path.module}/policies/s3-bucket-policy.json.tpl",
     {
-      statement = <<EOT
-      [
-      ${templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-tls.json.tpl", { bucket_arn = aws_s3_bucket.infrastructure_ecs_cluster_service_alb_logs[0].arn })},
-      ${templatefile("${path.root}/policies/s3-bucket-policy-statements/alb-logs.json.tpl", {
-      bucket_arn     = aws_s3_bucket.infrastructure_ecs_cluster_service_alb_logs[0].arn,
-      elb_account_id = data.aws_elb_service_account.current.id,
-      account_id     = local.aws_account_id
-})}
-      ]
-      EOT
-}
-)
+      statement = "[${join(",", [
+        for s in [
+          templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-tls.json.tpl", { bucket_arn = aws_s3_bucket.infrastructure_ecs_cluster_service_alb_logs[0].arn }),
+          templatefile("${path.root}/policies/s3-bucket-policy-statements/alb-logs.json.tpl", {
+            bucket_arn     = aws_s3_bucket.infrastructure_ecs_cluster_service_alb_logs[0].arn,
+            elb_account_id = data.aws_elb_service_account.current.id,
+            account_id     = local.aws_account_id
+          })
+        ] : s if s != null && s != ""
+      ])}]"
+    }
+  )
 }
 
 resource "aws_s3_bucket_public_access_block" "infrastructure_ecs_cluster_service_alb_logs" {

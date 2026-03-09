@@ -12,26 +12,23 @@ resource "aws_s3_bucket_policy" "custom" {
   policy = templatefile(
     "${path.module}/policies/s3-bucket-policy.json.tpl",
     {
-      statement = <<EOT
-      [
-      ${templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-tls.json.tpl",
-      {
-        bucket_arn = aws_s3_bucket.custom[each.key].arn
-      }
-      )}${contains([for k, v in local.custom_s3_buckets : (v["cloudfront_dedicated_distribution"] == true || v["cloudfront_infrastructure_ecs_cluster_service"] != null) ? true : false], true) && local.infrastructure_kms_encryption ? "," : ""}
-      ${templatefile("${path.root}/policies/s3-bucket-policy-statements/cloudfront-distribution-allow.json.tpl",
-      {
-        bucket_arn = aws_s3_bucket.custom[each.key].arn,
-        cloudfront_distribution_arns = jsonencode(distinct(concat(
-          [for k, v in local.custom_s3_buckets : aws_cloudfront_distribution.custom_s3_buckets[k].arn if v["cloudfront_dedicated_distribution"] == true],
-          [for k, v in local.custom_s3_buckets : aws_cloudfront_distribution.infrastructure_ecs_cluster_service_cloudfront[v["cloudfront_infrastructure_ecs_cluster_service"]].arn if v["cloudfront_infrastructure_ecs_cluster_service"] != null]
-        )))
-      }
-  )}${each.value["custom_bucket_policy_statements"] != null ? ",${each.value["custom_bucket_policy_statements"]}" : ""}
-      ]
-      EOT
-}
-)
+      statement = "[${join(",", [
+        for s in [
+          templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-tls.json.tpl", {
+            bucket_arn = aws_s3_bucket.custom[each.key].arn
+          }),
+          contains([for k, v in local.custom_s3_buckets : (v["cloudfront_dedicated_distribution"] == true || v["cloudfront_infrastructure_ecs_cluster_service"] != null) ? true : false], true) && local.infrastructure_kms_encryption ? templatefile("${path.root}/policies/s3-bucket-policy-statements/cloudfront-distribution-allow.json.tpl", {
+            bucket_arn = aws_s3_bucket.custom[each.key].arn,
+            cloudfront_distribution_arns = jsonencode(distinct(concat(
+              [for k, v in local.custom_s3_buckets : aws_cloudfront_distribution.custom_s3_buckets[k].arn if v["cloudfront_dedicated_distribution"] == true],
+              [for k, v in local.custom_s3_buckets : aws_cloudfront_distribution.infrastructure_ecs_cluster_service_cloudfront[v["cloudfront_infrastructure_ecs_cluster_service"]].arn if v["cloudfront_infrastructure_ecs_cluster_service"] != null]
+            )))
+          }) : null,
+          each.value["custom_bucket_policy_statements"]
+        ] : s if s != null && s != ""
+      ])}]"
+    }
+  )
 }
 
 resource "aws_s3_bucket_ownership_controls" "custom" {

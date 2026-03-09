@@ -11,23 +11,19 @@ resource "aws_s3_bucket_policy" "infrastructure_vpc_transfer" {
   policy = templatefile(
     "${path.module}/policies/s3-bucket-policy.json.tpl",
     {
-      statement = <<EOT
-      [
-      ${templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-tls.json.tpl",
-      {
-        bucket_arn = aws_s3_bucket.infrastructure_vpc_transfer[0].arn
-      }
-      )},
-      ${templatefile("${path.root}/policies/s3-bucket-policy-statements/vpc-rw.json.tpl",
-      {
-        bucket_arn = aws_s3_bucket.infrastructure_vpc_transfer[0].arn,
-        vpc_ids    = jsonencode(local.infrastructure_vpc_transfer_s3_bucket_access_vpc_ids)
-      }
-  )}
-      ]
-      EOT
-}
-)
+      statement = "[${join(",", [
+        for s in [
+          templatefile("${path.root}/policies/s3-bucket-policy-statements/enforce-tls.json.tpl", {
+            bucket_arn = aws_s3_bucket.infrastructure_vpc_transfer[0].arn
+          }),
+          templatefile("${path.root}/policies/s3-bucket-policy-statements/vpc-rw.json.tpl", {
+            bucket_arn = aws_s3_bucket.infrastructure_vpc_transfer[0].arn,
+            vpc_ids    = jsonencode(local.infrastructure_vpc_transfer_s3_bucket_access_vpc_ids)
+          })
+        ] : s if s != null && s != ""
+      ])}]"
+    }
+  )
 }
 
 resource "aws_s3_bucket_public_access_block" "infrastructure_vpc_transfer" {
