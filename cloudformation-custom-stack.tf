@@ -1,10 +1,8 @@
 resource "aws_cloudformation_stack" "custom" {
   for_each = local.custom_cloudformation_stacks
 
-  name = "cf-${local.resource_prefix_hash}-${each.key}"
-  parameters = each.value["parameters"] == null ? null : {
-    for k, v in each.value["parameters"] : k => contains(["AdminPass", "AdminPassword"], k) ? sensitive(v) : v
-  }
+  name              = "cf-${local.resource_prefix_hash}-${each.key}"
+  parameters        = each.value["parameters"]
   template_body     = each.value["template_body"]
   template_url      = local.enable_cloudformatian_s3_template_store && each.value["s3_template_store_key"] != null ? sensitive(data.external.s3_presigned_url[each.key].result.url) : null
   on_failure        = each.value["on_failure"] != null ? each.value["on_failure"] : "DO_NOTHING"
