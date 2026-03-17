@@ -5,6 +5,11 @@
 
 This project creates and manages resources within an AWS account for infrastructures on dxw's Dalmatian hosting platform.
 
+## Documentation
+
+*   **[Features](docs/FEATURES.md)**: A comprehensive overview of the capabilities provided by this module.
+*   **[Architecture Decision Records (ADRs)](docs/adr/INDEX.md)**: A collection of records for the significant architectural decisions made in this project.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
