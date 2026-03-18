@@ -85,3 +85,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "infrastructure_rds_s3_backups"
     status = "Enabled"
   }
 }
+
+resource "aws_s3_bucket_metric" "infrastructure_rds_s3_backups_missing_writes" {
+  count = local.enable_infrastructure_rds_backup_to_s3 ? 1 : 0
+
+  bucket = aws_s3_bucket.infrastructure_rds_s3_backups[0].id
+  name   = "EntireBucket"
+}

@@ -61,7 +61,7 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_service_blue_green_codedep
   description = "${local.resource_prefix}-ecs-cluster-service-blue-green-codedeploy-${each.key}-kms-encrypt"
   policy = templatefile(
     "${path.root}/policies/kms-encrypt.json.tpl",
-    { kms_key_arn = aws_kms_key.infrastructure[0].arn }
+    { kms_key_arn = jsonencode(aws_kms_key.infrastructure[0].arn) }
   )
 }
 

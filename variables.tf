@@ -936,6 +936,7 @@ variable "custom_s3_buckets" {
         cloudfront_infrastructure_ecs_cluster_service_path: If `cloudfront_infrastructure_ecs_cluster_service`, set this to the path that objects will be served from.
         cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
         custom_bucket_policy_statements: Conditionally add a string of comma delimited user-defined key policy statements (eg. '{"Effect": ...},{"Effect": ...}'
+        enable_missing_writes_alert: Conditionally enable an alert for missing writes to the S3 bucket.
       }
     }
   EOT
@@ -955,7 +956,20 @@ variable "custom_s3_buckets" {
     cloudfront_infrastructure_ecs_cluster_service_path    = optional(string, null)
     cloudfront_waf_association                            = optional(string, null)
     custom_bucket_policy_statements                       = optional(string, null)
+    enable_missing_writes_alert                           = optional(bool, false)
   }))
+}
+
+variable "external_s3_buckets_missing_writes_alert" {
+  description = "List of bucket names (in the same account) to monitor for missing writes."
+  type        = list(string)
+  default     = []
+}
+
+variable "s3_missing_writes_alert_lambda_schedule_expression" {
+  description = "The schedule expression for the S3 missing writes alert Lambda function."
+  type        = string
+  default     = "cron(0 10 * * ? *)"
 }
 
 variable "enable_cloudformatian_s3_template_store" {
