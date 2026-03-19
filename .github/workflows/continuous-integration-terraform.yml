@@ -63,7 +63,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1
         with:
           app-id: ${{ secrets.TERRAFORM_DOCS_APP_ID }}
           private-key: ${{ secrets.TERRAFORM_DOCS_APP_PRIVATE_KEY }}
@@ -99,7 +99,7 @@ jobs:
 
       - name: Auto-commit updated documentation
         if: "startsWith(github.head_ref || github.ref_name, 'renovate/')"
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
         with:
           commit_message: "${{ env.GIT_COMMIT_MESSAGE }} - Regenerate Terraform docs"
           file_pattern: README.md
