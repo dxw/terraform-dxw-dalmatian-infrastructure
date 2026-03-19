@@ -73,6 +73,16 @@ jobs:
         run: |
           echo "GITHUB_PR_BRANCH=${{ github.head_ref }}" >> $GITHUB_ENV
 
+      - name: Remove existing Terraform docs commit if present
+        if: "startsWith(env.GITHUB_PR_BRANCH, 'renovate/')"
+        run: |
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+          if git log -1 --pretty=%s | grep -q " - Terraform Docs$"; then
+            git reset --hard HEAD~1
+            git push origin HEAD:${{ github.event.pull_request.head.ref }} --force
+          fi
+
       - name: Get commit message
         run: |
           echo "GIT_COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
