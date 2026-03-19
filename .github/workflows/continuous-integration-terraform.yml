@@ -64,14 +64,13 @@ jobs:
       - name: Check out code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.TERRAFORM_DOCS_RENOVATE_WORKFLOW_GITHUB_TOKEN }}
+          ref: ${{ github.head_ref || github.ref }}
+          token: ${{ secrets.TERRAFORM_DOCS_RENOVATE_WORKFLOW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
-      - name: Get PR base branch
-        id: pr-base-branch-name
-        if: github.event_name == 'pull_request'
+      - name: Get PR branch
+        id: pr-branch-name
         run: |
-          echo "GITHUB_PR_BRANCH=${{ github.head_ref }}" >> $GITHUB_ENV
+          echo "GITHUB_PR_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
 
       - name: Get commit message
         run: |
@@ -96,5 +95,5 @@ jobs:
           output-file: README.md
           output-method: inject
           git-push: true
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ env.GITHUB_PR_BRANCH }}
           git-commit-message: "${{ env.GIT_COMMIT_MESSAGE }} - Terraform Docs"
