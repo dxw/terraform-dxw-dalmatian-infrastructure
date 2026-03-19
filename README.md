@@ -12,24 +12,6 @@ This project creates and manages resources within an AWS account for infrastruct
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.5 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.4.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.30.0 |
-| <a name="requirement_datadog"></a> [datadog](#requirement\_datadog) | >= 3.46.0 |
-| <a name="requirement_external"></a> [external](#requirement\_external) | >= 2.3.2 |
-| <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.2.2 |
-| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.6.0 |
-
-## Providers
-
-| Name | Version |
-|------|---------|
-| <a name="provider_archive"></a> [archive](#provider\_archive) | 2.7.0 |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.97.0 |
-| <a name="provider_aws.awsroute53root"></a> [aws.awsroute53root](#provider\_aws.awsroute53root) | 5.97.0 |
-| <a name="provider_aws.useast1"></a> [aws.useast1](#provider\_aws.useast1) | 5.97.0 |
-| <a name="provider_datadog"></a> [datadog](#provider\_datadog) | 3.63.0 |
-| <a name="provider_external"></a> [external](#provider\_external) | 2.3.5 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.7.2 |
-| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
 
