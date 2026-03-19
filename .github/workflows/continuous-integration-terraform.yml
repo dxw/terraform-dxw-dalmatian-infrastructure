@@ -64,18 +64,24 @@ jobs:
       - name: Check out code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.TERRAFORM_DOCS_RENOVATE_WORKFLOW_GITHUB_TOKEN }}
+          ref: ${{ github.head_ref || github.ref }}
 
-      - name: Get PR base branch
-        id: pr-base-branch-name
-        if: github.event_name == 'pull_request'
+      - name: Get PR branch
+        id: pr-branch-name
         run: |
-          echo "GITHUB_PR_BRANCH=${{ github.head_ref }}" >> $GITHUB_ENV
+          echo "GITHUB_PR_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
 
       - name: Get commit message
         run: |
           echo "GIT_COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
+
+      - name: Configure git credentials for Renovate
+        if: "startsWith(env.GITHUB_PR_BRANCH, 'renovate/')"
+        env:
+          GIT_TOKEN: ${{ secrets.TERRAFORM_DOCS_RENOVATE_WORKFLOW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          git config --local http.https://github.com/.extraheader \
+            "AUTHORIZATION: basic $(printf '%s' "x-access-token:${GIT_TOKEN}" | base64 | tr -d '\n')"
 
       - name: Generate Terraform docs
         uses: terraform-docs/gh-actions@6de6da0cefcc6b4b7a5cbea4d79d97060733093c # v1.4.1
@@ -96,5 +102,5 @@ jobs:
           output-file: README.md
           output-method: inject
           git-push: true
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ env.GITHUB_PR_BRANCH }}
           git-commit-message: "${{ env.GIT_COMMIT_MESSAGE }} - Terraform Docs"
