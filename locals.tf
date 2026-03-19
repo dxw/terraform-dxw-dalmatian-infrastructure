@@ -12,17 +12,21 @@ locals {
 
   infrastructure_logging_bucket_retention = var.infrastructure_logging_bucket_retention
 
+  enable_s3_missing_writes_alert = length([for k, v in local.custom_s3_buckets : k if v.enable_missing_writes_alert == true]) > 0 || local.enable_infrastructure_rds_backup_to_s3 || length(var.external_s3_buckets_missing_writes_alert) > 0
+
   infrastructure_slack_sns_topic_name    = "${local.project_name}-cloudwatch-slack-alerts"
   infrastructure_opsgenie_sns_topic_name = "${local.project_name}-cloudwatch-opsgenie-alerts"
   infrastructure_slack_sns_topic_in_use = (
     local.infrastructure_ecs_cluster_asg_cpu_alert_slack ||
     local.infrastructure_ecs_cluster_pending_task_alert_slack ||
-    local.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack
+    local.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack ||
+    local.enable_s3_missing_writes_alert
   )
   infrastructure_opsgenie_sns_topic_in_use = (
     local.infrastructure_ecs_cluster_asg_cpu_alert_opsgenie ||
     local.infrastructure_ecs_cluster_pending_task_alert_opsgenie ||
-    local.infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie
+    local.infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie ||
+    local.enable_s3_missing_writes_alert
   )
 
   enable_infrastructure_logs_bucket = (
