@@ -10,6 +10,14 @@ This project creates and manages resources within an AWS account for infrastruct
 
 | Name | Version |
 |------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.5 |
+| <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.4.1 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.30.0 |
+| <a name="requirement_datadog"></a> [datadog](#requirement\_datadog) | >= 3.46.0 |
+| <a name="requirement_external"></a> [external](#requirement\_external) | >= 2.3.2 |
+| <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.2.2 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.6.0 |
+
 ## Providers
 
 | Name | Version |
