@@ -67,33 +67,32 @@ jobs:
           ref: ${{ github.head_ref || github.ref }}
           token: ${{ secrets.TERRAFORM_DOCS_RENOVATE_WORKFLOW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
-      - name: Get PR branch
-        id: pr-branch-name
-        run: |
-          echo "GITHUB_PR_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
-
       - name: Get commit message
         run: |
           echo "GIT_COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
 
       - name: Generate Terraform docs
         uses: terraform-docs/gh-actions@6de6da0cefcc6b4b7a5cbea4d79d97060733093c # v1.4.1
-        if: "!startsWith(env.GITHUB_PR_BRANCH, 'renovate/')"
         with:
           working-dir: .
           config-file: .terraform-docs.yml
           output-file: README.md
           output-method: inject
-          fail-on-diff: true
+          git-push: false
+          fail-on-diff: false
 
-      - name: Generate Terraform docs for Renovate
-        uses: terraform-docs/gh-actions@6de6da0cefcc6b4b7a5cbea4d79d97060733093c # v1.4.1
-        if: "startsWith(env.GITHUB_PR_BRANCH, 'renovate/')"
+      - name: Check for documentation diffs
+        if: "!startsWith(github.head_ref || github.ref_name, 'renovate/')"
+        run: |
+          if [ -n "$(git status --porcelain README.md)" ]; then
+            echo "Documentation is out of date. Please run 'terraform-docs' locally and commit the changes."
+            git diff README.md
+            exit 1
+          fi
+
+      - name: Auto-commit updated documentation
+        if: "startsWith(github.head_ref || github.ref_name, 'renovate/')"
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          working-dir: .
-          config-file: .terraform-docs.yml
-          output-file: README.md
-          output-method: inject
-          git-push: true
-          ref: ${{ env.GITHUB_PR_BRANCH }}
-          git-commit-message: "${{ env.GIT_COMMIT_MESSAGE }} - Terraform Docs"
+          commit_message: "${{ env.GIT_COMMIT_MESSAGE }} - Regenerate Terraform docs"
+          file_pattern: README.md
