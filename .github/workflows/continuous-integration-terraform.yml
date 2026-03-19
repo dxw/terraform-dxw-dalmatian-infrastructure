@@ -66,6 +66,7 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref }}
           token: ${{ secrets.TERRAFORM_DOCS_RENOVATE_WORKFLOW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
       - name: Get commit message
         run: |
