@@ -61,11 +61,18 @@ jobs:
     needs: terraform-validate
     runs-on: ubuntu-latest
     steps:
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.TERRAFORM_DOCS_APP_ID }}
+          private-key: ${{ secrets.TERRAFORM_DOCS_APP_PRIVATE_KEY }}
+
       - name: Check out code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           ref: ${{ github.head_ref || github.ref }}
-          persist-credentials: true
+          token: ${{ steps.generate-token.outputs.token }}
 
       - name: Get commit message
         run: |
