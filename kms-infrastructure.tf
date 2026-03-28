@@ -44,6 +44,11 @@ resource "aws_kms_key" "infrastructure" {
       {
         log_group_arn = local.enable_infrastructure_ecs_cluster_ecs_asg_diff_alert && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:/aws/lambda/${local.resource_prefix_hash}-ecs-cluster-infrastructure-ecs-asg-diff-metric" : ""
       }
+      )}${local.enable_s3_missing_writes_alert && local.infrastructure_kms_encryption ? "," : ""}
+      ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudwatch-logs-allow.json.tpl",
+      {
+        log_group_arn = local.enable_s3_missing_writes_alert && local.infrastructure_kms_encryption ? "arn:aws:logs:${local.aws_region}:${local.aws_account_id}:log-group:/aws/lambda/${local.resource_prefix_hash}-s3-missing-writes-alert" : ""
+      }
       )}${length(local.infrastructure_ecs_cluster_services) > 0 && local.infrastructure_kms_encryption ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/cloudwatch-logs-allow.json.tpl",
       {
