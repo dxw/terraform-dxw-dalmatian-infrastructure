@@ -28,7 +28,7 @@ This project creates and manages resources within an AWS account for infrastruct
 | <a name="provider_aws.useast1"></a> [aws.useast1](#provider\_aws.useast1) | 5.97.0 |
 | <a name="provider_datadog"></a> [datadog](#provider\_datadog) | 3.63.0 |
 | <a name="provider_external"></a> [external](#provider\_external) | 2.3.5 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.7.2 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.8.1 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Resources
