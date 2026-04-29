@@ -103,7 +103,7 @@ resource "aws_iam_policy" "ecs_cluster_infrastructure_ecs_asg_diff_metric_kms_en
   name = "${local.resource_prefix}-ecs-cluster-infrastructure-ecs-asg-diff-metric-kms-encrypt"
   policy = templatefile(
     "${path.root}/policies/kms-encrypt.json.tpl",
-    { kms_key_arn = aws_kms_key.infrastructure[0].arn }
+    { kms_key_arn = jsonencode(aws_kms_key.infrastructure[0].arn) }
   )
 }
 

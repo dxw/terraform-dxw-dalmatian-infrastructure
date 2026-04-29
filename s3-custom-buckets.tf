@@ -159,3 +159,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "custom" {
     }
   }
 }
+
+resource "aws_s3_bucket_metric" "custom_missing_writes" {
+  for_each = { for k, v in local.custom_s3_buckets : k => v if v.enable_missing_writes_alert == true }
+
+  bucket = aws_s3_bucket.custom[each.key].id
+  name   = "EntireBucket"
+}

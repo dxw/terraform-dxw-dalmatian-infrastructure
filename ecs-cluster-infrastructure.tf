@@ -76,7 +76,7 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_kms_encrypt" {
   policy = templatefile(
     "${path.root}/policies/kms-encrypt.json.tpl",
     {
-      kms_key_arn = aws_kms_key.infrastructure[0].arn
+      kms_key_arn = jsonencode(aws_kms_key.infrastructure[0].arn)
     }
   )
 }
@@ -293,7 +293,7 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_autoscaling_lifecycle_term
   name = "${local.resource_prefix}-ecs-termination-hook-kms-encrypt"
   policy = templatefile(
     "${path.root}/policies/kms-encrypt.json.tpl",
-    { kms_key_arn = aws_kms_key.infrastructure[0].arn }
+    { kms_key_arn = jsonencode(aws_kms_key.infrastructure[0].arn) }
   )
 }
 

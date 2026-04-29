@@ -78,7 +78,7 @@ resource "aws_iam_policy" "ecs_cluster_infrastructure_draining_kms_encrypt" {
   name = "${local.resource_prefix}-ecs-cluster-infrastructure-kms-encrypt"
   policy = templatefile(
     "${path.root}/policies/kms-encrypt.json.tpl",
-    { kms_key_arn = aws_kms_key.infrastructure[0].arn }
+    { kms_key_arn = jsonencode(aws_kms_key.infrastructure[0].arn) }
   )
 }
 

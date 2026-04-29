@@ -58,6 +58,12 @@ data "aws_sns_topic" "infrastructure_slack_sns_topic" {
   name = local.infrastructure_slack_sns_topic_name
 }
 
+data "aws_kms_key" "infrastructure_slack_sns_topic" {
+  count = local.infrastructure_slack_sns_topic_in_use ? 1 : 0
+
+  key_id = "alias/${local.project_name}-cloudwatch-slack-alerts-sns"
+}
+
 data "aws_sns_topic" "infrastructure_opsgenie_sns_topic" {
   count = local.infrastructure_opsgenie_sns_topic_in_use ? 1 : 0
 
