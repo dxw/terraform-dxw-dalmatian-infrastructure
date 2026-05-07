@@ -1,14 +1,21 @@
 #!/bin/bash
 
 # Install useful packages
-sudo yum update --security -y
+sudo dnf -y update --security
 
 if ! command -v aws &> /dev/null
 then
-  sudo yum install -y aws-cli
+  sudo dnf -y install aws-cli
 fi
 
-sudo yum install -y \
+sudo dnf -y install \
   jq \
   rsync \
   vim
+
+# Add kernel live patching
+sudo dnf -y install kpatch-dnf
+sudo dnf -y install kernel-livepatch auto
+
+sudo dnf -y install kpatch-runtime
+sudo systemctl enable --now --no-block kpatch.service
