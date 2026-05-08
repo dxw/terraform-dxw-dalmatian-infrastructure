@@ -183,6 +183,7 @@ locals {
   infrastructure_ecs_cluster_wafs                                     = var.infrastructure_ecs_cluster_wafs
   infrastructure_ecs_cluster_syslog_endpoint                          = var.infrastructure_ecs_cluster_syslog_endpoint
   infrastructure_ecs_cluster_syslog_docker_address                    = length(split("syslog", local.infrastructure_ecs_cluster_syslog_endpoint)) > 1 ? "tcp${split("syslog", local.infrastructure_ecs_cluster_syslog_endpoint)[1]}" : ""
+  infrastructure_ecs_cluster_rsyslog_endpoint                         = local.infrastructure_ecs_cluster_syslog_endpoint != "" ? split(":", local.infrastructure_ecs_cluster_syslog_endpoint)[1] : ""
   infrastructure_ecs_cluster_syslog_port                              = local.infrastructure_ecs_cluster_syslog_endpoint != "" ? split(":", local.infrastructure_ecs_cluster_syslog_endpoint)[2] : null
   infrastructure_ecs_cluster_syslog_permitted_peer                    = var.infrastructure_ecs_cluster_syslog_permitted_peer
   infrastructure_ecs_cluster_logspout_command                         = var.infrastructure_ecs_cluster_logspout_command
@@ -200,6 +201,7 @@ locals {
       region                = local.aws_region,
       efs_dirs              = join(" ", local.ecs_cluster_efs_directories),
       syslog_endpoint       = local.infrastructure_ecs_cluster_syslog_endpoint
+      rsyslog_endpoint      = local.infrastructure_ecs_cluster_rsyslog_endpoint
       syslog_permitted_peer = local.infrastructure_ecs_cluster_syslog_permitted_peer
       log_debug_mode        = local.infrastructure_ecs_cluster_enable_debug_mode
     })

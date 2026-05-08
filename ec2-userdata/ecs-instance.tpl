@@ -58,7 +58,7 @@ sudo dnf -y install \
 %{~ if syslog_permitted_peer != ""}
   echo "\$ActionSendStreamDriverPermittedPeer ${syslog_permitted_peer}"
 %{~ endif }
-  echo "*.*     @@${syslog_endpoint}"
+  echo "*.*     @@${rsyslog_endpoint}"
 } > /etc/rsyslog.d/syslog-remote.conf
 
 sudo systemctl enable --now --no-block rsyslog
