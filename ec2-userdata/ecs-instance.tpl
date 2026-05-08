@@ -27,19 +27,27 @@ echo '{"debug": true}' >> /etc/docker/daemon.json
 sudo service docker restart
 
 # Install useful packages
-sudo yum update --security -y
+sudo dnf -y update --security
 
 if ! command -v aws &> /dev/null
 then
-  sudo yum install -y aws-cli
+  sudo dnf -y install aws-cli
 fi
 
-sudo yum install -y \
+sudo dnf -y install \
   jq \
   rsync
+
+# Add kernel live patching
+sudo dnf -y install kpatch-dnf
+sudo dnf -y install kernel-livepatch auto
+
+sudo dnf -y install kpatch-runtime
+sudo systemctl enable --now --no-block kpatch.service
+
 %{~ if syslog_endpoint != "" }
 # Configure Syslog
-sudo yum install -y \
+sudo dnf -y install \
   rsyslog-gnutls
 
 {
@@ -59,7 +67,7 @@ service rsyslog restart
 %{~ if efs_id != ""}
 # EFS
 sudo mkdir -p /mnt/efs
-sudo yum install -y nfs-utils
+sudo dnf -y install nfs-utils
 echo '${efs_id}.efs.${region}.amazonaws.com:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0' | sudo tee -a /etc/fstab
 sudo mount -a
 %{if efs_dirs != "" ~}
