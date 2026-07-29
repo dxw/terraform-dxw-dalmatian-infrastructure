@@ -48,20 +48,20 @@ sudo systemctl enable --now --no-block kpatch.service
 %{~ if syslog_endpoint != "" }
 # Configure Syslog
 sudo dnf -y install \
-  rsyslog-gnutls
+  rsyslog-openssl
 
 {
   echo "\$DefaultNetstreamDriverCAFile /etc/ssl/certs/ca-bundle.crt"
-  echo "\$ActionSendStreamDriver gtls # use gtls netstream driver"
+  echo "\$ActionSendStreamDriver ossl # use ossl netstream driver"
   echo "\$ActionSendStreamDriverMode 1 # require TLS"
   echo "\$ActionSendStreamDriverAuthMode x509/name # authenticate by hostname"
 %{~ if syslog_permitted_peer != ""}
   echo "\$ActionSendStreamDriverPermittedPeer ${syslog_permitted_peer}"
 %{~ endif }
-  echo "*.*     @@${syslog_endpoint}"
+  echo "*.*     @@${rsyslog_endpoint}:${syslog_port}"
 } > /etc/rsyslog.d/syslog-remote.conf
 
-service rsyslog restart
+sudo systemctl enable --now --no-block rsyslog
 %{ endif }
 
 %{~ if efs_id != ""}
