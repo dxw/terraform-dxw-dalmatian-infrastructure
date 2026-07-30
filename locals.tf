@@ -298,4 +298,10 @@ locals {
 
   custom_resource_tags       = zipmap([for idx in range(length(var.custom_resource_tags)) : idx], var.custom_resource_tags)
   custom_resource_tags_delay = var.custom_resource_tags_delay
+
+  s3_to_azure_ssm_arn_tenant_id      = var.s3_to_azure_ssm_arn_tenant_id
+  s3_to_azure_ssm_arn_application_id = var.s3_to_azure_ssm_arn_application_id
+  s3_to_azure_ssm_arn_client_secret  = var.s3_to_azure_ssm_arn_client_secret
+  s3_to_azure_sync_jobs              = var.s3_to_azure_sync_jobs
+  enable_s3_to_azure_scheduled_tasks = length(local.s3_to_azure_sync_jobs) > 0
 }

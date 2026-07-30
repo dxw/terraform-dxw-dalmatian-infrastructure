@@ -1069,3 +1069,32 @@ variable "custom_lambda_functions" {
     launch_in_infrastructure_vpc = optional(bool, null)
   }))
 }
+
+variable "s3_to_azure_ssm_arn_tenant_id" {
+  description = "SSM Parameter Store ARN containing the Azure Tenant ID"
+  type        = string
+  default     = ""
+}
+
+variable "s3_to_azure_ssm_arn_application_id" {
+  description = "SSM Parameter Store ARN containing the Azure Application ID"
+  type        = string
+  default     = ""
+}
+
+variable "s3_to_azure_ssm_arn_client_secret" {
+  description = "SSM Parameter Store ARN containing the Azure Client Secret"
+  type        = string
+  default     = ""
+}
+
+variable "s3_to_azure_sync_jobs" {
+  description = "Map of S3 to Azure sync jobs to be scheduled as ECS tasks"
+  type = map(object({
+    cron_expression   = string
+    source_bucket_uri = string
+    source_bucket_arn = string
+    destination_url   = string
+  }))
+  default = {}
+}
