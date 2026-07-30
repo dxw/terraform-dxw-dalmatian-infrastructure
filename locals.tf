@@ -298,4 +298,19 @@ locals {
 
   custom_resource_tags       = zipmap([for idx in range(length(var.custom_resource_tags)) : idx], var.custom_resource_tags)
   custom_resource_tags_delay = var.custom_resource_tags_delay
+
+  s3_to_azure_ssm_arn_tenant_id      = var.s3_to_azure_ssm_arn_tenant_id
+  s3_to_azure_ssm_arn_application_id = var.s3_to_azure_ssm_arn_application_id
+  s3_to_azure_ssm_arn_client_secret  = var.s3_to_azure_ssm_arn_client_secret
+  s3_to_azure_sync_jobs              = var.s3_to_azure_sync_jobs
+  enable_s3_to_azure_scheduled_tasks = length(local.s3_to_azure_sync_jobs) > 0
+  # The KMS key encrypting each job's source bucket, most specific first. A null
+  # result means the source is unencrypted or AES256, so no grant is needed.
+  s3_to_azure_sync_job_source_kms_key_arns = {
+    for k, v in local.s3_to_azure_sync_jobs : k => (
+      v["source_custom_s3_bucket"] != null ? aws_kms_key.custom_s3_buckets[v["source_custom_s3_bucket"]].arn :
+      v["source_kms_key_arn"] != null ? v["source_kms_key_arn"] :
+      local.infrastructure_kms_encryption ? aws_kms_key.infrastructure[0].arn : null
+    )
+  }
 }

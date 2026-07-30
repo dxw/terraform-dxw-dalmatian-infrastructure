@@ -1069,3 +1069,36 @@ variable "custom_lambda_functions" {
     launch_in_infrastructure_vpc = optional(bool, null)
   }))
 }
+
+variable "s3_to_azure_ssm_arn_tenant_id" {
+  description = "SSM Parameter Store ARN containing the Azure Tenant ID"
+  type        = string
+  default     = ""
+}
+
+variable "s3_to_azure_ssm_arn_application_id" {
+  description = "SSM Parameter Store ARN containing the Azure Application ID"
+  type        = string
+  default     = ""
+}
+
+variable "s3_to_azure_ssm_arn_client_secret" {
+  description = "SSM Parameter Store ARN containing the Azure Client Secret"
+  type        = string
+  default     = ""
+}
+
+variable "s3_to_azure_sync_jobs" {
+  description = "Map of S3 to Azure sync jobs to be scheduled as ECS tasks. Each map key feeds the EventBridge rule name and target_id, both capped at 64 characters after the resource prefix, so keep keys short. The task needs kms:Decrypt on whatever key encrypts the source bucket, otherwise Azure cannot read the pre-signed source URL and the copy fails with CannotVerifyCopySource. Set source_custom_s3_bucket to the key of a custom_s3_buckets entry with a dedicated key, or source_kms_key_arn for a bucket managed outside this project; if neither is set the infrastructure key is assumed. cpu and memory override the task definition's defaults via the schedule's task overrides, and must be a valid Fargate combination."
+  type = map(object({
+    cron_expression         = string
+    source_bucket_uri       = string
+    source_bucket_arn       = string
+    destination_url         = string
+    source_custom_s3_bucket = optional(string, null)
+    source_kms_key_arn      = optional(string, null)
+    cpu                     = optional(string, null)
+    memory                  = optional(string, null)
+  }))
+  default = {}
+}
