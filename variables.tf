@@ -973,7 +973,7 @@ variable "s3_missing_writes_alert_lambda_schedule_expression" {
 }
 
 variable "enable_cloudformatian_s3_template_store" {
-  description = "Creates an S3 bucket to store custom CloudFormation templates, which can then be referenced in `custom_cloudformation_stacks`. A user with RW access to the bucket is also created."
+  description = "Creates an S3 bucket to store custom CloudFormation templates, which can then be referenced in `custom_cloudformation_stacks`."
   type        = bool
 }
 
@@ -985,6 +985,7 @@ variable "custom_cloudformation_stacks" {
         s3_template_store_key: The filename of a CloudFormation template that is stored within the S3 bucket, created by the `enable_cloudformatian_s3_template_store`
         template_body: (Optional - use of s3_template_store_key is preferred) The CloudFormation template body
         parameters: The CloudFormation template parameters ({ parameter-name = parameter-value, ... })
+        ssm_parameters: CloudFormation template parameters whose values are read from AWS SSM Parameter Store ({ parameter-name = ssm-parameter-name, ... }). Use this for secrets, so that they are not stored in plaintext in tfvars. The SSM parameter must already exist, otherwise the plan will fail. SecureString parameters are decrypted automatically. Note that a stack using `ssm_parameters` has its whole parameter map marked as sensitive, so it renders as "(sensitive value)" in plan output
         on_failure: What to do on failure, either 'DO_NOTHING', 'ROLLBACK' or 'DELETE'
         capabilities: A list of capabilities. Valid values: `CAPABILITY_NAMED_IAM`, `CAPABILITY_IAM`, `CAPABILITY_AUTO_EXPAND`
       }
@@ -994,6 +995,7 @@ variable "custom_cloudformation_stacks" {
     s3_template_store_key = optional(string, null)
     template_body         = optional(string, null)
     parameters            = optional(map(string), null)
+    ssm_parameters        = optional(map(string), {})
     on_failure            = optional(string, null)
     capabilities          = optional(list(string), null)
   }))
@@ -1003,6 +1005,17 @@ variable "custom_cloudformation_stacks" {
       for k, v in var.custom_cloudformation_stacks : can(regex("^[a-zA-Z0-9-]+$", k))
     ])
     error_message = "CloudFormation stack names (keys in custom_cloudformation_stacks) can only contain alphanumeric characters and hyphens."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.custom_cloudformation_stacks :
+      length(setintersection(
+        keys(coalesce(v["parameters"], {})),
+        keys(v["ssm_parameters"])
+      )) == 0
+    ])
+    error_message = "CloudFormation stack parameters cannot be set in both `parameters` and `ssm_parameters`."
   }
 }
 

@@ -119,3 +119,9 @@ data "external" "s3_presigned_url" {
     aws_s3_bucket.cloudformation_custom_stack_template_store,
   ]
 }
+
+data "aws_ssm_parameter" "custom_cloudformation_stack" {
+  for_each = local.custom_cloudformation_stack_ssm_parameters
+
+  name = each.value
+}

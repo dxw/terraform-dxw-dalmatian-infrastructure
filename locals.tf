@@ -289,6 +289,24 @@ locals {
     for k, v in local.custom_cloudformation_stacks : k => "${aws_s3_bucket.cloudformation_custom_stack_template_store[0].id}/${v["s3_template_store_key"]}" if v["s3_template_store_key"] != null
   } : {}
 
+  custom_cloudformation_stack_ssm_parameters = merge([
+    for stack_key, stack in local.custom_cloudformation_stacks : {
+      for param_key, ssm_name in stack["ssm_parameters"] :
+      "${stack_key}:${param_key}" => ssm_name
+    }
+  ]...)
+
+  custom_cloudformation_stack_parameters = {
+    for stack_key, stack in local.custom_cloudformation_stacks :
+    stack_key => merge(
+      coalesce(stack["parameters"], {}),
+      {
+        for param_key, ssm_name in stack["ssm_parameters"] :
+        param_key => data.aws_ssm_parameter.custom_cloudformation_stack["${stack_key}:${param_key}"].value
+      }
+    )
+  }
+
   default_tags = {
     Project        = local.project_name,
     Infrastructure = local.infrastructure_name,
