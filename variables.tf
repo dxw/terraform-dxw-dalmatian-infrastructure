@@ -830,6 +830,194 @@ variable "infrastructure_elasticache" {
   }))
 }
 
+variable "infrastructure_cognito_user_pools_defaults" {
+  description = "Default values for Cognito User Pools. `client_defaults` applies to every client of every pool unless the client sets the field itself."
+  type = object({
+    deletion_protection      = optional(bool, true)
+    password_minimum_length  = optional(number, 16)
+    password_require_symbols = optional(bool, false)
+    custom_attributes = optional(map(object({
+      type    = string
+      mutable = optional(bool, true)
+    })), {})
+    threat_protection = optional(string, "OFF")
+    client_defaults = optional(object({
+      generate_secret               = optional(bool, true)
+      explicit_auth_flows           = optional(list(string), ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"])
+      access_token_validity_minutes = optional(number, 60)
+      id_token_validity_minutes     = optional(number, 60)
+      refresh_token_validity_days   = optional(number, 1)
+      enable_token_revocation       = optional(bool, true)
+    }), {})
+  })
+  default = {}
+
+  validation {
+    condition     = var.infrastructure_cognito_user_pools_defaults.password_minimum_length >= 8 && var.infrastructure_cognito_user_pools_defaults.password_minimum_length <= 99
+    error_message = "password_minimum_length must be between 8 and 99."
+  }
+
+  validation {
+    condition     = length(var.infrastructure_cognito_user_pools_defaults.client_defaults.explicit_auth_flows) > 0
+    error_message = "explicit_auth_flows must be a non-empty list of ALLOW_* flow names."
+  }
+
+  validation {
+    condition = (
+      var.infrastructure_cognito_user_pools_defaults.client_defaults.access_token_validity_minutes >= 5 &&
+      var.infrastructure_cognito_user_pools_defaults.client_defaults.access_token_validity_minutes <= 1440 &&
+      var.infrastructure_cognito_user_pools_defaults.client_defaults.id_token_validity_minutes >= 5 &&
+      var.infrastructure_cognito_user_pools_defaults.client_defaults.id_token_validity_minutes <= 1440
+    )
+    error_message = "access_token_validity_minutes and id_token_validity_minutes must be between 5 and 1440 minutes."
+  }
+
+  validation {
+    condition     = var.infrastructure_cognito_user_pools_defaults.client_defaults.refresh_token_validity_days >= 1 && var.infrastructure_cognito_user_pools_defaults.client_defaults.refresh_token_validity_days <= 3650
+    error_message = "refresh_token_validity_days must be between 1 and 3650 days."
+  }
+}
+
+variable "infrastructure_cognito_user_pools" {
+  description = <<EOT
+    Map of Cognito User Pools (The key will be the pool name). Values in here will override `infrastructure_cognito_user_pools_defaults` values if set.
+    Pools use email as the username, verified-email account recovery, and never send email themselves: `auto_verified_attributes` is empty and no email configuration is set, so the consuming application must own registration, verification and password-reset messaging and confirm the outcome through the Cognito Admin APIs.
+    `custom_attributes` is applied on create only; changing it later is silently ignored (`ignore_changes = [schema]`), so a new attribute needs a new pool under a new key.
+    {
+      pool-name = {
+        deletion_protection: Enable deletion protection on the pool (default true)
+        password_minimum_length: Minimum password length (default 16, dxw policy; validated 8-99). Upper case, lower case and numbers are always required
+        password_require_symbols: Require at least one symbol (default false)
+        custom_attributes: Map of custom attribute name to { type = "Boolean" | "String" | "Number", mutable = bool }. Declared without the `custom:` prefix
+        threat_protection: `OFF` (default), `AUDIT` or `ENFORCED`. Anything other than `OFF` moves the pool to the Plus feature plan, which is charged per monthly active user. With no MFA and no email configuration, ENFORCED can only block risky sign-ins; it cannot notify users.
+        clients: Map of app clients (The key will be the client name)
+          generate_secret: Generate a client secret (default from `client_defaults`: true)
+          explicit_auth_flows: Allowed auth flows (default from `client_defaults`: ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"])
+          access_token_validity_minutes: Access token validity in minutes (default from `client_defaults`: 60)
+          id_token_validity_minutes: ID token validity in minutes (default from `client_defaults`: 60)
+          refresh_token_validity_days: Refresh token validity in days (default from `client_defaults`: 1)
+          enable_token_revocation: Enable token revocation (default from `client_defaults`: true)
+      }
+    }
+  EOT
+  type = map(object({
+    deletion_protection      = optional(bool, null)
+    password_minimum_length  = optional(number, null)
+    password_require_symbols = optional(bool, null)
+    custom_attributes = optional(map(object({
+      type    = string
+      mutable = optional(bool, true)
+    })), null)
+    threat_protection = optional(string, null)
+    clients = optional(map(object({
+      generate_secret               = optional(bool, null)
+      explicit_auth_flows           = optional(list(string), null)
+      access_token_validity_minutes = optional(number, null)
+      id_token_validity_minutes     = optional(number, null)
+      refresh_token_validity_days   = optional(number, null)
+      enable_token_revocation       = optional(bool, null)
+    })), {})
+  }))
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_cognito_user_pools : can(regex("^[a-zA-Z0-9-]+$", k))
+    ])
+    error_message = "Cognito User Pool names (keys in infrastructure_cognito_user_pools) can only contain alphanumeric characters and hyphens."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_cognito_user_pools : [
+        for ck, cv in coalesce(v["clients"], {}) : can(regex("^[a-zA-Z0-9-]+$", ck))
+      ]
+    ]))
+    error_message = "Cognito User Pool client names (keys in clients) can only contain alphanumeric characters and hyphens."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_cognito_user_pools : contains(["OFF", "AUDIT", "ENFORCED"], coalesce(v["threat_protection"], "OFF"))
+    ])
+    error_message = "threat_protection must be one of OFF, AUDIT or ENFORCED."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_cognito_user_pools : v["password_minimum_length"] == null || (coalesce(v["password_minimum_length"], 16) >= 8 && coalesce(v["password_minimum_length"], 16) <= 99)
+    ])
+    error_message = "password_minimum_length must be between 8 and 99 (Cognito's range is 6-99; Dalmatian floors it at 8 and defaults to 16)."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_cognito_user_pools : [
+        for ck, cv in coalesce(v["clients"], {}) : (
+          cv["explicit_auth_flows"] == null || length(cv["explicit_auth_flows"]) > 0
+          ) && alltrue([
+            for flow in coalesce(cv["explicit_auth_flows"], []) : startswith(flow, "ALLOW_")
+        ])
+      ]
+    ]))
+    error_message = "explicit_auth_flows must be a non-empty list of ALLOW_* flow names."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_cognito_user_pools : [
+        for ck, cv in coalesce(v["clients"], {}) : (
+          cv["access_token_validity_minutes"] == null || (cv["access_token_validity_minutes"] >= 5 && cv["access_token_validity_minutes"] <= 1440)
+          ) && (
+          cv["id_token_validity_minutes"] == null || (cv["id_token_validity_minutes"] >= 5 && cv["id_token_validity_minutes"] <= 1440)
+        )
+      ]
+    ]))
+    error_message = "access_token_validity_minutes and id_token_validity_minutes must be between 5 and 1440 minutes."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_cognito_user_pools : [
+        for ck, cv in coalesce(v["clients"], {}) :
+        cv["refresh_token_validity_days"] == null || (cv["refresh_token_validity_days"] >= 1 && cv["refresh_token_validity_days"] <= 3650)
+      ]
+    ]))
+    error_message = "refresh_token_validity_days must be between 1 and 3650 days."
+  }
+
+  validation {
+    # Literal fallbacks (60/60/1) mirror client_defaults above: a variable's validation
+    # block cannot reference another variable at this repo's Terraform floor (>= 1.6.5),
+    # so the platform defaults are duplicated here rather than read from client_defaults.
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_cognito_user_pools : [
+        for ck, cv in coalesce(v["clients"], {}) :
+        coalesce(cv["refresh_token_validity_days"], 1) * 1440 > max(coalesce(cv["access_token_validity_minutes"], 60), coalesce(cv["id_token_validity_minutes"], 60))
+      ]
+    ]))
+    error_message = "refresh_token_validity_days must exceed both access_token_validity_minutes and id_token_validity_minutes."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_cognito_user_pools : [
+        for ak, av in coalesce(v["custom_attributes"], {}) : contains(["Boolean", "String", "Number"], av["type"])
+      ]
+    ]))
+    error_message = "custom_attributes type must be Boolean, String or Number."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_cognito_user_pools : [
+        for ak, av in coalesce(v["custom_attributes"], {}) : can(regex("^[A-Za-z0-9_-]{1,20}$", ak))
+      ]
+    ]))
+    error_message = "custom_attributes names must match ^[A-Za-z0-9_-]{1,20}$ (Cognito caps custom attribute names at 20 characters)."
+  }
+}
+
 variable "custom_route53_hosted_zones" {
   description = <<EOT
     Map of Route53 Hosted Zone configurations to create
