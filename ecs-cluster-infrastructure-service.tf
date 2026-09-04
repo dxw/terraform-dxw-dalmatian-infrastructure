@@ -193,6 +193,41 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_ta
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_custom[each.key].arn
 }
 
+resource "aws_iam_policy" "infrastructure_ecs_cluster_service_task_cognito" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if length(v["cognito_user_pools"]) > 0
+  }
+
+  name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-service-task-${each.key}-cognito"), 0, 6)}"
+  description = "${local.resource_prefix}-ecs-cluster-service-task-${each.key}-cognito"
+  policy = templatefile(
+    "${path.root}/policies/cognito-user-pool-admin.json.tpl",
+    {
+      actions = jsonencode(each.value["cognito_user_pool_actions"])
+      user_pool_arns = jsonencode([
+        for pool in each.value["cognito_user_pools"] : aws_cognito_user_pool.infrastructure[pool].arn
+      ])
+    }
+  )
+
+  lifecycle {
+    precondition {
+      condition = alltrue([
+        for pool in each.value["cognito_user_pools"] : contains(keys(local.infrastructure_cognito_user_pools), pool)
+      ])
+      error_message = "Service ${each.key} references a Cognito User Pool that is not declared in infrastructure_cognito_user_pools."
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_task_cognito" {
+  for_each = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if length(v["cognito_user_pools"]) > 0
+  }
+
+  role       = aws_iam_role.infrastructure_ecs_cluster_service_task[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_cognito[each.key].arn
+}
 
 resource "terraform_data" "infrastructure_ecs_cluster_service_env_file" {
   for_each = local.infrastructure_ecs_cluster_services
