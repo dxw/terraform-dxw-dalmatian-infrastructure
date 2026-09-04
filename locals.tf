@@ -271,24 +271,6 @@ locals {
       for elasticache_key in local.infrastructure_elasticache_keys : elasticache_key => try(coalesce(v[elasticache_key], local.infrastructure_elasticache_defaults[elasticache_key]), null)
     })
   }
-
-  infrastructure_cognito_user_pools_defaults = var.infrastructure_cognito_user_pools_defaults
-  infrastructure_cognito_user_pools_keys     = length(var.infrastructure_cognito_user_pools) > 0 ? keys(values(var.infrastructure_cognito_user_pools)[0]) : []
-  infrastructure_cognito_user_pools = {
-    for k, v in var.infrastructure_cognito_user_pools : k => merge(
-      {
-        for pool_key in local.infrastructure_cognito_user_pools_keys : pool_key => try(coalesce(v[pool_key], local.infrastructure_cognito_user_pools_defaults[pool_key]), null) if pool_key != "clients"
-      },
-      {
-        clients = {
-          for client_name, client in v["clients"] : client_name => {
-            for client_key, client_value in client : client_key => try(coalesce(client_value, local.infrastructure_cognito_user_pools_defaults["client_defaults"][client_key]), null)
-          }
-        }
-      }
-    )
-  }
-
   elasticache_ports = {
     "redis" = 6379
   }
