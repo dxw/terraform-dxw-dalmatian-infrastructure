@@ -598,7 +598,29 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     cloudfront_managed_response_headers_policy    = optional(string, null)
     cloudfront_waf_association                    = optional(string, null)
     alb_tls_certificate_arn                       = optional(string, null)
+    cognito_user_pools                            = optional(list(string), [])
+    cognito_user_pool_actions = optional(list(string), [
+      "cognito-idp:AdminGetUser",
+      "cognito-idp:AdminConfirmSignUp",
+      "cognito-idp:AdminSetUserPassword",
+      "cognito-idp:AdminUpdateUserAttributes",
+      "cognito-idp:AdminDisableUser",
+      "cognito-idp:AdminEnableUser",
+      "cognito-idp:AdminDeleteUser",
+      "cognito-idp:AdminUserGlobalSignOut",
+      "cognito-idp:ListUsers",
+    ])
   })
+  validation {
+    condition = (
+      length(var.infrastructure_ecs_cluster_service_defaults.cognito_user_pool_actions) > 0 &&
+      alltrue([
+        for action in var.infrastructure_ecs_cluster_service_defaults.cognito_user_pool_actions :
+        can(regex("^cognito-idp:(Admin[A-Za-z]+|ListUsers|ListUsersInGroup|ListGroups)$", action))
+      ])
+    )
+    error_message = "cognito_user_pool_actions must be Cognito Admin* user actions or ListUsers/ListUsersInGroup/ListGroups; pool-management actions and wildcards are not allowed."
+  }
 }
 
 variable "infrastructure_ecs_cluster_services" {
@@ -642,6 +664,8 @@ variable "infrastructure_ecs_cluster_services" {
         cloudfront_managed_response_headers_policy: Conditionally specify a CloudFront Managed Response Headers Policy for the distribution
         cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
         alb_tls_certificate_arn: Certificate ARN to attach to the Application Load Balancer - must contain the names provided in `domain_names`
+        cognito_user_pools: List of Cognito User Pool names (keys of `infrastructure_cognito_user_pools`) the service task role may administer
+        cognito_user_pool_actions: List of `cognito-idp` IAM actions granted on those pools. Defaults to the Admin actions an application needs to own registration, password reset, account state and session revocation. Must be Cognito Admin* user actions or ListUsers/ListUsersInGroup/ListGroups; pool-management actions and wildcards are not allowed
       }
     }
   EOT
@@ -698,7 +722,22 @@ variable "infrastructure_ecs_cluster_services" {
     cloudfront_managed_response_headers_policy    = optional(string, null)
     cloudfront_waf_association                    = optional(string, null)
     alb_tls_certificate_arn                       = optional(string, null)
+    cognito_user_pools                            = optional(list(string), null)
+    cognito_user_pool_actions                     = optional(list(string), null)
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_ecs_cluster_services :
+      v["cognito_user_pool_actions"] == null || (
+        length(coalesce(v["cognito_user_pool_actions"], [])) > 0 &&
+        alltrue([
+          for action in coalesce(v["cognito_user_pool_actions"], []) :
+          can(regex("^cognito-idp:(Admin[A-Za-z]+|ListUsers|ListUsersInGroup|ListGroups)$", action))
+        ])
+      )
+    ])
+    error_message = "cognito_user_pool_actions must be Cognito Admin* user actions or ListUsers/ListUsersInGroup/ListGroups; pool-management actions and wildcards are not allowed."
+  }
 }
 
 variable "infrastructure_rds_defaults" {
