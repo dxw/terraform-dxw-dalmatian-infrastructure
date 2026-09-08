@@ -11,8 +11,8 @@ resource "aws_db_parameter_group" "infrastructure_rds" {
     for_each = each.value["parameters"] != null ? each.value["parameters"] : {}
 
     content {
-      name  = each.key
-      value = each.value
+      name  = parameter.key
+      value = parameter.value
     }
   }
 
