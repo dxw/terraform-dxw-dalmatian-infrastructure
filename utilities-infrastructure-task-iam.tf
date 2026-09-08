@@ -49,7 +49,7 @@ resource "aws_iam_policy" "infrastructure_utilities_task_execution_get_secret_va
   description = "${local.resource_prefix}-utilities-task-execution-${each.key}-get-secret-value"
   policy = templatefile("${path.root}/policies/secrets-manager-get-secret-value.json.tpl", {
     secret_name_arns = jsonencode([
-      each.value["type"] == "instance" ? aws_db_instance.infrastructure_rds[each.key].master_user_secret.secret_arn : each.value["type"] == "cluster" ? aws_rds_cluster.infrastructure_rds[each.key].master_user_secret[0].secret_arn : null,
+      each.value["type"] == "instance" ? aws_db_instance.infrastructure_rds[each.key].master_user_secret[0].secret_arn : each.value["type"] == "cluster" ? aws_rds_cluster.infrastructure_rds[each.key].master_user_secret[0].secret_arn : null,
     ])
   })
 }
