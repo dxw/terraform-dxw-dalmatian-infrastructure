@@ -32,7 +32,7 @@ resource "aws_security_group_rule" "infrastructure_utilities_task_ingress_tcp" {
 }
 
 resource "aws_security_group_rule" "infrastructure_rds_ingress_tcp_custom_lambda" {
-  for_each = local.infrastructure_vpc_network_enable_public || local.infrastructure_vpc_network_enable_private ? [
+  for_each = (local.infrastructure_vpc_network_enable_public || local.infrastructure_vpc_network_enable_private) && length(local.infrastructure_rds) > 0 ? [
     for rds_k, rds_v in local.infrastructure_rds : {
       for lambda_k, lambda_v in local.custom_lambda_functions : "${rds_k}_${lambda_k}" => merge(rds_v, { lambda_source_security_group = aws_security_group.custom_lambda[lambda_k].id }) if lambda_v["launch_in_infrastructure_vpc"] == true
     }
