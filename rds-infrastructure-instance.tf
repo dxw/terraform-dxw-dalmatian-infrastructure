@@ -11,8 +11,8 @@ resource "aws_db_parameter_group" "infrastructure_rds" {
     for_each = each.value["parameters"] != null ? each.value["parameters"] : {}
 
     content {
-      name  = each.key
-      value = each.value
+      name  = parameter.key
+      value = parameter.value
     }
   }
 
@@ -87,8 +87,12 @@ resource "aws_db_instance" "infrastructure_rds" {
   option_group_name      = aws_db_option_group.infrastructure_rds[each.key].name
   network_type           = "IPV4"
   port                   = local.rds_ports[each.value["engine"]]
-  availability_zone      = "${local.aws_region}${sort(tolist(local.infrastructure_vpc_network_availability_zones))[0]}"
+  availability_zone      = each.value["multi_az"] == true ? null : "${local.aws_region}${sort(tolist(local.infrastructure_vpc_network_availability_zones))[0]}"
   multi_az               = each.value["multi_az"]
+
+  lifecycle {
+    ignore_changes = [availability_zone]
+  }
 
   depends_on = [
     aws_cloudwatch_log_group.infrastructure_rds_exports,

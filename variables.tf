@@ -770,7 +770,7 @@ variable "infrastructure_rds" {
       rds-name = {
         type: Choose either `instance` for RDS instance, or `cluster` for RDS Aurora
         engine: RDS engine (Either `mysql` or `postgres`)
-        engine_version: RDS Engine version (Specify the major version only, to prevent terraform attempting to downgrade minor versions)
+        engine_version: RDS Engine version. For `mysql` give major.minor (eg. `8.0`, `8.4`); for `postgres` give the major only (eg. `17`). Never give a patch version, to prevent terraform attempting to downgrade minor versions
         parameters: Map of Parameters for the DB parameter group ({ parameter-name = parameter-value, ... })
         instance_class: RDS instance class
         allocated_storage: RDS allocated storage

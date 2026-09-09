@@ -230,9 +230,11 @@ locals {
 
   infrastructure_rds_defaults = var.infrastructure_rds_defaults
   infrastructure_rds_keys     = length(var.infrastructure_rds) > 0 ? keys(values(var.infrastructure_rds)[0]) : []
+  # The fallback must be the typed defaults attribute, not a bare null: an untyped null gives each
+  # entry a different object type, and entries of different types cannot be converted to a map.
   infrastructure_rds = {
     for k, v in var.infrastructure_rds : k => merge({
-      for rds_key in local.infrastructure_rds_keys : rds_key => try(coalesce(v[rds_key], local.infrastructure_rds_defaults[rds_key]), null)
+      for rds_key in local.infrastructure_rds_keys : rds_key => try(coalesce(v[rds_key], local.infrastructure_rds_defaults[rds_key]), local.infrastructure_rds_defaults[rds_key])
     })
   }
   rds_engines = {
