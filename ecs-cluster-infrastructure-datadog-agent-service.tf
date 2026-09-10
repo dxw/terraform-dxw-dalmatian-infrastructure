@@ -241,6 +241,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_datadog_agent" {
       cloudwatch_log_group  = aws_cloudwatch_log_group.infrastructure_ecs_cluster_datadog_agent[0].name
       awslogs_stream_prefix = ""
       region                = local.aws_region
+      links                 = "[]"
+      sidecars              = ""
     }
   )
 
