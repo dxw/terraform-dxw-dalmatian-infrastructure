@@ -586,6 +586,14 @@ variable "infrastructure_ecs_cluster_service_defaults" {
       entrypoint          = optional(list(string), null)
       schedule_expression = string
     })), {})
+    sidecar_containers = optional(map(object({
+      image              = string
+      command            = optional(list(string), null)
+      environment        = optional(list(object({ name = string, value = string })), [])
+      memory_reservation = optional(number, 256)
+      container_port     = optional(number, null)
+      essential          = optional(bool, true)
+    })), {})
     domain_names                                  = optional(list(string), null)
     enable_cloudfront                             = optional(bool, null)
     cloudfront_tls_certificate_arn                = optional(string, null)
@@ -621,6 +629,20 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     )
     error_message = "cognito_user_pool_actions must be Cognito Admin* user actions or ListUsers/ListUsersInGroup/ListGroups; pool-management actions and wildcards are not allowed."
   }
+  validation {
+    condition = alltrue([
+      for name, sidecar in var.infrastructure_ecs_cluster_service_defaults.sidecar_containers :
+      can(regex("^[a-z0-9]+([.-][a-z0-9]+)*(:[0-9]+)?(/[a-z0-9]+([._-][a-z0-9]+)*)+@sha256:[a-f0-9]{64}$", sidecar.image))
+    ])
+    error_message = "sidecar_containers images must be pinned by digest: <registry>/<repository>@sha256:<64 hex characters>, with every registry and path component starting and ending with a letter or digit. Tags are not allowed."
+  }
+  validation {
+    condition = alltrue([
+      for name in keys(var.infrastructure_ecs_cluster_service_defaults.sidecar_containers) :
+      can(regex("^[a-z][a-z0-9]*(-[a-z0-9]+)*$", name))
+    ])
+    error_message = "sidecar_containers keys must be lower-case container names: a letter, then letters, digits and single hyphens, not ending in a hyphen (^[a-z][a-z0-9]*(-[a-z0-9]+)*$)."
+  }
 }
 
 variable "infrastructure_ecs_cluster_services" {
@@ -652,6 +674,7 @@ variable "infrastructure_ecs_cluster_services" {
         container_heath_check_path: Destination for the health check request
         container_heath_grace_period: Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown
         scheduled_tasks: A map of scheduled tasks that use the same image as the service defined eg. { "name" => { "entrypoint" = ["bundle", "exec", "run_jobs"], "schedule_expression" = "cron(* * * * ? *)" } }
+        sidecar_containers: Map of extra containers to run in the service task alongside the application container, keyed by container name (eg. { gotenberg = { image = "docker.io/gotenberg/gotenberg@sha256:<digest>", command = ["gotenberg", "--api-timeout=30s"], memory_reservation = 768 } }). Each `image` must be pinned by digest (`<registry>/<repo>@sha256:<64 hex>`); it is mirrored into an ECR repository in this account and the task pulls from there. The mirror authenticates to Docker Hub only (with `infrastructure_dockerhub_*` when set), so images must be public unless they are on Docker Hub. The application container is linked to every sidecar so it can reach it as `http://<name>:<port>`; sidecars publish no ports, so nothing outside the task can reach them. `command` and `environment` are passed through verbatim, `memory_reservation` is in MiB (default 256), `container_port` is informational only, and `essential` (default true) restarts the whole task if the sidecar exits
         domain_names: Domain names to assign to CloudFront aliases, and the Application Load Balancer's `host_header` condition
         enable_cloudfront: Enable cloadfront for the service
         cloudfront_tls_certificate_arn: Certificate ARN to attach to CloudFront - must contain the names provided in `domain_names`
@@ -710,6 +733,14 @@ variable "infrastructure_ecs_cluster_services" {
       entrypoint          = list(string)
       schedule_expression = string
     })), null)
+    sidecar_containers = optional(map(object({
+      image              = string
+      command            = optional(list(string), null)
+      environment        = optional(list(object({ name = string, value = string })), [])
+      memory_reservation = optional(number, 256)
+      container_port     = optional(number, null)
+      essential          = optional(bool, true)
+    })), null)
     domain_names                                  = optional(list(string), null)
     enable_cloudfront                             = optional(bool, null)
     cloudfront_tls_certificate_arn                = optional(string, null)
@@ -737,6 +768,24 @@ variable "infrastructure_ecs_cluster_services" {
       )
     ])
     error_message = "cognito_user_pool_actions must be Cognito Admin* user actions or ListUsers/ListUsersInGroup/ListGroups; pool-management actions and wildcards are not allowed."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_ecs_cluster_services : [
+        for name, sidecar in coalesce(v["sidecar_containers"], {}) :
+        can(regex("^[a-z0-9]+([.-][a-z0-9]+)*(:[0-9]+)?(/[a-z0-9]+([._-][a-z0-9]+)*)+@sha256:[a-f0-9]{64}$", sidecar.image))
+      ]
+    ]))
+    error_message = "sidecar_containers images must be pinned by digest: <registry>/<repository>@sha256:<64 hex characters>, with every registry and path component starting and ending with a letter or digit. Tags are not allowed."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_ecs_cluster_services : [
+        for name in keys(coalesce(v["sidecar_containers"], {})) :
+        can(regex("^[a-z][a-z0-9]*(-[a-z0-9]+)*$", name)) && name != k
+      ]
+    ]))
+    error_message = "sidecar_containers keys must be lower-case container names: a letter, then letters, digits and single hyphens, not ending in a hyphen (^[a-z][a-z0-9]*(-[a-z0-9]+)*$), and must differ from the service name."
   }
 }
 
