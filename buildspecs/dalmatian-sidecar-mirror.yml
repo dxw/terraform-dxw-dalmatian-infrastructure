@@ -1,0 +1,53 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Build started on $(date)"
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com"
+      - |
+        if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_TOKEN" ];
+        then
+          echo "Logging into Dockerhub ...";
+          echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin;
+        fi;
+      - |
+        if DESCRIBE_OUTPUT="$(aws ecr describe-images --repository-name "$REPOSITORY_NAME" --image-ids imageTag="$IMAGE_TAG" 2>&1)";
+        then
+          echo "$REPOSITORY_URI:$IMAGE_TAG is already mirrored, skipping pull and push";
+          touch /tmp/mirror-exists;
+        elif echo "$DESCRIBE_OUTPUT" | grep -q ImageNotFoundException;
+        then
+          echo "$REPOSITORY_URI:$IMAGE_TAG is not yet mirrored";
+        else
+          echo "Could not determine whether $REPOSITORY_URI:$IMAGE_TAG is mirrored:";
+          echo "$DESCRIBE_OUTPUT";
+          exit 1;
+        fi;
+  build:
+    commands:
+      - |
+        if [ ! -f /tmp/mirror-exists ];
+        then
+          echo "Pulling $SOURCE_IMAGE ...";
+          docker pull "$SOURCE_IMAGE";
+          docker image inspect "$SOURCE_IMAGE" --format 'resolved={{index .RepoDigests 0}} os={{.Os}} arch={{.Architecture}}';
+          docker tag "$SOURCE_IMAGE" "$REPOSITORY_URI:$IMAGE_TAG";
+        fi;
+  post_build:
+    commands:
+      - |
+        if [ "$CODEBUILD_BUILD_SUCCEEDING" != "1" ];
+        then
+          echo "Build failed before push, nothing to do";
+          exit 1;
+        fi;
+      - |
+        if [ ! -f /tmp/mirror-exists ];
+        then
+          echo "Pushing $REPOSITORY_URI:$IMAGE_TAG ...";
+          docker push "$REPOSITORY_URI:$IMAGE_TAG";
+        fi;
+      - echo "Mirrored image in ECR:"
+      - aws ecr describe-images --repository-name "$REPOSITORY_NAME" --image-ids imageTag="$IMAGE_TAG" --query 'imageDetails[0].{digest:imageDigest,tags:imageTags,pushedAt:imagePushedAt,sizeInBytes:imageSizeInBytes}' --output json
