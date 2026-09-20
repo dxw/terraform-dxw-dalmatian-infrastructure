@@ -221,6 +221,11 @@ variable "infrastructure_vpc_network_acl_ingress_custom_rules_public" {
   }))
 }
 
+variable "infrastructure_vpc_egress_domain_filtering_allow_list" {
+  description = "List of domains to allow outbout, using AWS Network firewall. If empty, domain filtering will not be applied"
+  type        = list(string)
+}
+
 variable "enable_infrastructure_vpc_transfer_s3_bucket" {
   description = "Enable VPC transfer S3 bucket. This allows uploading/downloading files from resources within the infrastructure VPC"
   type        = bool
