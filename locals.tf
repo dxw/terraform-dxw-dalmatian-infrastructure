@@ -222,6 +222,18 @@ locals {
       for service_key in local.infrastructure_ecs_cluster_services_keys : service_key => try(coalesce(v[service_key], local.infrastructure_ecs_cluster_service_defaults[service_key]), null)
     })
   }
+  infrastructure_ecs_cluster_service_sidecar_containers = merge([
+    for service_name, service in local.infrastructure_ecs_cluster_services : {
+      for sidecar_name, sidecar in coalesce(service["sidecar_containers"], {}) : "${service_name}_${sidecar_name}" => merge(
+        sidecar,
+        {
+          service_name = service_name
+          sidecar_name = sidecar_name
+          image_tag    = regex("@sha256:([a-f0-9]{64})$", sidecar["image"])[0]
+        }
+      )
+    }
+  ]...)
   infrastructure_ecs_cluster_services_alb_enable_global_accelerator     = var.infrastructure_ecs_cluster_services_alb_enable_global_accelerator && length(local.infrastructure_ecs_cluster_services) > 0
   infrastructure_ecs_cluster_services_alb_ip_allow_list                 = var.infrastructure_ecs_cluster_services_alb_ip_allow_list
   enable_infrastructure_ecs_cluster_services_alb_logs                   = var.enable_infrastructure_ecs_cluster_services_alb_logs && length(local.infrastructure_ecs_cluster_services) > 0

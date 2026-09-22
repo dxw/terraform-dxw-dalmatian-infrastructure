@@ -283,6 +283,26 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       cloudwatch_log_group  = !local.infrastructure_ecs_cluster_logspout_enabled ? each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.key].name : "" : ""
       awslogs_stream_prefix = ""
       region                = local.aws_region
+      links                 = jsonencode(keys(each.value["sidecar_containers"]))
+      sidecars = join(",", [
+        for sidecar_name, sidecar in each.value["sidecar_containers"] : templatefile(
+          "./container-definitions/sidecar.json.tpl",
+          {
+            name = sidecar_name
+            # Built from the repository name rather than repository_url so the
+            # rendered definitions are known at plan time for a new sidecar.
+            image                = "${local.aws_account_id}.dkr.ecr.${local.aws_region}.amazonaws.com/${aws_ecr_repository.infrastructure_ecs_cluster_service_sidecar["${each.key}_${sidecar_name}"].name}:${local.infrastructure_ecs_cluster_service_sidecar_containers["${each.key}_${sidecar_name}"]["image_tag"]}"
+            command              = sidecar["command"] != null ? jsonencode(sidecar["command"]) : "[]"
+            environment          = jsonencode(sidecar["environment"])
+            memory_reservation   = sidecar["memory_reservation"]
+            essential            = sidecar["essential"]
+            syslog_address       = !local.infrastructure_ecs_cluster_logspout_enabled ? local.infrastructure_ecs_cluster_syslog_docker_address : ""
+            syslog_tag           = "${local.resource_prefix}-${each.key}-${sidecar_name}-{{.ID}}"
+            cloudwatch_log_group = !local.infrastructure_ecs_cluster_logspout_enabled ? each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.key].name : "" : ""
+            region               = local.aws_region
+          }
+        )
+      ])
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.key].arn
@@ -305,7 +325,16 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
     aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_task_execution_s3_read_envfiles,
     aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_task_execution_kms_decrypt,
     aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_task_ssm_create_channels,
+    aws_iam_role_policy_attachment.infrastructure_ecs_cluster_service_task_execution_sidecar_ecr_pull,
+    terraform_data.infrastructure_ecs_cluster_service_sidecar_image_mirror_trigger_codebuild,
   ]
+
+  lifecycle {
+    precondition {
+      condition     = !contains(keys(each.value["sidecar_containers"]), each.key)
+      error_message = "Service ${each.key} has a sidecar container with the same name as the service; container names within a task must be unique."
+    }
+  }
 }
 
 resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
