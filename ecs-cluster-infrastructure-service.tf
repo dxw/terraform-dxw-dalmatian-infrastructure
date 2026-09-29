@@ -75,7 +75,7 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_ta
 }
 
 resource "aws_iam_policy" "infrastructure_ecs_cluster_service_task_execution_kms_decrypt" {
-  for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
+  for_each = { for k, v in local.infrastructure_ecs_cluster_services : k => v if local.infrastructure_kms_encryption }
 
   name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-service-task-execution-${each.key}-kms-decrypt"), 0, 6)}"
   description = "${local.resource_prefix}-ecs-cluster-service-task-execution-${each.key}-kms-decrypt"
@@ -86,7 +86,7 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_service_task_execution_kms
 }
 
 resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_task_execution_kms_decrypt" {
-  for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
+  for_each = { for k, v in local.infrastructure_ecs_cluster_services : k => v if local.infrastructure_kms_encryption }
 
   role       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.key].name
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_execution_kms_decrypt[each.key].arn
@@ -262,6 +262,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       environment         = jsonencode([])
       secrets             = jsonencode([])
       container_port      = each.value["container_port"] != null ? each.value["container_port"] : 0
+      memory_reservation  = each.value["container_memory_reservation"] != null ? each.value["container_memory_reservation"] : 16
+      cpu                 = each.value["container_cpu"] != null ? each.value["container_cpu"] : 0
       extra_hosts = each.value["container_extra_hosts"] != null ? jsonencode([
         for extra_host in each.value["container_extra_hosts"] : {
           hostname  = extra_host["hostname"],
@@ -346,16 +348,30 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
 
   health_check_grace_period_seconds = each.value["container_port"] != 0 ? each.value["container_heath_grace_period"] : null
 
-  launch_type = "EC2"
+  # ECS refuses to move a service from the EC2 launch type to an ASG
+  # capacity provider in place; see the variable description.
+  launch_type = local.infrastructure_ecs_cluster_capacity_provider_enabled ? null : "EC2"
+
+  dynamic "capacity_provider_strategy" {
+    for_each = local.infrastructure_ecs_cluster_capacity_provider_enabled ? [1] : []
+
+    content {
+      capacity_provider = aws_ecs_capacity_provider.infrastructure_ecs_cluster[0].name
+      weight            = 1
+      base              = 0
+    }
+  }
 
   depends_on = [
     aws_alb_listener.infrastructure_ecs_cluster_service_http_https_redirect,
     aws_alb_listener.infrastructure_ecs_cluster_service_http,
     aws_alb_listener.infrastructure_ecs_cluster_service_https,
+    aws_ecs_cluster_capacity_providers.infrastructure_ecs_cluster,
   ]
 
   lifecycle {
     ignore_changes = [
+      desired_count,
       load_balancer,
       task_definition,
     ]

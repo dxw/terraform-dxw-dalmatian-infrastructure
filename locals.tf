@@ -158,6 +158,12 @@ locals {
   infrastructure_ecs_cluster_autoscaling_time_based_custom = {
     for custom in toset(var.infrastructure_ecs_cluster_autoscaling_time_based_custom) : "${custom["min"]}-${custom["max"]} ${custom["cron"]}" => custom
   }
+  infrastructure_ecs_cluster_capacity_provider         = var.infrastructure_ecs_cluster_capacity_provider
+  infrastructure_ecs_cluster_capacity_provider_enabled = local.enable_infrastructure_ecs_cluster && var.infrastructure_ecs_cluster_capacity_provider != null
+  # Capacity provider names may not start with "aws", "ecs" or "fargate";
+  # resource_prefix starts with the project name, which a precondition on
+  # the capacity provider checks.
+  infrastructure_ecs_cluster_capacity_provider_name                   = "${local.resource_prefix}-infrastructure-ecs-cluster"
   enable_infrastructure_ecs_cluster_asg_cpu_alert                     = var.enable_infrastructure_ecs_cluster_asg_cpu_alert && local.enable_infrastructure_ecs_cluster
   infrastructure_ecs_cluster_asg_cpu_alert_evaluation_periods         = var.infrastructure_ecs_cluster_asg_cpu_alert_evaluation_periods
   infrastructure_ecs_cluster_asg_cpu_alert_period                     = var.infrastructure_ecs_cluster_asg_cpu_alert_period
@@ -221,6 +227,21 @@ locals {
     for k, v in var.infrastructure_ecs_cluster_services : k => merge({
       for service_key in local.infrastructure_ecs_cluster_services_keys : service_key => try(coalesce(v[service_key], local.infrastructure_ecs_cluster_service_defaults[service_key]), null)
     })
+  }
+  # One target-tracking policy per autoscaled service, over every target group
+  # the service has (one for rolling, blue and green for blue/green). The
+  # policy sums RequestCountPerTarget across them with FILL(..., 0), so a
+  # target group with no traffic (the idle colour, or a quiet site) counts as
+  # zero instead of leaving the scale-in alarm without data.
+  infrastructure_ecs_cluster_service_autoscaling_policies = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => {
+      autoscaling = v["autoscaling"]
+      target_group_arn_suffixes = concat(
+        [for tg_k, tg in aws_alb_target_group.infrastructure_ecs_cluster_service : tg.arn_suffix if tg_k == k],
+        [for tg_k, tg in aws_alb_target_group.infrastructure_ecs_cluster_service_blue : tg.arn_suffix if tg_k == k],
+        [for tg_k, tg in aws_alb_target_group.infrastructure_ecs_cluster_service_green : tg.arn_suffix if tg_k == k],
+      )
+    } if v["autoscaling"] != null && v["container_port"] != null && v["container_port"] != 0
   }
   infrastructure_ecs_cluster_services_alb_enable_global_accelerator     = var.infrastructure_ecs_cluster_services_alb_enable_global_accelerator && length(local.infrastructure_ecs_cluster_services) > 0
   infrastructure_ecs_cluster_services_alb_ip_allow_list                 = var.infrastructure_ecs_cluster_services_alb_ip_allow_list

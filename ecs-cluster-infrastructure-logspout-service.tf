@@ -13,6 +13,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
       environment         = jsonencode([])
       secrets             = jsonencode([])
       container_port      = 0
+      memory_reservation  = 16
+      cpu                 = 0
       extra_hosts         = jsonencode([])
       volumes = jsonencode([
         {
@@ -41,8 +43,11 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
 resource "aws_ecs_service" "infrastructure_ecs_cluster_logspout" {
   count = local.infrastructure_ecs_cluster_logspout_enabled ? 1 : 0
 
-  name                = "logsput"
-  cluster             = aws_ecs_cluster.infrastructure[0].name
-  task_definition     = aws_ecs_task_definition.infrastructure_ecs_cluster_logspout[0].arn
+  name            = "logsput"
+  cluster         = aws_ecs_cluster.infrastructure[0].name
+  task_definition = aws_ecs_task_definition.infrastructure_ecs_cluster_logspout[0].arn
+  # Daemon services cannot use a capacity provider strategy, so they must not
+  # inherit the cluster default strategy when a capacity provider is enabled.
+  launch_type         = "EC2"
   scheduling_strategy = "DAEMON"
 }
