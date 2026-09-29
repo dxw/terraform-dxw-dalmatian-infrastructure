@@ -75,7 +75,7 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_ta
 }
 
 resource "aws_iam_policy" "infrastructure_ecs_cluster_service_task_execution_kms_decrypt" {
-  for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
+  for_each = { for k, v in local.infrastructure_ecs_cluster_services : k => v if local.infrastructure_kms_encryption }
 
   name        = "${local.resource_prefix}-${substr(sha512("ecs-cluster-service-task-execution-${each.key}-kms-decrypt"), 0, 6)}"
   description = "${local.resource_prefix}-ecs-cluster-service-task-execution-${each.key}-kms-decrypt"
@@ -86,7 +86,7 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_service_task_execution_kms
 }
 
 resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_task_execution_kms_decrypt" {
-  for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
+  for_each = { for k, v in local.infrastructure_ecs_cluster_services : k => v if local.infrastructure_kms_encryption }
 
   role       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.key].name
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_task_execution_kms_decrypt[each.key].arn

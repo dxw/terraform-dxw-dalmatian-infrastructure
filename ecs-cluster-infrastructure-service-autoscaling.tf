@@ -28,3 +28,56 @@ resource "aws_appautoscaling_target" "infrastructure_ecs_cluster_service" {
     }
   }
 }
+
+resource "aws_appautoscaling_policy" "infrastructure_ecs_cluster_service_requests" {
+  for_each = local.infrastructure_ecs_cluster_service_autoscaling_policies
+
+  name               = "${local.resource_prefix}-${each.key}-requests-per-target"
+  policy_type        = "TargetTrackingScaling"
+  service_namespace  = aws_appautoscaling_target.infrastructure_ecs_cluster_service[each.key].service_namespace
+  scalable_dimension = aws_appautoscaling_target.infrastructure_ecs_cluster_service[each.key].scalable_dimension
+  resource_id        = aws_appautoscaling_target.infrastructure_ecs_cluster_service[each.key].resource_id
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = each.value["autoscaling"]["target_requests_per_target"]
+    scale_in_cooldown  = each.value["autoscaling"]["scale_in_cooldown"]
+    scale_out_cooldown = each.value["autoscaling"]["scale_out_cooldown"]
+
+    customized_metric_specification {
+      dynamic "metrics" {
+        for_each = { for i, suffix in each.value["target_group_arn_suffixes"] : "tg${i}" => suffix }
+
+        content {
+          id          = metrics.key
+          return_data = false
+
+          metric_stat {
+            stat = "Sum"
+
+            metric {
+              namespace   = "AWS/ApplicationELB"
+              metric_name = "RequestCountPerTarget"
+
+              dimensions {
+                name  = "TargetGroup"
+                value = metrics.value
+              }
+
+              dimensions {
+                name  = "LoadBalancer"
+                value = aws_alb.infrastructure_ecs_cluster_service[0].arn_suffix
+              }
+            }
+          }
+        }
+      }
+
+      metrics {
+        id          = "requests_per_target"
+        label       = "ALB requests per target per minute, summed over the service's target groups"
+        expression  = join(" + ", [for i, suffix in each.value["target_group_arn_suffixes"] : "FILL(tg${i}, 0)"])
+        return_data = true
+      }
+    }
+  }
+}
