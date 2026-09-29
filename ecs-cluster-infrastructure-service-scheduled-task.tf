@@ -25,6 +25,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service_scheduled
       environment         = jsonencode([])
       secrets             = jsonencode([])
       container_port      = 0
+      memory_reservation  = 16
+      cpu                 = 0
       extra_hosts = each.value["extra_hosts"] != null ? jsonencode([
         for extra_host in each.value["extra_hosts"] : {
           hostname  = extra_host.value["hostname"],

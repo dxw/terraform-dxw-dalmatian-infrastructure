@@ -582,6 +582,15 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     container_count              = optional(number, null)
     container_heath_check_path   = optional(string, null)
     container_heath_grace_period = optional(number, null)
+    container_memory_reservation = optional(number, null)
+    container_cpu                = optional(number, null)
+    autoscaling = optional(object({
+      min_count                  = number
+      max_count                  = number
+      target_requests_per_target = number
+      scale_in_cooldown          = optional(number, 300)
+      scale_out_cooldown         = optional(number, 60)
+    }), null)
     scheduled_tasks = optional(map(object({
       entrypoint          = optional(list(string), null)
       schedule_expression = string
@@ -651,6 +660,9 @@ variable "infrastructure_ecs_cluster_services" {
         container_count: Number of containers to launch for the service
         container_heath_check_path: Destination for the health check request
         container_heath_grace_period: Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown
+        container_memory_reservation: Soft memory reservation for the container in MiB (default 16). Set it to what the process really uses so ECS can place tasks and scale instances correctly
+        container_cpu: CPU units reserved for the container (1024 = one vCPU). Omitted when unset
+        autoscaling: Scale the service's task count on ALB requests per task per minute eg. { min_count = 2, max_count = 8, target_requests_per_target = 300, scale_in_cooldown = 300, scale_out_cooldown = 60 }. Requires a container_port. When unset the service runs exactly container_count tasks
         scheduled_tasks: A map of scheduled tasks that use the same image as the service defined eg. { "name" => { "entrypoint" = ["bundle", "exec", "run_jobs"], "schedule_expression" = "cron(* * * * ? *)" } }
         domain_names: Domain names to assign to CloudFront aliases, and the Application Load Balancer's `host_header` condition
         enable_cloudfront: Enable cloadfront for the service
@@ -706,6 +718,15 @@ variable "infrastructure_ecs_cluster_services" {
     container_count              = optional(number, null)
     container_heath_check_path   = optional(string, null)
     container_heath_grace_period = optional(number, null)
+    container_memory_reservation = optional(number, null)
+    container_cpu                = optional(number, null)
+    autoscaling = optional(object({
+      min_count                  = number
+      max_count                  = number
+      target_requests_per_target = number
+      scale_in_cooldown          = optional(number, 300)
+      scale_out_cooldown         = optional(number, 60)
+    }), null)
     scheduled_tasks = optional(map(object({
       entrypoint          = list(string)
       schedule_expression = string

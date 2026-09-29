@@ -262,6 +262,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service" {
       environment         = jsonencode([])
       secrets             = jsonencode([])
       container_port      = each.value["container_port"] != null ? each.value["container_port"] : 0
+      memory_reservation  = each.value["container_memory_reservation"] != null ? each.value["container_memory_reservation"] : 16
+      cpu                 = each.value["container_cpu"] != null ? each.value["container_cpu"] : 0
       extra_hosts = each.value["container_extra_hosts"] != null ? jsonencode([
         for extra_host in each.value["container_extra_hosts"] : {
           hostname  = extra_host["hostname"],
@@ -356,6 +358,7 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
 
   lifecycle {
     ignore_changes = [
+      desired_count,
       load_balancer,
       task_definition,
     ]

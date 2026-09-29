@@ -154,8 +154,10 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_datadog_agent" {
           valueFrom = aws_secretsmanager_secret.infrastructure_ecs_cluster_datadog_agent_api_key[0].arn
         }
       ])
-      container_port = 0
-      extra_hosts    = jsonencode([])
+      container_port     = 0
+      memory_reservation = 16
+      cpu                = 0
+      extra_hosts        = jsonencode([])
       volumes = jsonencode([
         {
           sourceVolume  = "dockersock"

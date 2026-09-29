@@ -13,6 +13,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
       environment         = jsonencode([])
       secrets             = jsonencode([])
       container_port      = 0
+      memory_reservation  = 16
+      cpu                 = 0
       extra_hosts         = jsonencode([])
       volumes = jsonencode([
         {
