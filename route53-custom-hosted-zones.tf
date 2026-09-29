@@ -63,6 +63,26 @@ resource "aws_route53_record" "custom_alias" {
   }
 }
 
+resource "aws_route53_record" "custom_alias_ipv6" {
+  for_each = merge([
+    for k, v in local.custom_route53_hosted_zones : {
+      for alias_name, alias_records in v["alias_records"] : "${k}_${alias_name}" => merge(alias_records, { zone_name = k, name = alias_name }) if alias_records["ipv6"] == true
+    }
+  ]...)
+
+  name = each.value["name"]
+
+  type = "AAAA"
+
+  zone_id = aws_route53_zone.custom[each.value["zone_name"]].zone_id
+
+  alias {
+    name                   = each.value["value"]
+    zone_id                = each.value["zone_id"]
+    evaluate_target_health = false
+  }
+}
+
 resource "aws_route53_record" "custom_cname" {
   for_each = merge([
     for k, v in local.custom_route53_hosted_zones : {
