@@ -348,12 +348,25 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
 
   health_check_grace_period_seconds = each.value["container_port"] != 0 ? each.value["container_heath_grace_period"] : null
 
-  launch_type = "EC2"
+  # ECS refuses to move a service from the EC2 launch type to an ASG
+  # capacity provider in place; see the variable description.
+  launch_type = local.infrastructure_ecs_cluster_capacity_provider_enabled ? null : "EC2"
+
+  dynamic "capacity_provider_strategy" {
+    for_each = local.infrastructure_ecs_cluster_capacity_provider_enabled ? [1] : []
+
+    content {
+      capacity_provider = aws_ecs_capacity_provider.infrastructure_ecs_cluster[0].name
+      weight            = 1
+      base              = 0
+    }
+  }
 
   depends_on = [
     aws_alb_listener.infrastructure_ecs_cluster_service_http_https_redirect,
     aws_alb_listener.infrastructure_ecs_cluster_service_http,
     aws_alb_listener.infrastructure_ecs_cluster_service_https,
+    aws_ecs_cluster_capacity_providers.infrastructure_ecs_cluster,
   ]
 
   lifecycle {

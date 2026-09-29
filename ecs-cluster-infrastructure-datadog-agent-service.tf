@@ -318,8 +318,11 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_datadog_agent" {
 resource "aws_ecs_service" "infrastructure_ecs_cluster_datadog_agent" {
   count = local.enable_infrastructure_ecs_cluster_datadog_agent ? 1 : 0
 
-  name                = "datadog-agent"
-  cluster             = aws_ecs_cluster.infrastructure[0].name
-  task_definition     = aws_ecs_task_definition.infrastructure_ecs_cluster_datadog_agent[0].arn
+  name            = "datadog-agent"
+  cluster         = aws_ecs_cluster.infrastructure[0].name
+  task_definition = aws_ecs_task_definition.infrastructure_ecs_cluster_datadog_agent[0].arn
+  # Daemon services cannot use a capacity provider strategy, so they must not
+  # inherit the cluster default strategy when a capacity provider is enabled.
+  launch_type         = "EC2"
   scheduling_strategy = "DAEMON"
 }
