@@ -158,6 +158,12 @@ locals {
   infrastructure_ecs_cluster_autoscaling_time_based_custom = {
     for custom in toset(var.infrastructure_ecs_cluster_autoscaling_time_based_custom) : "${custom["min"]}-${custom["max"]} ${custom["cron"]}" => custom
   }
+  infrastructure_ecs_cluster_capacity_provider         = var.infrastructure_ecs_cluster_capacity_provider
+  infrastructure_ecs_cluster_capacity_provider_enabled = local.enable_infrastructure_ecs_cluster && var.infrastructure_ecs_cluster_capacity_provider != null
+  # Capacity provider names may not start with "aws", "ecs" or "fargate";
+  # resource_prefix starts with the project name, which a precondition on
+  # the capacity provider checks.
+  infrastructure_ecs_cluster_capacity_provider_name                   = "${local.resource_prefix}-infrastructure-ecs-cluster"
   enable_infrastructure_ecs_cluster_asg_cpu_alert                     = var.enable_infrastructure_ecs_cluster_asg_cpu_alert && local.enable_infrastructure_ecs_cluster
   infrastructure_ecs_cluster_asg_cpu_alert_evaluation_periods         = var.infrastructure_ecs_cluster_asg_cpu_alert_evaluation_periods
   infrastructure_ecs_cluster_asg_cpu_alert_period                     = var.infrastructure_ecs_cluster_asg_cpu_alert_period

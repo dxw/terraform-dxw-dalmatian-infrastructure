@@ -159,6 +159,15 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
     }
 
     dynamic "environment_variable" {
+      for_each = local.infrastructure_ecs_cluster_capacity_provider_enabled && each.value["deployment_type"] == "blue-green" ? [1] : []
+
+      content {
+        name  = "CAPACITY_PROVIDER_NAME"
+        value = aws_ecs_capacity_provider.infrastructure_ecs_cluster[0].name
+      }
+    }
+
+    dynamic "environment_variable" {
       for_each = each.value["codebuild_environment_variables"]
 
       content {
