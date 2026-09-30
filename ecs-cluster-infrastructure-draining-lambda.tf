@@ -104,7 +104,7 @@ resource "aws_lambda_function" "ecs_cluster_infrastructure_draining" {
   function_name    = "${local.resource_prefix_hash}-ecs-cluster-infrastructure-draining"
   description      = "${local.resource_prefix} ECS Cluster Infrastructure Draining"
   handler          = "function.lambda_handler"
-  runtime          = "python3.11"
+  runtime          = "python3.13"
   role             = aws_iam_role.ecs_cluster_infrastructure_draining_lambda[0].arn
   source_code_hash = data.archive_file.ecs_cluster_infrastructure_draining_lambda[0].output_base64sha256
   memory_size      = 128

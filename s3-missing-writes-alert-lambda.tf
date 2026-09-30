@@ -110,7 +110,7 @@ resource "aws_lambda_function" "s3_missing_writes_alert" {
   function_name    = "${local.resource_prefix_hash}-s3-missing-writes-alert"
   description      = "${local.resource_prefix} S3 Missing Writes Alert"
   handler          = "function.lambda_handler"
-  runtime          = "python3.11"
+  runtime          = "python3.13"
   role             = aws_iam_role.s3_missing_writes_alert_lambda[0].arn
   source_code_hash = data.archive_file.s3_missing_writes_alert_lambda[0].output_base64sha256
   memory_size      = 128
