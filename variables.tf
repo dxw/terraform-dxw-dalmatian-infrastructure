@@ -1128,7 +1128,7 @@ variable "custom_route53_hosted_zones" {
       example.com = {
         ns_records: Map of NS records to create ({ "domain.example.com"  = { values = ["ns1.example.com", "ns2.example.com"], ttl = 300 })
         a_records: Map of A records to create ({ "domain.example.com"  = { values = ["1.2.3.4", "5.6.7.8"], ttl = 300 })
-        alias_records: Map of ALIAS records to create ({ "domain.example.com"  = { value = "example.cloudfront.com", zone_id = "Z2FDTNDATAQYW2" })
+        alias_records: Map of ALIAS records to create ({ "domain.example.com"  = { value = "example.cloudfront.com", zone_id = "Z2FDTNDATAQYW2", ipv6 = true }). `ipv6` also creates an AAAA ALIAS to the same target, which must itself answer over IPv6 (eg. a CloudFront distribution or dual-stack ALB)
         cname_records: Map of CNAME records to create ({ "domain.example.com"  = { values = ["external1.example.com", "external2.example.com"], ttl = 60 })
         mx_records: Map of MX records to create ({ "example.com"  = { values = ["1 mail.example.com", "5 mail2.example.com"], ttl = 60 })
         txt_records: Map of TXT records to create ({ "example.com"  = { values = ["v=spf1 include:spf.example.com -all"], ttl = 60 })
@@ -1147,6 +1147,7 @@ variable "custom_route53_hosted_zones" {
     alias_records = optional(map(object({
       value   = string
       zone_id = string
+      ipv6    = optional(bool, false)
     })), null)
     cname_records = optional(map(object({
       values = list(string)
