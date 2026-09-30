@@ -760,6 +760,18 @@ variable "infrastructure_ecs_cluster_service_defaults" {
       "cognito-idp:AdminUserGlobalSignOut",
       "cognito-idp:ListUsers",
     ])
+    cloudfront_cache_policies = optional(map(object({
+      min_ttl                    = optional(number, 0)
+      default_ttl                = optional(number, 86400)
+      max_ttl                    = optional(number, 31536000)
+      cookies_in_cache_key       = optional(string, "none")
+      query_strings_in_cache_key = optional(string, "all")
+      headers_in_cache_key       = optional(list(string), [])
+    })), null)
+    cloudfront_cache_behaviours = optional(list(object({
+      path_pattern = string
+      cache_policy = string
+    })), null)
   })
   validation {
     condition = (
@@ -816,6 +828,8 @@ variable "infrastructure_ecs_cluster_services" {
         cloudfront_managed_origin_request_policy: Conditionally specify a CloudFront Managed Origin Request Policy for the distribution
         cloudfront_managed_response_headers_policy: Conditionally specify a CloudFront Managed Response Headers Policy for the distribution
         cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
+        cloudfront_cache_policies: Map of custom cache policies for the distribution's extra cache behaviours, eg. { static-assets = { default_ttl = 86400 } }. Defaults: min_ttl 0, default_ttl 86400, max_ttl 31536000, no cookies and all query strings in the cache key, no headers. default_ttl only applies when the origin sends no Cache-Control or Expires header
+        cloudfront_cache_behaviours: List of extra cache behaviours in evaluation order, each a CloudFront path pattern and the key of a `cloudfront_cache_policies` entry, eg. [{ path_pattern = "*.png", cache_policy = "static-assets" }]. They share the default behaviour's origin, origin request policy and response headers policy
         alb_tls_certificate_arn: Certificate ARN to attach to the Application Load Balancer - must contain the names provided in `domain_names`
         cognito_user_pools: List of Cognito User Pool names (keys of `infrastructure_cognito_user_pools`) the service task role may administer
         cognito_user_pool_actions: List of `cognito-idp` IAM actions granted on those pools. Defaults to the Admin actions an application needs to own registration, password reset, account state and session revocation. Must be Cognito Admin* user actions or ListUsers/ListUsersInGroup/ListGroups; pool-management actions and wildcards are not allowed
@@ -886,6 +900,18 @@ variable "infrastructure_ecs_cluster_services" {
     alb_tls_certificate_arn                       = optional(string, null)
     cognito_user_pools                            = optional(list(string), null)
     cognito_user_pool_actions                     = optional(list(string), null)
+    cloudfront_cache_policies = optional(map(object({
+      min_ttl                    = optional(number, 0)
+      default_ttl                = optional(number, 86400)
+      max_ttl                    = optional(number, 31536000)
+      cookies_in_cache_key       = optional(string, "none")
+      query_strings_in_cache_key = optional(string, "all")
+      headers_in_cache_key       = optional(list(string), [])
+    })), null)
+    cloudfront_cache_behaviours = optional(list(object({
+      path_pattern = string
+      cache_policy = string
+    })), null)
   }))
   validation {
     condition = alltrue([

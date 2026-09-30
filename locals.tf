@@ -228,6 +228,19 @@ locals {
       for service_key in local.infrastructure_ecs_cluster_services_keys : service_key => try(coalesce(v[service_key], local.infrastructure_ecs_cluster_service_defaults[service_key]), null)
     })
   }
+  # Custom cache policies flattened across services, keyed "<service>-<policy>".
+  # merge() drops a key silently if two pairs collide, so the declared count
+  # is kept alongside for the precondition that compares them.
+  infrastructure_ecs_cluster_service_cloudfront_cache_policies = merge([
+    for k, v in local.infrastructure_ecs_cluster_services : {
+      for policy_key, policy in v["cloudfront_cache_policies"] != null ? v["cloudfront_cache_policies"] : {} :
+      "${k}-${policy_key}" => merge(policy, { service = k, key = policy_key })
+    } if v["enable_cloudfront"] == true
+  ]...)
+  infrastructure_ecs_cluster_service_cloudfront_cache_policies_declared = sum(concat([0], [
+    for k, v in local.infrastructure_ecs_cluster_services :
+    length(v["cloudfront_cache_policies"] != null ? v["cloudfront_cache_policies"] : {}) if v["enable_cloudfront"] == true
+  ]))
   # One target-tracking policy per autoscaled service, over every target group
   # the service has (one for rolling, blue and green for blue/green). The
   # policy sums RequestCountPerTarget across them with FILL(..., 0), so a
