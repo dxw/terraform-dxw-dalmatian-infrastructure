@@ -773,6 +773,12 @@ variable "infrastructure_ecs_cluster_service_defaults" {
       cache_policy = string
     })), null)
     cloudfront_enhanced_metrics_enabled = optional(bool, null)
+    cloudfront_custom_error_responses = optional(list(object({
+      error_code            = number
+      response_code         = optional(number, null)
+      response_page_path    = string
+      error_caching_min_ttl = optional(number, 10)
+    })), null)
   })
   validation {
     condition = (
@@ -832,6 +838,7 @@ variable "infrastructure_ecs_cluster_services" {
         cloudfront_cache_policies: Map of custom cache policies for the distribution's extra cache behaviours, eg. { static-assets = { default_ttl = 86400 } }. Defaults: min_ttl 0, default_ttl 86400, max_ttl 31536000, no cookies and all query strings in the cache key, no headers. default_ttl only applies when the origin sends no Cache-Control or Expires header
         cloudfront_cache_behaviours: List of extra cache behaviours in evaluation order, each a CloudFront path pattern and the key of a `cloudfront_cache_policies` entry, eg. [{ path_pattern = "*.png", cache_policy = "static-assets" }]. They share the default behaviour's origin, origin request policy and response headers policy
         cloudfront_enhanced_metrics_enabled: Subscribe the distribution to CloudFront's additional CloudWatch metrics (cache hit rate, origin latency, error rates by status code). Billed per distribution
+        cloudfront_custom_error_responses: List of origin error codes to answer with a static page served from a path on the same distribution, eg. [{ error_code = 503, response_page_path = "/__errors/503.html", error_caching_min_ttl = 30 }]. response_code defaults to error_code. The page must come from an origin other than the service, typically a custom S3 bucket served through the distribution at that path
         alb_tls_certificate_arn: Certificate ARN to attach to the Application Load Balancer - must contain the names provided in `domain_names`
         cognito_user_pools: List of Cognito User Pool names (keys of `infrastructure_cognito_user_pools`) the service task role may administer
         cognito_user_pool_actions: List of `cognito-idp` IAM actions granted on those pools. Defaults to the Admin actions an application needs to own registration, password reset, account state and session revocation. Must be Cognito Admin* user actions or ListUsers/ListUsersInGroup/ListGroups; pool-management actions and wildcards are not allowed
@@ -915,6 +922,12 @@ variable "infrastructure_ecs_cluster_services" {
       cache_policy = string
     })), null)
     cloudfront_enhanced_metrics_enabled = optional(bool, null)
+    cloudfront_custom_error_responses = optional(list(object({
+      error_code            = number
+      response_code         = optional(number, null)
+      response_page_path    = string
+      error_caching_min_ttl = optional(number, 10)
+    })), null)
   }))
   validation {
     condition = alltrue([
@@ -1356,6 +1369,7 @@ variable "custom_s3_buckets" {
         cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
         custom_bucket_policy_statements: Conditionally add a string of comma delimited user-defined key policy statements (eg. '{"Effect": ...},{"Effect": ...}'
         enable_missing_writes_alert: Conditionally enable an alert for missing writes to the S3 bucket.
+        objects: Map of object keys to content to keep in the bucket from Terraform, eg. { "503.html" = { content = "<html>...</html>" } }. content_type is inferred from the key's extension when unset; cache_control is sent as the object's Cache-Control header
       }
     }
   EOT
@@ -1376,6 +1390,11 @@ variable "custom_s3_buckets" {
     cloudfront_waf_association                            = optional(string, null)
     custom_bucket_policy_statements                       = optional(string, null)
     enable_missing_writes_alert                           = optional(bool, false)
+    objects = optional(map(object({
+      content       = string
+      content_type  = optional(string, null)
+      cache_control = optional(string, null)
+    })), null)
   }))
 }
 
