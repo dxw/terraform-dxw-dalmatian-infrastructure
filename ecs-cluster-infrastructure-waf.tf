@@ -59,7 +59,14 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
   scope       = "CLOUDFRONT"
 
   default_action {
-    allow {}
+    dynamic "allow" {
+      for_each = each.value["default_action"] == "block" ? [] : [1]
+      content {}
+    }
+    dynamic "block" {
+      for_each = each.value["default_action"] == "block" ? [1] : []
+      content {}
+    }
   }
   custom_response_body {
     key          = "rate_limit_exceeded"
@@ -120,7 +127,7 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
 
     content {
       name     = "CustomDalmatianBlockIPv6Set"
-      priority = 3 # Always process this rule before any others if it is defined
+      priority = 2 # IPv6 deny follows the IPv4 lists; managed rules start at 4
 
       action {
         block {}
@@ -144,7 +151,7 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
 
     content {
       name     = "CustomDalmatianAllowIPv6Set"
-      priority = 4 # Always process this rule before any others if it is defined
+      priority = 3 # IPv6 allow follows the IPv6 deny; managed rules start at 4
 
       action {
         allow {}

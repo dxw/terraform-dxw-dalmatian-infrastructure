@@ -537,8 +537,22 @@ variable "infrastructure_ecs_cluster_logspout_command" {
 }
 
 variable "infrastructure_ecs_cluster_wafs" {
-  description = "Map of WAF ACLs to create, which can be used with service CloudFront distributions"
+  description = <<EOT
+    Map of WAF ACLs to create, which can be used with service CloudFront distributions
+    {
+      waf-name = {
+        default_action: Action for requests no rule matches - 'allow' (the default) or 'block'. Set to 'block' with an allow list to restrict access to listed addresses only
+        ipv4_deny_list: List of IPv4 CIDRs to block
+        ipv4_allow_list: List of IPv4 CIDRs to allow, bypassing the managed and rate limiting rules
+        ipv6_deny_list: List of IPv6 CIDRs to block
+        ipv6_allow_list: List of IPv6 CIDRs to allow, bypassing the managed and rate limiting rules
+        aws_managed_rules: List of AWS managed rule groups to apply ({ name = "AWSManagedRulesCommonRuleSet", action = "block" })
+        rate_limiting: Per-IP rate limiting ({ enabled = true, limit = 1000, evaluation_window_sec = 300 })
+      }
+    }
+  EOT
   type = map(object({
+    default_action  = optional(string, "allow")
     ipv4_deny_list  = optional(list(string), null)
     ipv4_allow_list = optional(list(string), null)
     ipv6_deny_list  = optional(list(string), null)
@@ -563,6 +577,12 @@ variable "infrastructure_ecs_cluster_wafs" {
       true
     ])
     error_message = "Valid values for evaluation_window_sec are 60, 120, 300, and 600."
+  }
+  validation {
+    condition = alltrue([
+      for waf in var.infrastructure_ecs_cluster_wafs : contains(["allow", "block"], waf.default_action)
+    ])
+    error_message = "Valid values for default_action are allow and block."
   }
 }
 
