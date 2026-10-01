@@ -54,8 +54,9 @@ function handler(event) {
   var trimRequestDirsNum = ${trim_request_dirs_num};
   var newUri = pathChroot(req.uri, trimRequestDirsNum, newRoot);
   if (newUri.slice(-1) == "/") {
-    req.uri = newUri.concat("", "index.html")
+    newUri = newUri.concat("", "index.html")
   }
+  req.uri = newUri;
   %{endif~}
   %{~ if basic_auth_user_list != "{}" }
   const userList = JSON.parse('${basic_auth_user_list}');
