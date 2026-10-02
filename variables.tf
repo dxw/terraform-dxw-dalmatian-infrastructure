@@ -699,6 +699,8 @@ variable "infrastructure_ecs_cluster_service_defaults" {
       name  = string
       value = string
     })), [])
+    codebuild_compute_type        = optional(string, null)
+    codebuild_image               = optional(string, null)
     ecr_scan_target_sns_topic_arn = optional(string, null)
     deployment_type               = optional(string, null)
     enable_cloudwatch_logs        = optional(bool, null)
@@ -806,6 +808,8 @@ variable "infrastructure_ecs_cluster_services" {
         buildspec: The filename of the buildspec to use for the CodePipeline build phase, stored within the 'codepipeline buildspec store' S3 bucket
         buildspec_from_github_repo: Conditionally use the 'buildspec' filename stored within the GitHub repo as the buildspec
         codebuild_environment_variables: List of codebuild environment variable objects (eg. [{ name = "MY_VAR", value = "foo" },{ name = "MY_OTHER_VAR", value = "bar"}])
+        codebuild_compute_type: The CodeBuild compute type for the image build (eg. BUILD_GENERAL1_MEDIUM). Defaults to BUILD_GENERAL1_SMALL
+        codebuild_image: The CodeBuild image for the image build (eg. aws/codebuild/standard:7.0). Defaults to aws/codebuild/standard:5.0. Docker 23 and later, as in standard:7.0, builds with BuildKit by default
         ecr_scan_target_sns_topic_arn: An SNS topic ARN to publish ECR scan results to
         deployment_type: The service deployment type - Can be one of 'rolling' or 'blue-green'
         enable_cloudwatch_logs: Conditionally enable cloudwatch logs for the service
@@ -858,6 +862,8 @@ variable "infrastructure_ecs_cluster_services" {
       name  = string
       value = string
     })), [])
+    codebuild_compute_type        = optional(string, null)
+    codebuild_image               = optional(string, null)
     ecr_scan_target_sns_topic_arn = optional(string, null)
     deployment_type               = optional(string, null)
     enable_cloudwatch_logs        = optional(bool, null)
