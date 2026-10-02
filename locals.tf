@@ -20,7 +20,8 @@ locals {
     local.infrastructure_ecs_cluster_asg_cpu_alert_slack ||
     local.infrastructure_ecs_cluster_pending_task_alert_slack ||
     local.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack ||
-    local.enable_s3_missing_writes_alert
+    local.enable_s3_missing_writes_alert ||
+    local.infrastructure_ecs_cluster_service_pipeline_slack_notifications
   )
   infrastructure_opsgenie_sns_topic_in_use = (
     local.infrastructure_ecs_cluster_asg_cpu_alert_opsgenie ||
@@ -184,6 +185,7 @@ locals {
   infrastructure_ecs_cluster_ecs_asg_diff_alert_threshold             = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_threshold
   infrastructure_ecs_cluster_ecs_asg_diff_alert_slack                 = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack
   infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie              = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie
+  infrastructure_ecs_cluster_service_pipeline_slack_notifications     = var.infrastructure_ecs_cluster_service_pipeline_slack_notifications && length(local.infrastructure_ecs_cluster_services) != 0
   infrastructure_ecs_cluster_enable_debug_mode                        = var.infrastructure_ecs_cluster_enable_debug_mode
   infrastructure_ecs_cluster_enable_execute_command_logging           = var.infrastructure_ecs_cluster_enable_execute_command_logging
   infrastructure_ecs_cluster_wafs                                     = var.infrastructure_ecs_cluster_wafs
