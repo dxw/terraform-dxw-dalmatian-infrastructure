@@ -517,6 +517,12 @@ variable "infrastructure_ecs_cluster_service_pipeline_slack_notifications" {
   default     = false
 }
 
+variable "infrastructure_ecs_cluster_autoscaling_slack_notifications" {
+  description = "Send autoscaling activity to the account's CloudWatch Slack alerts SNS topic: ECS services' target tracking alarms going into ALARM (scaling out or in), ECS cluster instance launches and terminations caused by a scaling policy or scheduled action, failed instance launches and terminations, and ECS task placement failures. On a cluster with infrastructure_ecs_cluster_capacity_provider, tasks short of capacity wait in PROVISIONING rather than failing placement, so a scale-out held at the ASG's max_size is not reported. Requires the account-bootstrap CloudWatch Slack alerts (topic and KMS key alias)."
+  type        = bool
+  default     = false
+}
+
 variable "infrastructure_ecs_cluster_enable_debug_mode" {
   description = "Enable debug mode for ECS and Docker on the Infrastructure ECS. This should only be enabled when debugging (Can cause a lot of logs)"
   type        = bool
