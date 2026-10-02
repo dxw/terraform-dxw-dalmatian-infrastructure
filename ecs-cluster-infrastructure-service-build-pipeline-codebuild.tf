@@ -97,8 +97,8 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
   }
 
   environment {
-    compute_type    = "BUILD_GENERAL1_SMALL"
-    image           = "aws/codebuild/standard:5.0"
+    compute_type    = coalesce(each.value["codebuild_compute_type"], "BUILD_GENERAL1_SMALL")
+    image           = coalesce(each.value["codebuild_image"], "aws/codebuild/standard:5.0")
     type            = "LINUX_CONTAINER"
     privileged_mode = true
 
