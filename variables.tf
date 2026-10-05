@@ -1385,6 +1385,7 @@ variable "custom_s3_buckets" {
         cloudfront_infrastructure_ecs_cluster_service: Conditionally create an Origin on a CloudFront distribution that is serving the given Infrastructure ECS Cluster Service name
         cloudfront_infrastructure_ecs_cluster_service_path: If `cloudfront_infrastructure_ecs_cluster_service`, set this to the path that objects will be served from.
         cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
+        cloudfront_origin_shield_enabled: Enable CloudFront Origin Shield, in the infrastructure's region, on the bucket's origin. Applies to the dedicated distribution and to the origin on the service distribution set by `cloudfront_infrastructure_ecs_cluster_service`
         custom_bucket_policy_statements: Conditionally add a string of comma delimited user-defined key policy statements (eg. '{"Effect": ...},{"Effect": ...}'
         enable_missing_writes_alert: Conditionally enable an alert for missing writes to the S3 bucket.
         objects: Map of object keys to content to keep in the bucket from Terraform, eg. { "503.html" = { content = "<html>...</html>" } }. content_type is inferred from the key's extension when unset; cache_control is sent as the object's Cache-Control header
@@ -1406,6 +1407,7 @@ variable "custom_s3_buckets" {
     cloudfront_infrastructure_ecs_cluster_service         = optional(string, null)
     cloudfront_infrastructure_ecs_cluster_service_path    = optional(string, null)
     cloudfront_waf_association                            = optional(string, null)
+    cloudfront_origin_shield_enabled                      = optional(bool, null)
     custom_bucket_policy_statements                       = optional(string, null)
     enable_missing_writes_alert                           = optional(bool, false)
     objects = optional(map(object({
