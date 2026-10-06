@@ -139,9 +139,48 @@ resource "aws_cloudfront_distribution" "cloudfront_redirects" {
       condition     = length(flatten([for redirect in local.cloudfront_redirects : redirect["aliases"]])) == length(local.cloudfront_redirect_alias_zones)
       error_message = "cloudfront_redirects: an alias may appear in only one redirect, because CloudFront rejects an alias already attached to another distribution."
     }
+
+    precondition {
+      condition     = !each.value["create_route53_records"] || alltrue([for alias in each.value["aliases"] : local.cloudfront_redirect_alias_zones[alias] != null])
+      error_message = "Redirect ${each.key}: create_route53_records writes into custom_route53_hosted_zones, but these aliases fall in no zone there: ${join(", ", [for alias in each.value["aliases"] : alias if local.cloudfront_redirect_alias_zones[alias] == null])}."
+    }
   }
 
   depends_on = [
     aws_s3_bucket_acl.infrastructure_logs_log_delivery_write,
   ]
+}
+
+resource "aws_route53_record" "cloudfront_redirects_alias_a" {
+  for_each = {
+    for k, v in local.cloudfront_redirect_aliases : k => v
+    if v["zone"] != null && local.cloudfront_redirects[v["redirect"]]["create_route53_records"]
+  }
+
+  zone_id = aws_route53_zone.custom[each.value["zone"]].zone_id
+  name    = each.value["alias"]
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cloudfront_redirects[each.value["redirect"]].domain_name
+    zone_id                = aws_cloudfront_distribution.cloudfront_redirects[each.value["redirect"]].hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "cloudfront_redirects_alias_aaaa" {
+  for_each = {
+    for k, v in local.cloudfront_redirect_aliases : k => v
+    if v["zone"] != null && local.cloudfront_redirects[v["redirect"]]["create_route53_records"]
+  }
+
+  zone_id = aws_route53_zone.custom[each.value["zone"]].zone_id
+  name    = each.value["alias"]
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cloudfront_redirects[each.value["redirect"]].domain_name
+    zone_id                = aws_cloudfront_distribution.cloudfront_redirects[each.value["redirect"]].hosted_zone_id
+    evaluate_target_health = false
+  }
 }
