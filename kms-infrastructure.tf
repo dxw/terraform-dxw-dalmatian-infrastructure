@@ -90,10 +90,10 @@ resource "aws_kms_key" "infrastructure" {
           [for k, v in local.custom_s3_buckets : aws_cloudfront_distribution.custom_s3_buckets[k].arn if v["cloudfront_dedicated_distribution"] == true && (v["create_dedicated_kms_key"] == null || v["create_dedicated_kms_key"] == false)],
           [for k, v in local.custom_s3_buckets : aws_cloudfront_distribution.infrastructure_ecs_cluster_service_cloudfront[v["cloudfront_infrastructure_ecs_cluster_service"]].arn if v["cloudfront_infrastructure_ecs_cluster_service"] != null && (v["create_dedicated_kms_key"] == null || v["create_dedicated_kms_key"] == false)]
         )))
-      })}${(local.infrastructure_vpc_flow_logs_s3_with_athena || local.enable_cloudformatian_s3_template_store || contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true)) || length(local.custom_s3_buckets) > 0 && local.infrastructure_kms_encryption ? "," : ""}
+      })}${(local.infrastructure_vpc_flow_logs_s3_with_athena || local.enable_cloudformatian_s3_template_store || contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true) || local.cloudfront_redirects_access_logging_enabled) || length(local.custom_s3_buckets) > 0 && local.infrastructure_kms_encryption ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/log-delivery-allow.json.tpl",
       {
-        account_id = (local.infrastructure_vpc_flow_logs_s3_with_athena || local.enable_cloudformatian_s3_template_store || contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true)) || length(local.custom_s3_buckets) > 0 && local.infrastructure_kms_encryption ? local.aws_account_id : ""
+        account_id = (local.infrastructure_vpc_flow_logs_s3_with_athena || local.enable_cloudformatian_s3_template_store || contains([for service in local.infrastructure_ecs_cluster_services : service["cloudfront_access_logging_enabled"]], true) || local.cloudfront_redirects_access_logging_enabled) || length(local.custom_s3_buckets) > 0 && local.infrastructure_kms_encryption ? local.aws_account_id : ""
         region     = local.aws_region
       })}${local.enable_infrastructure_vpc_transfer_s3_bucket ? "," : ""}
       ${templatefile("${path.root}/policies/kms-key-policy-statements/vpc-id-and-s3-bucket-allow.json.tpl",
