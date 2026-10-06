@@ -1322,6 +1322,57 @@ variable "custom_route53_hosted_zones" {
   }))
 }
 
+variable "cloudfront_redirects" {
+  description = <<EOT
+    Map of CloudFront distributions that answer every request with a redirect to a fixed target. See docs/cloudfront-redirects.md
+    {
+      redirect-name = {
+        aliases: Hostnames the distribution answers for (lowercase, no wildcards, 1 to 100)
+        target: https:// URL to redirect to - scheme and host, optionally a path prefix, no query string or fragment
+        status_code: Redirect status code, one of 301, 302, 307 or 308 (default 301)
+        preserve_path: Append the request URI and query string to the target (default true)
+        tls_certificate_arn: us-east-1 ACM certificate covering every alias. If null, a certificate is issued and DNS-validated in the matching `custom_route53_hosted_zones` zones
+        create_route53_records: Create A and AAAA ALIAS records for every alias in its matching `custom_route53_hosted_zones` zone (default false)
+        access_logging_enabled: Enable access logging for the distribution to the infrastructure S3 logs bucket (default false)
+      }
+    }
+  EOT
+  type = map(object({
+    aliases                = list(string)
+    target                 = string
+    status_code            = optional(number, 301)
+    preserve_path          = optional(bool, true)
+    tls_certificate_arn    = optional(string, null)
+    create_route53_records = optional(bool, false)
+    access_logging_enabled = optional(bool, false)
+  }))
+  default = {}
+
+  validation {
+    condition     = alltrue([for k, v in var.cloudfront_redirects : can(regex("^[a-z0-9-]{1,46}$", k))])
+    error_message = "cloudfront_redirects keys must match ^[a-z0-9-]{1,46}$, so the CloudFront function name stays within 64 characters."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.cloudfront_redirects :
+      length(v["aliases"]) >= 1 && length(v["aliases"]) <= 100 && length(distinct(v["aliases"])) == length(v["aliases"]) &&
+      alltrue([for alias in v["aliases"] : can(regex("^([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?$", alias))])
+    ])
+    error_message = "cloudfront_redirects aliases must be 1 to 100 distinct lowercase hostnames, without wildcards."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.cloudfront_redirects : can(regex("^https://[a-z0-9.-]+(/[^?#\\s\"\\\\]*)?$", v["target"]))])
+    error_message = "cloudfront_redirects target must be an https:// URL with a lowercase host and an optional path, and no query string or fragment."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.cloudfront_redirects : contains([301, 302, 307, 308], v["status_code"])])
+    error_message = "cloudfront_redirects status_code must be one of 301, 302, 307 or 308."
+  }
+}
+
 variable "infrastructure_ecs_cluster_services_alb_enable_global_accelerator" {
   description = "Enable Global Accelerator (GA) for the infrastructure ECS cluster services ALB. If `cloudfront_bypass_protection_enabled` is set for a service, any domain pointing towards the GA must be added to the `cloudfront_bypass_protection_excluded_domains` list. It is recommended that the GA only be used for apex domains that redirect to the domain associated with CloudFront. Ideally, apex domains would use an ALIAS record pointing towards the CloudFront distribution."
   type        = bool

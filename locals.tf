@@ -38,7 +38,8 @@ locals {
     local.enable_infrastructure_vpc_transfer_s3_bucket ||
     local.infrastructure_ecs_cluster_enable_execute_command_logging ||
     local.enable_infrastructure_rds_backup_to_s3 ||
-    length(local.custom_lambda_functions) != 0
+    length(local.custom_lambda_functions) != 0 ||
+    local.cloudfront_redirects_access_logging_enabled
   )
   logs_bucket_s3_source_arns = concat(
     length(local.infrastructure_ecs_cluster_services) != 0 ? [aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn] : [],
@@ -335,6 +336,36 @@ locals {
   }
 
   custom_route53_hosted_zones = var.custom_route53_hosted_zones
+
+  cloudfront_redirects                        = var.cloudfront_redirects
+  cloudfront_redirects_access_logging_enabled = contains([for redirect in local.cloudfront_redirects : redirect["access_logging_enabled"]], true)
+  cloudfront_redirect_status_descriptions = {
+    "301" = "Moved Permanently"
+    "302" = "Found"
+    "307" = "Temporary Redirect"
+    "308" = "Permanent Redirect"
+  }
+  # The custom zone each alias belongs to: the longest zone name that equals
+  # the alias or is a suffix of it on a label boundary. null when none does.
+  cloudfront_redirect_alias_zones = {
+    for alias in distinct(flatten([for redirect in local.cloudfront_redirects : redirect["aliases"]])) :
+    alias => try(
+      split(" ", reverse(sort([
+        for zone in keys(local.custom_route53_hosted_zones) : format("%04d %s", length(zone), zone)
+        if alias == zone || endswith(alias, ".${zone}")
+      ]))[0])[1],
+      null
+    )
+  }
+  cloudfront_redirect_aliases = merge([
+    for k, v in local.cloudfront_redirects : {
+      for alias in v["aliases"] : "${k}_${alias}" => {
+        redirect = k
+        alias    = alias
+        zone     = local.cloudfront_redirect_alias_zones[alias]
+      }
+    }
+  ]...)
 
   custom_s3_buckets = var.custom_s3_buckets
 
