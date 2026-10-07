@@ -129,7 +129,7 @@ resource "aws_lambda_function" "ecs_cluster_infrastructure_ecs_asg_diff_metric" 
   function_name    = "${local.resource_prefix_hash}-ecs-cluster-infrastructure-ecs-asg-diff-metric"
   description      = "${local.resource_prefix} ECS Cluster Infrastructure Container Instance / ASG Instance Difference Metric"
   handler          = "function.lambda_handler"
-  runtime          = "python3.11"
+  runtime          = "python3.13"
   role             = aws_iam_role.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda[0].arn
   source_code_hash = data.archive_file.ecs_cluster_infrastructure_ecs_asg_diff_metric_lambda[0].output_base64sha256
   memory_size      = 128
