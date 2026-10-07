@@ -189,24 +189,22 @@ resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header
 }
 
 resource "aws_alb_listener_rule" "infrastructure_ecs_cluster_service_host_header_custom" {
-  for_each = {
-    for k, service in local.infrastructure_ecs_cluster_services : k => service if service["domain_names"] != null ? length(service["domain_names"]) > 0 && service["container_port"] != 0 : false
-  }
+  for_each = local.infrastructure_ecs_cluster_service_alb_host_header_custom_chunks
 
-  listener_arn = each.value["alb_tls_certificate_arn"] != null ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
+  listener_arn = each.value["service"]["alb_tls_certificate_arn"] != null ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
 
   action {
     type             = "forward"
-    target_group_arn = each.value["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn : each.value["deployment_type"] == "blue-green" ? aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.key].arn : null
+    target_group_arn = each.value["service"]["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.value["service_name"]].arn : each.value["service"]["deployment_type"] == "blue-green" ? aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.value["service_name"]].arn : null
   }
 
   dynamic "condition" {
-    for_each = each.value["enable_cloudfront"] == true && each.value["cloudfront_bypass_protection_enabled"] == true ? [1] : []
+    for_each = each.value["service"]["enable_cloudfront"] == true && each.value["service"]["cloudfront_bypass_protection_enabled"] == true ? [1] : []
 
     content {
       http_header {
         http_header_name = "X-CloudFront-Secret"
-        values           = [random_password.infrastructure_ecs_cluster_service_cloudfront_bypass_protection_secret[each.key].result]
+        values           = [random_password.infrastructure_ecs_cluster_service_cloudfront_bypass_protection_secret[each.value["service_name"]].result]
       }
     }
   }
@@ -234,25 +232,18 @@ resource "aws_lb_listener_certificate" "service_shared_alb_certificate" {
 }
 
 resource "aws_alb_listener_rule" "service_alb_host_rule_bypass_exclusions" {
-  for_each = {
-    for k, v in local.infrastructure_ecs_cluster_services : k => v if(
-      v["enable_cloudfront"] == true &&
-      v["cloudfront_bypass_protection_enabled"] == true &&
-      v["cloudfront_bypass_protection_excluded_domains"] != null &&
-      v["container_port"] != 0
-    )
-  }
+  for_each = local.infrastructure_ecs_cluster_service_alb_bypass_exclusion_chunks
 
-  listener_arn = local.enable_infrastructure_wildcard_certificate || each.value["alb_tls_certificate_arn"] != null ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
+  listener_arn = local.enable_infrastructure_wildcard_certificate || each.value["service"]["alb_tls_certificate_arn"] != null ? aws_alb_listener.infrastructure_ecs_cluster_service_https[0].arn : aws_alb_listener.infrastructure_ecs_cluster_service_http[0].arn
 
   action {
     type             = "forward"
-    target_group_arn = each.value["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.key].arn : each.value["deployment_type"] == "blue-green" ? aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.key].arn : null
+    target_group_arn = each.value["service"]["deployment_type"] == "rolling" ? aws_alb_target_group.infrastructure_ecs_cluster_service[each.value["service_name"]].arn : each.value["service"]["deployment_type"] == "blue-green" ? aws_alb_target_group.infrastructure_ecs_cluster_service_blue[each.value["service_name"]].arn : null
   }
 
   condition {
     host_header {
-      values = each.value["cloudfront_bypass_protection_excluded_domains"]
+      values = each.value["domain_names"]
     }
   }
 
