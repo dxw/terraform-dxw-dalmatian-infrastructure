@@ -1377,6 +1377,9 @@ variable "custom_s3_buckets" {
         use_aes256_encryption: Conditionally enforce using AES256 encryption, rather than the infrastructure KMS key. Also overrides `create_dedicated_kms_key`
         transition_to_ia_days: Conditionally transition objects to 'Standard Infrequent Access' storage in N days
         transition_to_glacier_days: Conditionally transition objects to 'Glacier' storage in N days
+        expiration_days: Conditionally expire current object versions N days after creation. Versioning is always on, so this leaves a noncurrent version behind; pair it with `noncurrent_version_expiration_days` to remove the data. Must be later than any transition_to_* days
+        noncurrent_version_expiration_days: Conditionally delete noncurrent object versions permanently N days after they become noncurrent. Also removes the expired-object delete markers left once no versions remain
+        abort_incomplete_multipart_upload_days: Conditionally abort multipart uploads that are still incomplete N days after they started
         cloudfront_dedicated_distribution: Conditionally create a CloudFront distribution to serve objects from the S3 bucket.
         cloudfront_decicated_distribution_aliases: Specify custom aliases, rather than using a generated infrastriucture subdomain
         cloudfront_decicated_distribution_tls_certificate_arn: Specify a CloudFront TLS certificate to use rather than the infrastructure wildcard certificate
@@ -1398,6 +1401,9 @@ variable "custom_s3_buckets" {
     use_aes256_encryption                                 = optional(bool, null)
     transition_to_ia_days                                 = optional(number, null)
     transition_to_glacier_days                            = optional(number, null)
+    expiration_days                                       = optional(number, null)
+    noncurrent_version_expiration_days                    = optional(number, null)
+    abort_incomplete_multipart_upload_days                = optional(number, null)
     cloudfront_dedicated_distribution                     = optional(bool, null)
     cloudfront_decicated_distribution_aliases             = optional(list(string), null)
     cloudfront_decicated_distribution_tls_certificate_arn = optional(string, null)
@@ -1416,6 +1422,25 @@ variable "custom_s3_buckets" {
       cache_control = optional(string, null)
     })), null)
   }))
+  validation {
+    condition = alltrue(flatten([
+      for bucket in var.custom_s3_buckets : [
+        for days in [bucket.expiration_days, bucket.noncurrent_version_expiration_days, bucket.abort_incomplete_multipart_upload_days] :
+        days == null || try(days >= 1 && floor(days) == days, false)
+      ]
+    ]))
+    error_message = "expiration_days, noncurrent_version_expiration_days and abort_incomplete_multipart_upload_days must be whole numbers of at least 1."
+  }
+  validation {
+    condition = alltrue([
+      for bucket in var.custom_s3_buckets :
+      bucket.expiration_days == null || alltrue([
+        for days in [bucket.transition_to_ia_days, bucket.transition_to_glacier_days] :
+        days == null || try(bucket.expiration_days > days, false)
+      ])
+    ])
+    error_message = "expiration_days must be greater than transition_to_ia_days and transition_to_glacier_days, or S3 rejects the lifecycle configuration."
+  }
 }
 
 variable "external_s3_buckets_missing_writes_alert" {
