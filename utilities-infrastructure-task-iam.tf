@@ -195,3 +195,24 @@ resource "aws_iam_role_policy_attachment" "infrastructure_utilities_task_kms_enc
   role       = aws_iam_role.infrastructure_utilities_task[each.key].name
   policy_arn = aws_iam_policy.infrastructure_utilities_task_kms_encrypt[each.key].arn
 }
+
+# Lets `dalmatian rds create-database` hand the task only the name of the new
+# user's password parameter, rather than the password itself
+resource "aws_iam_policy" "infrastructure_utilities_task_ssm_get_rds_user_passwords" {
+  for_each = local.enable_infrastructure_utilities ? local.infrastructure_rds : {}
+
+  name        = "${local.resource_prefix}-${substr(sha512("utilities-task-${each.key}-ssm-get-rds-user-passwords"), 0, 6)}"
+  description = "${local.resource_prefix}-utilities-task-${each.key}-ssm-get-rds-user-passwords"
+  policy = templatefile("${path.root}/policies/ssm-get-parameter.json.tpl", {
+    parameter_arns = jsonencode([
+      "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:parameter/${local.infrastructure_name}/${local.environment}/rds/${each.key}/*",
+    ])
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "infrastructure_utilities_task_ssm_get_rds_user_passwords" {
+  for_each = local.enable_infrastructure_utilities ? local.infrastructure_rds : {}
+
+  role       = aws_iam_role.infrastructure_utilities_task[each.key].name
+  policy_arn = aws_iam_policy.infrastructure_utilities_task_ssm_get_rds_user_passwords[each.key].arn
+}
