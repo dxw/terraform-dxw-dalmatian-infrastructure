@@ -26,6 +26,8 @@ rule.
 | 1 | Allow IPv4 allow list | `ipv4_allow_list` |
 | 2 | Block IPv6 deny list | `ipv6_deny_list` |
 | 3 | Allow IPv6 allow list | `ipv6_allow_list` |
+| 4 | Bot Control, only when `geo_rule_verified_bot_categories` is set | `aws_managed_rules` |
+| 5 | `VerifiedBotGeoExemption`, only when `geo_rule_verified_bot_categories` is set | `geo_rule_verified_bot_categories` |
 | 10 + n | Geo rules, in list order | `geo_rules` |
 | 100 + n | AWS managed rule groups, in list order | `aws_managed_rules` |
 | 200 + n | Scoped rate rules, in list order | `rate_rules` |
@@ -38,7 +40,9 @@ entries when they are no longer needed.
 
 Cheap rules run first on purpose. Bot Control is billed per request it
 inspects, so put it last in `aws_managed_rules` and let the geo rules and the
-other groups dispose of traffic before it.
+other groups dispose of traffic before it. The exception is
+`geo_rule_verified_bot_categories`, which moves it before the geo rules
+because they need its labels.
 
 ## Challenge versus CAPTCHA
 
@@ -77,6 +81,56 @@ for a few days, then switch to `block`. Two rules commonly catch legitimate
 traffic: `CategoryMonitoring` (uptime checkers) and
 `SignalNonBrowserUserAgent` (scripts and load generators). Either allow-list
 those sources or keep the two rules counting with `exclude_rules`.
+
+## Letting verified bots past a geo rule
+
+A geo rule that challenges visitors from abroad also challenges the robots
+that social networks and search engines send to read a page. They cannot run
+the challenge, so they get the empty interstitial: shared links show no
+preview card, and search engines cannot index the site.
+
+```hcl
+geo_rule_verified_bot_categories = ["social_media", "page_preview", "search_engine"]
+```
+
+With this set, Bot Control runs at priority 4, before the geo rules. A
+count-only rule at priority 5, `VerifiedBotGeoExemption`, adds the label
+`dalmatian:verified-bot-geo-exempt` to requests that Bot Control labelled
+`bot:verified` and placed in one of the listed categories. Every geo rule in
+the ACL skips requests with that label. Everything after the geo rules still
+applies to them: the managed groups and the rate limits.
+
+Bot Control verifies a bot by its source address, not its User-Agent, so
+claiming to be `Twitterbot` is not enough to skip the challenge. Do not
+replace this with a User-Agent match for that reason.
+
+Categories Bot Control uses: `advertising`, `ai`, `archiver`,
+`content_fetcher`, `email_client`, `http_library`, `link_checker`,
+`miscellaneous`, `monitoring`, `page_preview`, `scraping_framework`,
+`search_engine`, `security`, `seo`, `social_media`, `webhooks`. AWS documents
+`page_preview` as a rule (`CategoryPagePreview`) but it was not yet in the
+rule group's `AvailableLabels` in October 2026; listing it is harmless and
+takes effect when AWS starts using it. A name that is not in Bot Control's
+list passes validation and never matches, so check the labels in the logs
+after deploying. AWS lists the current set as `AvailableLabels` from `aws
+wafv2 describe-managed-rule-group --scope CLOUDFRONT --vendor-name AWS --name
+AWSManagedRulesBotControlRuleSet`.
+
+Costs and caveats:
+
+- Bot Control is billed per request inspected. Running it first means it
+  also inspects the requests the geo rule would have challenged first.
+- Paths in Bot Control's `excluded_path_patterns` get no Bot Control
+  labels, so verified bots are still challenged on those paths.
+- Never set it on an ACL without a geo rule; it would only add cost.
+
+To check it works, after the deploy:
+
+```
+fields @timestamp, httpRequest.country, action, terminatingRuleId
+| filter @message like /verified-bot-geo-exempt/
+| stats count() by action, httpRequest.country
+```
 
 ## Managed rule groups
 
@@ -158,6 +212,7 @@ infrastructure_ecs_cluster_wafs = {
         excluded_path_regex = "^/auth/callback/"
       }
     ]
+    geo_rule_verified_bot_categories = ["social_media", "page_preview", "search_engine"]
     rate_rules = [
       {
         name       = "AuthRateLimit"
@@ -197,3 +252,7 @@ Plan with `dalmatian deploy infrastructure -w <workspace> -p` and read the
 geo rule's statement: with `negate` and `excluded_path_regex` it must be an
 `and_statement` of `not_statement { geo_match_statement }` and
 `not_statement { regex_match_statement }`.
+With `geo_rule_verified_bot_categories` set, the and_statement gains a third
+statement, `not_statement { label_match_statement { key =
+"dalmatian:verified-bot-geo-exempt" } }`, and the plan shows Bot Control at
+priority 4 and `VerifiedBotGeoExemption` at 5.

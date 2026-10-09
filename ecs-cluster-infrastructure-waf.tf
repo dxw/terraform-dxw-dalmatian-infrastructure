@@ -191,11 +191,80 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
     }
   }
   dynamic "rule" {
+    for_each = each.value["geo_rule_verified_bot_categories"] != null ? [each.value["geo_rule_verified_bot_categories"]] : []
+
+    content {
+      name     = "VerifiedBotGeoExemption"
+      priority = 5 # After Bot Control at 4, before the geo rules at 10
+
+      # Count only: the rule decides nothing, it labels verified bots in the
+      # listed categories so each geo rule can skip them with one label match.
+      # Matching the Bot Control labels inside the geo rule would nest four
+      # statements deep, past the provider's limit of three.
+      action {
+        count {}
+      }
+
+      rule_label {
+        name = "dalmatian:verified-bot-geo-exempt"
+      }
+
+      statement {
+        and_statement {
+          statement {
+            label_match_statement {
+              scope = "LABEL"
+              key   = "awswaf:managed:aws:bot-control:bot:verified"
+            }
+          }
+
+          dynamic "statement" {
+            for_each = length(rule.value) == 1 ? rule.value : []
+
+            content {
+              label_match_statement {
+                scope = "LABEL"
+                key   = "awswaf:managed:aws:bot-control:bot:category:${statement.value}"
+              }
+            }
+          }
+
+          # WAF rejects an or_statement with fewer than two statements.
+          dynamic "statement" {
+            for_each = length(rule.value) > 1 ? [rule.value] : []
+
+            content {
+              or_statement {
+                dynamic "statement" {
+                  for_each = statement.value
+                  iterator = category
+
+                  content {
+                    label_match_statement {
+                      scope = "LABEL"
+                      key   = "awswaf:managed:aws:bot-control:bot:category:${category.value}"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-verified-bot-geo-exemption"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+  dynamic "rule" {
     for_each = each.value["geo_rules"] != null ? each.value["geo_rules"] : []
 
     content {
       name     = rule.value["name"]
-      priority = rule.key + 10 # Geo rules run before the managed groups so Bot Control never inspects challenged traffic
+      priority = rule.key + 10 # Geo rules run before the managed groups so Bot Control never inspects challenged traffic, unless geo_rule_verified_bot_categories moves it to 4
 
       action {
         dynamic "block" {
@@ -217,8 +286,11 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
       }
 
       statement {
+        # One condition renders as a bare (possibly negated) geo match, exactly
+        # as before the verified-bot exemption existed; two or more render as
+        # an and_statement of geo match, path exclusion and label exclusion.
         dynamic "geo_match_statement" {
-          for_each = !rule.value["negate"] && rule.value["excluded_path_regex"] == null ? [1] : []
+          for_each = !rule.value["negate"] && rule.value["excluded_path_regex"] == null && each.value["geo_rule_verified_bot_categories"] == null ? [1] : []
 
           content {
             country_codes = rule.value["country_codes"]
@@ -226,7 +298,7 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
         }
 
         dynamic "not_statement" {
-          for_each = rule.value["negate"] && rule.value["excluded_path_regex"] == null ? [1] : []
+          for_each = rule.value["negate"] && rule.value["excluded_path_regex"] == null && each.value["geo_rule_verified_bot_categories"] == null ? [1] : []
 
           content {
             statement {
@@ -238,7 +310,7 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
         }
 
         dynamic "and_statement" {
-          for_each = rule.value["excluded_path_regex"] != null ? [1] : []
+          for_each = rule.value["excluded_path_regex"] != null || each.value["geo_rule_verified_bot_categories"] != null ? [1] : []
 
           content {
             statement {
@@ -263,19 +335,38 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
               }
             }
 
-            statement {
-              not_statement {
-                statement {
-                  regex_match_statement {
-                    regex_string = rule.value["excluded_path_regex"]
+            dynamic "statement" {
+              for_each = rule.value["excluded_path_regex"] != null ? [1] : []
 
-                    field_to_match {
-                      uri_path {}
+              content {
+                not_statement {
+                  statement {
+                    regex_match_statement {
+                      regex_string = rule.value["excluded_path_regex"]
+
+                      field_to_match {
+                        uri_path {}
+                      }
+
+                      text_transformation {
+                        priority = 0
+                        type     = "NONE"
+                      }
                     }
+                  }
+                }
+              }
+            }
 
-                    text_transformation {
-                      priority = 0
-                      type     = "NONE"
+            dynamic "statement" {
+              for_each = each.value["geo_rule_verified_bot_categories"] != null ? [1] : []
+
+              content {
+                not_statement {
+                  statement {
+                    label_match_statement {
+                      scope = "LABEL"
+                      key   = "dalmatian:verified-bot-geo-exempt"
                     }
                   }
                 }
@@ -296,8 +387,15 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
     for_each = each.value["aws_managed_rules"] != null ? each.value["aws_managed_rules"] : []
 
     content {
-      name     = rule.value["name"]
-      priority = rule.key + 100 # Managed groups run after the IP sets and geo rules; scoped rate rules follow at 200
+      name = rule.value["name"]
+      # Managed groups run after the IP sets and geo rules; scoped rate rules
+      # follow at 200. Bot Control moves ahead of the geo rules when
+      # geo_rule_verified_bot_categories needs its labels there.
+      priority = (
+        each.value["geo_rule_verified_bot_categories"] != null && rule.value["name"] == "AWSManagedRulesBotControlRuleSet"
+        ? 4
+        : rule.key + 100
+      )
 
       override_action {
         dynamic "count" {
