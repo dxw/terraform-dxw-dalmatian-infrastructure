@@ -511,6 +511,12 @@ variable "infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie" {
   type        = bool
 }
 
+variable "infrastructure_ecs_cluster_service_pipeline_slack_notifications" {
+  description = "Send the ECS service pipelines' execution state changes (started, succeeded, failed, stopped, superseded) to the account's CloudWatch Slack alerts SNS topic. Requires the account-bootstrap CloudWatch Slack alerts to be enabled in this account."
+  type        = bool
+  default     = false
+}
+
 variable "infrastructure_ecs_cluster_enable_debug_mode" {
   description = "Enable debug mode for ECS and Docker on the Infrastructure ECS. This should only be enabled when debugging (Can cause a lot of logs)"
   type        = bool
