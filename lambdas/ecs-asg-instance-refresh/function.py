@@ -4,6 +4,7 @@ import os
 
 asgName = os.environ['asgName']
 launchTemplateName = os.environ['launchTemplateName']
+launchTemplateDescription = os.environ['launchTemplateDescription']
 amiVersion = os.environ['amiVersion']
 
 def lambda_handler(event, context):
@@ -50,6 +51,7 @@ def lambda_handler(event, context):
             new_version_response = ec2Client.create_launch_template_version(
                 LaunchTemplateName=launchTemplateName,
                 SourceVersion="$Latest",
+                VersionDescription=launchTemplateDescription,
                 LaunchTemplateData=template_data
             )
             new_version_number = new_version_response['LaunchTemplateVersion']['VersionNumber']
