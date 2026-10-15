@@ -560,6 +560,7 @@ variable "infrastructure_ecs_cluster_wafs" {
         ipv6_allow_list: List of IPv6 CIDRs to allow, bypassing the managed and rate limiting rules
         aws_managed_rules: List of AWS managed rule groups to apply ({ name = "AWSManagedRulesCommonRuleSet", action = "block" }). `exclude_rules` overrides named rules to count, `challenge_rules` and `captcha_rules` override them to challenge or captcha, `excluded_path_patterns` skips the group for URI paths containing any pattern, and `bot_control_inspection_level` ('COMMON' or 'TARGETED') applies to AWSManagedRulesBotControlRuleSet only
         geo_rules: List of geo match rules ({ name = "ChallengeNonUK", country_codes = ["GB"], negate = true, action = "challenge", excluded_path_regex = "^/api/auth/" }). `action` is one of block, challenge, captcha or count; `negate` matches requests NOT from the listed countries
+        geo_rule_verified_bot_categories: Bot Control categories whose verified bots skip every geo rule (["social_media", "page_preview", "search_engine"]). Moves AWSManagedRulesBotControlRuleSet to run before the geo rules, so it must be in aws_managed_rules
         rate_rules: List of per-IP rate rules scoped to a URI path regex and optionally to HTTP methods ({ name = "LoginRateLimit", limit = 20, evaluation_window_sec = 300, action = "block", path_regex = "^/login$", methods = ["POST"] })
         rate_limiting: Site-wide per-IP rate limiting ({ enabled = true, limit = 1000, evaluation_window_sec = 300 })
         challenge_immunity_time_sec: Seconds a solved challenge token stays valid (WAF default is 300)
@@ -590,6 +591,7 @@ variable "infrastructure_ecs_cluster_wafs" {
       action              = optional(string, "challenge")
       excluded_path_regex = optional(string, null)
     })), null)
+    geo_rule_verified_bot_categories = optional(list(string), null)
     rate_rules = optional(list(object({
       name                  = string
       limit                 = number
@@ -644,6 +646,26 @@ variable "infrastructure_ecs_cluster_wafs" {
       ]
     ]))
     error_message = "geo_rules need at least one country code and an action of block, challenge, captcha or count."
+  }
+  validation {
+    condition = alltrue([
+      for waf in var.infrastructure_ecs_cluster_wafs :
+      waf.geo_rule_verified_bot_categories == null || (
+        length(coalesce(waf.geo_rule_verified_bot_categories, [])) > 0 &&
+        alltrue([for c in coalesce(waf.geo_rule_verified_bot_categories, []) : can(regex("^[a-z_]+$", c))])
+      )
+    ])
+    error_message = "geo_rule_verified_bot_categories must be a non-empty list of Bot Control category names such as social_media, without the awswaf:managed:aws:bot-control:bot:category: prefix."
+  }
+  validation {
+    condition = alltrue([
+      for waf in var.infrastructure_ecs_cluster_wafs :
+      waf.geo_rule_verified_bot_categories == null || contains(
+        [for rule in waf.aws_managed_rules != null ? waf.aws_managed_rules : [] : rule.name],
+        "AWSManagedRulesBotControlRuleSet"
+      )
+    ])
+    error_message = "geo_rule_verified_bot_categories needs AWSManagedRulesBotControlRuleSet in aws_managed_rules: the exemption matches the labels Bot Control adds."
   }
   validation {
     condition = alltrue(flatten([
