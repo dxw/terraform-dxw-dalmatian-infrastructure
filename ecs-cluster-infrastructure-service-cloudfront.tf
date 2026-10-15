@@ -112,6 +112,15 @@ resource "aws_cloudfront_distribution" "infrastructure_ecs_cluster_service_cloud
       domain_name              = aws_s3_bucket.custom[origin.key].bucket_regional_domain_name
       origin_id                = "${origin.key}-custom-bucket"
       origin_access_control_id = aws_cloudfront_origin_access_control.custom_s3_buckets[origin.key].id
+
+      dynamic "origin_shield" {
+        for_each = origin.value["cloudfront_origin_shield_enabled"] == true ? [1] : []
+
+        content {
+          enabled              = true
+          origin_shield_region = local.aws_region
+        }
+      }
     }
   }
 

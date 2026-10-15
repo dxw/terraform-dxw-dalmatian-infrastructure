@@ -23,6 +23,15 @@ resource "aws_cloudfront_distribution" "custom_s3_buckets" {
     domain_name              = aws_s3_bucket.custom[each.key].bucket_regional_domain_name
     origin_id                = "${each.key}-custom-bucket"
     origin_access_control_id = aws_cloudfront_origin_access_control.custom_s3_buckets[each.key].id
+
+    dynamic "origin_shield" {
+      for_each = each.value["cloudfront_origin_shield_enabled"] == true ? [1] : []
+
+      content {
+        enabled              = true
+        origin_shield_region = local.aws_region
+      }
+    }
   }
 
   default_cache_behavior {
