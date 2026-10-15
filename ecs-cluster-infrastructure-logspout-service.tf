@@ -27,6 +27,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_logspout" {
       cloudwatch_log_group  = ""
       awslogs_stream_prefix = ""
       region                = local.aws_region
+      links                 = "[]"
+      sidecars              = ""
     }
   )
 

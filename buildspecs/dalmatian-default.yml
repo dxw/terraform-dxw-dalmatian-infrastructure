@@ -34,7 +34,7 @@ phases:
         then
           echo "Writing appspec file..."
           aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_FAMILY" | jq > latest-task-definition.json;
-          cat latest-task-definition.json | jq -r --arg image "$REPOSITORY_URL:$IMAGE_TAG" '.taskDefinition.containerDefinitions | .[0].image = $image' > new-container-defs.json;
+          cat latest-task-definition.json | jq -r --arg name "$CONTAINER_NAME" --arg image "$REPOSITORY_URL:$IMAGE_TAG" '.taskDefinition.containerDefinitions | map(if .name == $name then .image = $image else . end)' > new-container-defs.json;
           NEW_TASK_DEFINITION="$(aws ecs register-task-definition \
             --family "$TASK_DEFINITION_FAMILY" \
             --container-definitions file://new-container-defs.json \
@@ -45,7 +45,7 @@ phases:
             --placement-constraints "$(cat latest-task-definition.json | jq -r '.taskDefinition.placementConstraints')" \
             --requires-compatibilities "$(cat latest-task-definition.json | jq -r '.taskDefinition.requiresCompatibilities')")";
           NEW_TASK_DEFINITION_ARN=$(echo "$NEW_TASK_DEFINITION" | jq -r '.taskDefinition.taskDefinitionArn')
-          CONTAINER_PORT=$(echo "$NEW_TASK_DEFINITION" | jq -r '.taskDefinition.containerDefinitions[0].portMappings[0].containerPort')
+          CONTAINER_PORT=$(echo "$NEW_TASK_DEFINITION" | jq -r --arg name "$CONTAINER_NAME" '.taskDefinition.containerDefinitions[] | select(.name == $name) | .portMappings[0].containerPort')
           APPSPEC=$(jq -rn \
             --arg task_definition_arn "$NEW_TASK_DEFINITION_ARN" \
             --arg container_name "$CONTAINER_NAME" \

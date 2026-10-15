@@ -55,16 +55,22 @@ do
 done
 echo "CodeBuild $BUILD_ID Completed, checking for failures ..."
 
-FAILURES="$(
+# buildStatus is the build's overall terminal state (SUCCEEDED, FAILED, FAULT,
+# TIMED_OUT, STOPPED). Checking only for a FAILED phase would report a timed
+# out or stopped build as a success.
+BUILD_STATUS="$(
   echo "$BUILD_PROGRESS" \
   | jq -r \
-  '.builds[0].phases[] | select(.phaseStatus == "FAILED")'
+  '.builds[0].buildStatus'
 )"
 
-if [ -n "$FAILURES" ]
+if [ "$BUILD_STATUS" != "SUCCEEDED" ]
 then
-  echo "$FAILURES"
+  echo "CodeBuild $BUILD_ID finished with status $BUILD_STATUS"
+  echo "$BUILD_PROGRESS" \
+    | jq -r \
+    '.builds[0].phases[] | select(.phaseStatus != null and .phaseStatus != "SUCCEEDED")'
   exit 1
 fi
 
-echo "CodeBuild $BUILD_ID completed without failures"
+echo "CodeBuild $BUILD_ID completed successfully"
