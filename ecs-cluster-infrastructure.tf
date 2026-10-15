@@ -209,6 +209,18 @@ resource "aws_autoscaling_group" "infrastructure_ecs_cluster" {
     }
   }
 
+  # ECS adds this tag when the ASG backs a capacity provider; declaring it
+  # stops Terraform removing it on the next apply.
+  dynamic "tag" {
+    for_each = local.infrastructure_ecs_cluster_capacity_provider_enabled ? [1] : []
+
+    content {
+      key                 = "AmazonECSManaged"
+      value               = ""
+      propagate_at_launch = true
+    }
+  }
+
   instance_refresh {
     strategy = "Rolling"
     preferences {
@@ -219,6 +231,12 @@ resource "aws_autoscaling_group" "infrastructure_ecs_cluster" {
 
   timeouts {
     delete = "15m"
+  }
+
+  # Managed scaling (and the time-based schedules) own desired capacity;
+  # Terraform sets it only at creation.
+  lifecycle {
+    ignore_changes = [desired_capacity]
   }
 
   enabled_metrics = [

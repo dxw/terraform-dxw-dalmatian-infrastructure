@@ -1,5 +1,5 @@
 resource "datadog_service_definition_yaml" "infrastructure_ecs_cluster_service" {
-  for_each = local.enable_infrastructure_ecs_cluster_datadog_agent ? local.infrastructure_ecs_cluster_services : {}
+  for_each = { for k, v in local.infrastructure_ecs_cluster_services : k => v if local.enable_infrastructure_ecs_cluster_datadog_agent }
 
   service_definition = yamlencode({
     schema-version = "v2.2",

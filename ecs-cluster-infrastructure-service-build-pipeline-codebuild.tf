@@ -50,7 +50,7 @@ resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_co
 }
 
 resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codebuild_kms_encrypt" {
-  for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
+  for_each = { for k, v in local.infrastructure_ecs_cluster_services : k => v if local.infrastructure_kms_encryption }
 
   name        = "${local.resource_prefix}-${substr(sha512("ecs-service-codepipeline-codebuild-${each.key}-kms-encrypt"), 0, 6)}"
   description = "${local.resource_prefix}-ecs-service-codepipeline-codebuild-${each.key}-kms-encrypt"
@@ -61,7 +61,7 @@ resource "aws_iam_policy" "infrastructure_ecs_cluster_service_codebuild_kms_encr
 }
 
 resource "aws_iam_role_policy_attachment" "infrastructure_ecs_cluster_service_codebuild_kms_encrypt" {
-  for_each = local.infrastructure_kms_encryption ? local.infrastructure_ecs_cluster_services : {}
+  for_each = { for k, v in local.infrastructure_ecs_cluster_services : k => v if local.infrastructure_kms_encryption }
 
   role       = aws_iam_role.infrastructure_ecs_cluster_service_codebuild[each.key].name
   policy_arn = aws_iam_policy.infrastructure_ecs_cluster_service_codebuild_kms_encrypt[each.key].arn
@@ -155,6 +155,15 @@ resource "aws_codebuild_project" "infrastructure_ecs_cluster_service_build" {
       content {
         name  = "TASK_DEFINITION_FAMILY"
         value = aws_ecs_task_definition.infrastructure_ecs_cluster_service[each.key].family
+      }
+    }
+
+    dynamic "environment_variable" {
+      for_each = local.infrastructure_ecs_cluster_capacity_provider_enabled && each.value["deployment_type"] == "blue-green" ? [1] : []
+
+      content {
+        name  = "CAPACITY_PROVIDER_NAME"
+        value = aws_ecs_capacity_provider.infrastructure_ecs_cluster[0].name
       }
     }
 
