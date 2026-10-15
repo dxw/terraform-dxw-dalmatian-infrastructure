@@ -136,6 +136,23 @@ resource "aws_cloudfront_distribution" "infrastructure_ecs_cluster_service_cloud
     }
   }
 
+  dynamic "ordered_cache_behavior" {
+    for_each = each.value["cloudfront_cache_behaviours"] != null ? each.value["cloudfront_cache_behaviours"] : []
+
+    content {
+      path_pattern           = ordered_cache_behavior.value["path_pattern"]
+      allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+      cached_methods         = ["GET", "HEAD"]
+      target_origin_id       = "${each.key}-default"
+      compress               = true
+      viewer_protocol_policy = "redirect-to-https"
+
+      cache_policy_id            = aws_cloudfront_cache_policy.infrastructure_ecs_cluster_service["${each.key}-${ordered_cache_behavior.value["cache_policy"]}"].id
+      origin_request_policy_id   = each.value["cloudfront_managed_origin_request_policy"] != null ? data.aws_cloudfront_origin_request_policy.managed_policy[each.value["cloudfront_managed_origin_request_policy"]].id : null
+      response_headers_policy_id = each.value["cloudfront_managed_response_headers_policy"] != null ? data.aws_cloudfront_response_headers_policy.managed_policy[each.value["cloudfront_managed_response_headers_policy"]].id : null
+    }
+  }
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
@@ -154,6 +171,18 @@ resource "aws_cloudfront_distribution" "infrastructure_ecs_cluster_service_cloud
 
   tags = {
     Name = "${local.resource_prefix}-infrastructure-ecs-cluster-service-${each.key}"
+  }
+
+  lifecycle {
+    # Checked here rather than on the variable so a policy or behaviour
+    # inherited from infrastructure_ecs_cluster_service_defaults is covered.
+    precondition {
+      condition = alltrue([
+        for behaviour in each.value["cloudfront_cache_behaviours"] != null ? each.value["cloudfront_cache_behaviours"] : [] :
+        contains(keys(each.value["cloudfront_cache_policies"] != null ? each.value["cloudfront_cache_policies"] : {}), behaviour["cache_policy"])
+      ])
+      error_message = "Service ${each.key}: every cloudfront_cache_behaviours entry must name a key of the service's effective cloudfront_cache_policies (service value or infrastructure_ecs_cluster_service_defaults)."
+    }
   }
 
   depends_on = [
