@@ -546,8 +546,13 @@ variable "infrastructure_ecs_cluster_wafs" {
         ipv4_allow_list: List of IPv4 CIDRs to allow, bypassing the managed and rate limiting rules
         ipv6_deny_list: List of IPv6 CIDRs to block
         ipv6_allow_list: List of IPv6 CIDRs to allow, bypassing the managed and rate limiting rules
-        aws_managed_rules: List of AWS managed rule groups to apply ({ name = "AWSManagedRulesCommonRuleSet", action = "block" })
-        rate_limiting: Per-IP rate limiting ({ enabled = true, limit = 1000, evaluation_window_sec = 300 })
+        aws_managed_rules: List of AWS managed rule groups to apply ({ name = "AWSManagedRulesCommonRuleSet", action = "block" }). `exclude_rules` overrides named rules to count, `challenge_rules` and `captcha_rules` override them to challenge or captcha, `excluded_path_patterns` skips the group for URI paths containing any pattern, and `bot_control_inspection_level` ('COMMON' or 'TARGETED') applies to AWSManagedRulesBotControlRuleSet only
+        geo_rules: List of geo match rules ({ name = "ChallengeNonUK", country_codes = ["GB"], negate = true, action = "challenge", excluded_path_regex = "^/api/auth/" }). `action` is one of block, challenge, captcha or count; `negate` matches requests NOT from the listed countries
+        rate_rules: List of per-IP rate rules scoped to a URI path regex and optionally to HTTP methods ({ name = "LoginRateLimit", limit = 20, evaluation_window_sec = 300, action = "block", path_regex = "^/login$", methods = ["POST"] })
+        rate_limiting: Site-wide per-IP rate limiting ({ enabled = true, limit = 1000, evaluation_window_sec = 300 })
+        challenge_immunity_time_sec: Seconds a solved challenge token stays valid (WAF default is 300)
+        captcha_immunity_time_sec: Seconds a solved CAPTCHA token stays valid (WAF default is 300)
+        logging: Send WAF logs to a CloudWatch log group in us-east-1 ({ enabled = true, retention = 30 })
       }
     }
   EOT
@@ -558,15 +563,39 @@ variable "infrastructure_ecs_cluster_wafs" {
     ipv6_deny_list  = optional(list(string), null)
     ipv6_allow_list = optional(list(string), null)
     aws_managed_rules = optional(list(object({
-      name                   = string
-      action                 = string
-      exclude_rules          = optional(list(string), null)
-      excluded_path_patterns = optional(list(string), null)
+      name                         = string
+      action                       = string
+      exclude_rules                = optional(list(string), null)
+      challenge_rules              = optional(list(string), null)
+      captcha_rules                = optional(list(string), null)
+      excluded_path_patterns       = optional(list(string), null)
+      bot_control_inspection_level = optional(string, null)
+    })), null)
+    geo_rules = optional(list(object({
+      name                = string
+      country_codes       = list(string)
+      negate              = optional(bool, false)
+      action              = optional(string, "challenge")
+      excluded_path_regex = optional(string, null)
+    })), null)
+    rate_rules = optional(list(object({
+      name                  = string
+      limit                 = number
+      evaluation_window_sec = optional(number, 300)
+      action                = optional(string, "block")
+      path_regex            = string
+      methods               = optional(list(string), null)
     })), null)
     rate_limiting = optional(object({
       enabled               = bool
       limit                 = optional(number, 1000)
       evaluation_window_sec = optional(number, 300)
+    }), null)
+    challenge_immunity_time_sec = optional(number, null)
+    captcha_immunity_time_sec   = optional(number, null)
+    logging = optional(object({
+      enabled   = bool
+      retention = optional(number, 30)
     }), null)
   }))
   validation {
@@ -583,6 +612,75 @@ variable "infrastructure_ecs_cluster_wafs" {
       for waf in var.infrastructure_ecs_cluster_wafs : contains(["allow", "block"], waf.default_action)
     ])
     error_message = "Valid values for default_action are allow and block."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.aws_managed_rules != null ? waf.aws_managed_rules : [] :
+        rule.bot_control_inspection_level == null || (
+          rule.name == "AWSManagedRulesBotControlRuleSet" && contains(["COMMON", "TARGETED"], coalesce(rule.bot_control_inspection_level, "COMMON"))
+        )
+      ]
+    ]))
+    error_message = "bot_control_inspection_level must be COMMON or TARGETED and is only valid on AWSManagedRulesBotControlRuleSet."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.geo_rules != null ? waf.geo_rules : [] :
+        contains(["block", "challenge", "captcha", "count"], rule.action) && length(rule.country_codes) > 0
+      ]
+    ]))
+    error_message = "geo_rules need at least one country code and an action of block, challenge, captcha or count."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.rate_rules != null ? waf.rate_rules : [] :
+        contains(["block", "challenge", "captcha", "count"], rule.action) && contains([60, 120, 300, 600], rule.evaluation_window_sec)
+      ]
+    ]))
+    error_message = "rate_rules need an action of block, challenge, captcha or count, and an evaluation_window_sec of 60, 120, 300 or 600."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.rate_rules != null ? waf.rate_rules : [] :
+        rule.methods == null || (
+          length(coalesce(rule.methods, [])) > 0 && alltrue([for m in coalesce(rule.methods, []) : can(regex("^[A-Z]+$", m))])
+        )
+      ]
+    ]))
+    error_message = "rate_rules methods must be omitted or a non-empty list of upper-case HTTP methods, for example [\"POST\"]. WAF matches the method exactly, so a lower-case entry would never match."
+  }
+  validation {
+    condition = alltrue([
+      for waf in var.infrastructure_ecs_cluster_wafs :
+      length(waf.geo_rules != null ? waf.geo_rules : []) <= 90 &&
+      length(waf.aws_managed_rules != null ? waf.aws_managed_rules : []) <= 100 &&
+      length(waf.rate_rules != null ? waf.rate_rules : []) <= 800
+    ])
+    error_message = "Rule priorities are banded (geo 10+, managed 100+, rate 200+, RateLimit 1000), so a WAF may have at most 90 geo_rules, 100 aws_managed_rules and 800 rate_rules."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.aws_managed_rules != null ? waf.aws_managed_rules : [] :
+        length(setintersection(
+          toset(rule.exclude_rules != null ? rule.exclude_rules : []),
+          toset(rule.challenge_rules != null ? rule.challenge_rules : []),
+        )) == 0 &&
+        length(setintersection(
+          toset(rule.exclude_rules != null ? rule.exclude_rules : []),
+          toset(rule.captcha_rules != null ? rule.captcha_rules : []),
+        )) == 0 &&
+        length(setintersection(
+          toset(rule.challenge_rules != null ? rule.challenge_rules : []),
+          toset(rule.captcha_rules != null ? rule.captcha_rules : []),
+        )) == 0
+      ]
+    ]))
+    error_message = "A managed rule may appear in only one of exclude_rules, challenge_rules and captcha_rules; WAF rejects an ACL with two overrides for the same rule."
   }
 }
 
