@@ -16,8 +16,8 @@ resource "aws_elasticache_parameter_group" "infrastructure_elasticache_cluster" 
   dynamic "parameter" {
     for_each = each.value["parameters"] != null ? each.value["parameters"] : {}
     content {
-      name  = parameter.value.name
-      value = parameter.value.value
+      name  = parameter.key
+      value = parameter.value
     }
   }
 
