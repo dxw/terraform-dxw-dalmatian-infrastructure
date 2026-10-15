@@ -113,9 +113,10 @@ resource "aws_lambda_function" "ecs_cluster_infrastructure_instance_refresh" {
 
   environment {
     variables = {
-      asgName            = aws_autoscaling_group.infrastructure_ecs_cluster[0].name
-      launchTemplateName = aws_launch_template.infrastructure_ecs_cluster[0].name
-      amiVersion         = local.infrastructure_ecs_cluster_ami_name_filter
+      asgName                   = aws_autoscaling_group.infrastructure_ecs_cluster[0].name
+      launchTemplateName        = aws_launch_template.infrastructure_ecs_cluster[0].name
+      launchTemplateDescription = aws_launch_template.infrastructure_ecs_cluster[0].description
+      amiVersion                = local.infrastructure_ecs_cluster_ami_name_filter
     }
   }
 
