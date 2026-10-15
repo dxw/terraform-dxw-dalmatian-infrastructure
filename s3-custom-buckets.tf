@@ -102,7 +102,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "custom" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "custom" {
   for_each = {
-    for k, v in local.custom_s3_buckets : k => v if v["transition_to_ia_days"] != null || v["transition_to_glacier_days"] != null
+    for k, v in local.custom_s3_buckets : k => v if anytrue([
+      for attr in ["transition_to_ia_days", "transition_to_glacier_days", "expiration_days", "noncurrent_version_expiration_days", "abort_incomplete_multipart_upload_days"] :
+      v[attr] != null
+    ])
   }
 
   bucket = aws_s3_bucket.custom[each.key].id
@@ -149,6 +152,62 @@ resource "aws_s3_bucket_lifecycle_configuration" "custom" {
       transition {
         days          = each.value["transition_to_glacier_days"]
         storage_class = "GLACIER"
+      }
+
+      filter {
+        prefix = ""
+      }
+
+      status = "Enabled"
+    }
+  }
+
+  dynamic "rule" {
+    for_each = each.value["expiration_days"] != null ? [1] : []
+    content {
+      id = "expiration"
+
+      expiration {
+        days = each.value["expiration_days"]
+      }
+
+      filter {
+        prefix = ""
+      }
+
+      status = "Enabled"
+    }
+  }
+
+  dynamic "rule" {
+    for_each = each.value["noncurrent_version_expiration_days"] != null ? [1] : []
+    content {
+      id = "noncurrent-version-expiration"
+
+      noncurrent_version_expiration {
+        noncurrent_days = each.value["noncurrent_version_expiration_days"]
+      }
+
+      # S3 rejects expired_object_delete_marker alongside days in one expiration block
+      expiration {
+        expired_object_delete_marker = true
+      }
+
+      filter {
+        prefix = ""
+      }
+
+      status = "Enabled"
+    }
+  }
+
+  dynamic "rule" {
+    for_each = each.value["abort_incomplete_multipart_upload_days"] != null ? [1] : []
+    content {
+      id = "abort-incomplete-multipart-upload"
+
+      abort_incomplete_multipart_upload {
+        days_after_initiation = each.value["abort_incomplete_multipart_upload_days"]
       }
 
       filter {
