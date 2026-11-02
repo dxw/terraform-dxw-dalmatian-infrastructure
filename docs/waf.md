@@ -29,6 +29,7 @@ rule.
 | 4 | Bot Control, only when `geo_rule_verified_bot_categories` is set | `aws_managed_rules` |
 | 5 | `VerifiedBotGeoExemption`, only when `geo_rule_verified_bot_categories` is set | `geo_rule_verified_bot_categories` |
 | 10 + n | Geo rules, in list order | `geo_rules` |
+| 50 + n | Request match rules, in list order | `match_rules` |
 | 100 + n | AWS managed rule groups, in list order | `aws_managed_rules` |
 | 200 + n | Scoped rate rules, in list order | `rate_rules` |
 | 1000 | Site-wide per-IP rate limit | `rate_limiting` |
@@ -143,6 +144,50 @@ Sites with user-generated content usually need `CrossSiteScripting_BODY`,
 `GenericRFI_BODY` and `SizeRestrictions_BODY` (Common) and `SQLi_BODY` (SQLi)
 counting rather than blocking, because free text in a POST body looks like
 an attack to those rules.
+
+## Request match rules
+
+`match_rules` act on requests by what they ask for rather than by how often a
+single address asks. That is the tool for a scrape spread across thousands of
+residential addresses at one or two requests each: no per-IP rate limit sees
+it, but every request has the same shape.
+
+A rule matches when every condition it sets holds:
+
+| Field | Matches |
+|---|---|
+| `host` | the Host header, exactly, ignoring case |
+| `path_regex` | the URI path |
+| `query_regex` | the query string after URL decoding, so `%5B` is written `\[` |
+| `excluded_path_regex` | excludes matching URI paths |
+| `exempt_country_codes` | excludes requests from these countries |
+
+At least one of `host`, `path_regex` or `query_regex` is required, because a
+rule made only of exclusions would match everything else. `action` is
+`challenge` by default, or `block`, `captcha` or `count`.
+
+```hcl
+match_rules = [
+  {
+    name                 = "ChallengeCitationSearch"
+    host                 = "www.example.com"
+    query_regex          = "(^|&)query=\\[[0-9]{4}\\]"
+    excluded_path_regex  = "^/feed"
+    exempt_country_codes = ["GB"]
+  },
+]
+```
+
+`host` matters when one ACL serves several distributions: without it the rule
+applies to all of them, including APIs whose clients cannot answer a
+challenge. Exclude feeds and other paths fetched by non-browser clients with
+`excluded_path_regex`. Start a new rule with `action = "count"` and read its
+matches in the WAF log or sampled requests before switching it to challenge.
+
+`host` is the Host the viewer sent. A request to the distribution's own
+`*.cloudfront.net` name carries that name instead and is not matched, so
+where the origin answers on that name a host-scoped rule can be sidestepped.
+A rule without `host` has no such gap.
 
 ## Scoped rate rules
 
