@@ -384,6 +384,208 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
     }
   }
   dynamic "rule" {
+    for_each = [
+      for r in each.value["match_rules"] != null ? each.value["match_rules"] : [] :
+      merge(r, {
+        conditions = length(compact([r["host"], r["path_regex"], r["query_regex"], r["excluded_path_regex"]])) + (r["exempt_country_codes"] != null ? 1 : 0)
+      })
+    ]
+
+    content {
+      name     = rule.value["name"]
+      priority = rule.key + 50 # After the geo rules and before the managed groups, so challenged traffic never reaches Bot Control
+
+      action {
+        dynamic "block" {
+          for_each = rule.value["action"] == "block" ? [1] : []
+          content {}
+        }
+        dynamic "challenge" {
+          for_each = rule.value["action"] == "challenge" ? [1] : []
+          content {}
+        }
+        dynamic "captcha" {
+          for_each = rule.value["action"] == "captcha" ? [1] : []
+          content {}
+        }
+        dynamic "count" {
+          for_each = rule.value["action"] == "count" ? [1] : []
+          content {}
+        }
+      }
+
+      statement {
+        # One condition renders as a bare statement, since WAF rejects an
+        # and_statement with fewer than two; validation guarantees that a lone
+        # condition is a positive match rather than an exclusion.
+        dynamic "byte_match_statement" {
+          for_each = rule.value["conditions"] == 1 && rule.value["host"] != null ? [1] : []
+
+          content {
+            positional_constraint = "EXACTLY"
+            search_string         = lower(rule.value["host"])
+
+            field_to_match {
+              single_header {
+                name = "host"
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+          }
+        }
+
+        dynamic "regex_match_statement" {
+          for_each = rule.value["conditions"] == 1 && rule.value["path_regex"] != null ? [1] : []
+
+          content {
+            regex_string = rule.value["path_regex"]
+
+            field_to_match {
+              uri_path {}
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        dynamic "regex_match_statement" {
+          for_each = rule.value["conditions"] == 1 && rule.value["query_regex"] != null ? [1] : []
+
+          content {
+            regex_string = rule.value["query_regex"]
+
+            field_to_match {
+              query_string {}
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+          }
+        }
+
+        dynamic "and_statement" {
+          for_each = rule.value["conditions"] > 1 ? [1] : []
+
+          content {
+            dynamic "statement" {
+              for_each = rule.value["host"] != null ? [1] : []
+
+              content {
+                byte_match_statement {
+                  positional_constraint = "EXACTLY"
+                  search_string         = lower(rule.value["host"])
+
+                  field_to_match {
+                    single_header {
+                      name = "host"
+                    }
+                  }
+
+                  text_transformation {
+                    priority = 0
+                    type     = "LOWERCASE"
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = rule.value["path_regex"] != null ? [1] : []
+
+              content {
+                regex_match_statement {
+                  regex_string = rule.value["path_regex"]
+
+                  field_to_match {
+                    uri_path {}
+                  }
+
+                  text_transformation {
+                    priority = 0
+                    type     = "NONE"
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = rule.value["query_regex"] != null ? [1] : []
+
+              content {
+                regex_match_statement {
+                  regex_string = rule.value["query_regex"]
+
+                  field_to_match {
+                    query_string {}
+                  }
+
+                  # Clients may percent-encode the same query any number of
+                  # ways; the regex is written against the decoded form.
+                  text_transformation {
+                    priority = 0
+                    type     = "URL_DECODE"
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = rule.value["excluded_path_regex"] != null ? [1] : []
+
+              content {
+                not_statement {
+                  statement {
+                    regex_match_statement {
+                      regex_string = rule.value["excluded_path_regex"]
+
+                      field_to_match {
+                        uri_path {}
+                      }
+
+                      text_transformation {
+                        priority = 0
+                        type     = "NONE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = rule.value["exempt_country_codes"] != null ? [1] : []
+
+              content {
+                not_statement {
+                  statement {
+                    geo_match_statement {
+                      country_codes = rule.value["exempt_country_codes"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-${rule.value["name"]}"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+  dynamic "rule" {
     for_each = each.value["aws_managed_rules"] != null ? each.value["aws_managed_rules"] : []
 
     content {

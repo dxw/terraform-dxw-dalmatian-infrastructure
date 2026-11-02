@@ -561,6 +561,7 @@ variable "infrastructure_ecs_cluster_wafs" {
         aws_managed_rules: List of AWS managed rule groups to apply ({ name = "AWSManagedRulesCommonRuleSet", action = "block" }). `exclude_rules` overrides named rules to count, `challenge_rules` and `captcha_rules` override them to challenge or captcha, `excluded_path_patterns` skips the group for URI paths containing any pattern, and `bot_control_inspection_level` ('COMMON' or 'TARGETED') applies to AWSManagedRulesBotControlRuleSet only
         geo_rules: List of geo match rules ({ name = "ChallengeNonUK", country_codes = ["GB"], negate = true, action = "challenge", excluded_path_regex = "^/api/auth/" }). `action` is one of block, challenge, captcha or count; `negate` matches requests NOT from the listed countries
         geo_rule_verified_bot_categories: Bot Control categories whose verified bots skip every geo rule (["social_media", "page_preview", "search_engine"]). Moves AWSManagedRulesBotControlRuleSet to run before the geo rules, so it must be in aws_managed_rules
+        match_rules: List of request match rules ({ name = "ChallengeSearchEnumeration", action = "challenge", host = "www.example.com", path_regex = "^/search$", query_regex = "(^|&)q=\\[[0-9]{4}\\]", excluded_path_regex = "^/feed", exempt_country_codes = ["GB"] }). A request matches when every condition given holds: `host` is the Host header (exact, case-insensitive), `path_regex` the URI path, `query_regex` the URL-decoded query string; `excluded_path_regex` and `exempt_country_codes` exclude requests. At least one of host, path_regex or query_regex is required. `action` is one of block, challenge, captcha or count
         rate_rules: List of per-IP rate rules scoped to a URI path regex and optionally to HTTP methods ({ name = "LoginRateLimit", limit = 20, evaluation_window_sec = 300, action = "block", path_regex = "^/login$", methods = ["POST"] })
         rate_limiting: Site-wide per-IP rate limiting ({ enabled = true, limit = 1000, evaluation_window_sec = 300 })
         challenge_immunity_time_sec: Seconds a solved challenge token stays valid (WAF default is 300)
@@ -592,6 +593,15 @@ variable "infrastructure_ecs_cluster_wafs" {
       excluded_path_regex = optional(string, null)
     })), null)
     geo_rule_verified_bot_categories = optional(list(string), null)
+    match_rules = optional(list(object({
+      name                 = string
+      action               = optional(string, "challenge")
+      host                 = optional(string, null)
+      path_regex           = optional(string, null)
+      query_regex          = optional(string, null)
+      excluded_path_regex  = optional(string, null)
+      exempt_country_codes = optional(list(string), null)
+    })), null)
     rate_rules = optional(list(object({
       name                  = string
       limit                 = number
@@ -670,6 +680,17 @@ variable "infrastructure_ecs_cluster_wafs" {
   validation {
     condition = alltrue(flatten([
       for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.match_rules != null ? waf.match_rules : [] :
+        contains(["block", "challenge", "captcha", "count"], rule.action) &&
+        (rule.host != null || rule.path_regex != null || rule.query_regex != null) &&
+        (rule.exempt_country_codes == null || length(coalesce(rule.exempt_country_codes, [])) > 0)
+      ]
+    ]))
+    error_message = "match_rules need an action of block, challenge, captcha or count, and at least one of host, path_regex or query_regex: exclusions alone would match every other request. exempt_country_codes must be omitted or non-empty."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
         for rule in waf.rate_rules != null ? waf.rate_rules : [] :
         contains(["block", "challenge", "captcha", "count"], rule.action) && contains([60, 120, 300, 600], rule.evaluation_window_sec)
       ]
@@ -690,11 +711,12 @@ variable "infrastructure_ecs_cluster_wafs" {
   validation {
     condition = alltrue([
       for waf in var.infrastructure_ecs_cluster_wafs :
-      length(waf.geo_rules != null ? waf.geo_rules : []) <= 90 &&
+      length(waf.geo_rules != null ? waf.geo_rules : []) <= 40 &&
+      length(waf.match_rules != null ? waf.match_rules : []) <= 50 &&
       length(waf.aws_managed_rules != null ? waf.aws_managed_rules : []) <= 100 &&
       length(waf.rate_rules != null ? waf.rate_rules : []) <= 800
     ])
-    error_message = "Rule priorities are banded (geo 10+, managed 100+, rate 200+, RateLimit 1000), so a WAF may have at most 90 geo_rules, 100 aws_managed_rules and 800 rate_rules."
+    error_message = "Rule priorities are banded (geo 10+, match 50+, managed 100+, rate 200+, RateLimit 1000), so a WAF may have at most 40 geo_rules, 50 match_rules, 100 aws_managed_rules and 800 rate_rules."
   }
   validation {
     condition = alltrue(flatten([
