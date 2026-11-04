@@ -802,6 +802,7 @@ variable "infrastructure_ecs_cluster_service_defaults" {
       container_port     = optional(number, null)
       essential          = optional(bool, true)
     })), {})
+    alb_scheme                                    = optional(string, "internet-facing")
     domain_names                                  = optional(list(string), null)
     enable_cloudfront                             = optional(bool, null)
     cloudfront_tls_certificate_arn                = optional(string, null)
@@ -870,6 +871,10 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     ])
     error_message = "sidecar_containers keys must be lower-case container names: a letter, then letters, digits and single hyphens, not ending in a hyphen (^[a-z][a-z0-9]*(-[a-z0-9]+)*$)."
   }
+  validation {
+    condition     = contains(["internet-facing", "internal"], var.infrastructure_ecs_cluster_service_defaults.alb_scheme)
+    error_message = "alb_scheme must be \"internet-facing\" or \"internal\"."
+  }
 }
 
 variable "infrastructure_ecs_cluster_services" {
@@ -907,6 +912,7 @@ variable "infrastructure_ecs_cluster_services" {
         autoscaling: Scale the service's task count on ALB requests per task per minute, summed over the service's target groups, eg. { min_count = 2, max_count = 8, target_requests_per_target = 300, scale_in_cooldown = 300, scale_out_cooldown = 60 }. Requires a container_port. When unset the service runs exactly container_count tasks
         scheduled_tasks: A map of scheduled tasks that use the same image as the service defined eg. { "name" => { "entrypoint" = ["bundle", "exec", "run_jobs"], "schedule_expression" = "cron(* * * * ? *)" } }
         sidecar_containers: Map of extra containers to run in the service task alongside the application container, keyed by container name (eg. { gotenberg = { image = "docker.io/gotenberg/gotenberg@sha256:<digest>", command = ["gotenberg", "--api-timeout=30s"], memory_reservation = 768 } }). Each `image` must be pinned by digest (`<registry>/<repo>@sha256:<64 hex>`); it is mirrored into an ECR repository in this account and the task pulls from there. The mirror authenticates to Docker Hub only (with `infrastructure_dockerhub_*` when set), so images must be public unless they are on Docker Hub. The application container is linked to every sidecar so it can reach it as `http://<name>:<port>`; sidecars publish no ports, so nothing outside the task can reach them. Every container in the task can obtain the task role's credentials, so a sidecar image is trusted with the service's AWS permissions; run a helper as its own service when IAM isolation is needed. `command` and `environment` are passed through verbatim, `memory_reservation` is in MiB (default 256), `container_port` is informational only, and `essential` (default true) restarts the whole task if the sidecar exits
+        alb_scheme: `internet-facing` (default) or `internal`. An internal service is served only by a shared internal Application Load Balancer in the private subnets, over HTTPS on the infrastructure wildcard certificate at `https://<service>.<infrastructure domain>`, and gets no public ALB rule, CloudFront distribution or public-ALB record; its record resolves to private addresses. Only the cluster's container instances can connect to it, so every task on the cluster can reach every internal service, and internal services keep the instances' outbound access. Requires the infrastructure Route53 hosted zone, private subnets, `deployment_type = "rolling"`, a `container_port`, `enable_cloudfront = false` and no `domain_names`. An existing service cannot switch scheme in one apply: remove it, apply, then add it back with the new scheme and apply
         domain_names: Domain names to assign to CloudFront aliases, and the Application Load Balancer's `host_header` condition
         enable_cloudfront: Enable cloadfront for the service
         cloudfront_tls_certificate_arn: Certificate ARN to attach to CloudFront - must contain the names provided in `domain_names`
@@ -988,6 +994,7 @@ variable "infrastructure_ecs_cluster_services" {
       container_port     = optional(number, null)
       essential          = optional(bool, true)
     })), null)
+    alb_scheme                                    = optional(string, null)
     domain_names                                  = optional(list(string), null)
     enable_cloudfront                             = optional(bool, null)
     cloudfront_tls_certificate_arn                = optional(string, null)
@@ -1052,6 +1059,37 @@ variable "infrastructure_ecs_cluster_services" {
       ]
     ]))
     error_message = "sidecar_containers keys must be lower-case container names: a letter, then letters, digits and single hyphens, not ending in a hyphen (^[a-z][a-z0-9]*(-[a-z0-9]+)*$), and must differ from the service name."
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_ecs_cluster_services :
+      v["alb_scheme"] == null || contains(["internet-facing", "internal"], v["alb_scheme"])
+    ])
+    error_message = "alb_scheme must be \"internet-facing\" or \"internal\"."
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_ecs_cluster_services :
+      !(coalesce(v["alb_scheme"], var.infrastructure_ecs_cluster_service_defaults.alb_scheme) == "internal") || try(coalesce(v["enable_cloudfront"], var.infrastructure_ecs_cluster_service_defaults.enable_cloudfront), false) != true
+    ])
+    error_message = "internal services cannot use CloudFront: set enable_cloudfront = false on any service with alb_scheme = \"internal\"."
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_ecs_cluster_services :
+      !(coalesce(v["alb_scheme"], var.infrastructure_ecs_cluster_service_defaults.alb_scheme) == "internal") || length(try(coalesce(v["domain_names"], var.infrastructure_ecs_cluster_service_defaults.domain_names), [])) == 0
+    ])
+    error_message = "internal services cannot set domain_names: they are reached at <service>.<infrastructure domain> only."
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_ecs_cluster_services :
+      !(coalesce(v["alb_scheme"], var.infrastructure_ecs_cluster_service_defaults.alb_scheme) == "internal") || (
+        try(coalesce(v["deployment_type"], var.infrastructure_ecs_cluster_service_defaults.deployment_type), null) == "rolling" &&
+        try(coalesce(v["container_port"], var.infrastructure_ecs_cluster_service_defaults.container_port), 0) != 0
+      )
+    ])
+    error_message = "internal services must be rolling and have a container_port: set deployment_type = \"rolling\" and a non-zero container_port."
   }
 }
 
