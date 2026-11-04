@@ -395,6 +395,8 @@ resource "aws_ecs_service" "infrastructure_ecs_cluster_service" {
     aws_alb_listener.infrastructure_ecs_cluster_service_http_https_redirect,
     aws_alb_listener.infrastructure_ecs_cluster_service_http,
     aws_alb_listener.infrastructure_ecs_cluster_service_https,
+    aws_alb_listener.infrastructure_ecs_cluster_service_internal_https,
+    aws_alb_listener_rule.infrastructure_ecs_cluster_service_internal_host_header,
     aws_ecs_cluster_capacity_providers.infrastructure_ecs_cluster,
   ]
 
