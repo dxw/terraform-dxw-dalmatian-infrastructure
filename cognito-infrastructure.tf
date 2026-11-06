@@ -8,6 +8,10 @@ resource "aws_cognito_user_pool" "infrastructure" {
   username_attributes      = ["email"]
   auto_verified_attributes = []
 
+  admin_create_user_config {
+    allow_admin_create_user_only = each.value["allow_admin_create_user_only"]
+  }
+
   account_recovery_setting {
     recovery_mechanism {
       name     = "verified_email"
@@ -92,6 +96,22 @@ resource "aws_cognito_user_pool_client" "infrastructure" {
   prevent_user_existence_errors        = "ENABLED"
   supported_identity_providers         = ["COGNITO"]
   allowed_oauth_flows_user_pool_client = false
+}
+
+resource "aws_cognito_user_group" "infrastructure" {
+  for_each = merge([
+    for pool_name, pool in local.infrastructure_cognito_user_pools : {
+      for group_name, group in pool["groups"] : "${pool_name}_${group_name}" => merge(group, {
+        pool_name  = pool_name
+        group_name = group_name
+      })
+    }
+  ]...)
+
+  name         = each.value["group_name"]
+  user_pool_id = aws_cognito_user_pool.infrastructure[each.value["pool_name"]].id
+  description  = each.value["description"]
+  precedence   = each.value["precedence"]
 }
 
 resource "aws_iam_role" "infrastructure_cognito_user_pool_import" {
