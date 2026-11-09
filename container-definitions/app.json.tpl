@@ -72,7 +72,10 @@
     %{if command != "[]"}
     "command": ${command},
     %{ endif }
-    "memoryReservation": 16,
+    %{ if cpu != 0 }
+    "cpu": ${cpu},
+    %{ endif }
+    "memoryReservation": ${memory_reservation},
     "essential": true
   }
   %{ if sidecars != "" }

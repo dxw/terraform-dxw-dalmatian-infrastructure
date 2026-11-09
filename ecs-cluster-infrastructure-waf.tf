@@ -59,12 +59,39 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
   scope       = "CLOUDFRONT"
 
   default_action {
-    allow {}
+    dynamic "allow" {
+      for_each = each.value["default_action"] == "block" ? [] : [1]
+      content {}
+    }
+    dynamic "block" {
+      for_each = each.value["default_action"] == "block" ? [1] : []
+      content {}
+    }
   }
   custom_response_body {
     key          = "rate_limit_exceeded"
     content      = "You have exceeded the rate limit for this service. Please try again later."
     content_type = "TEXT_PLAIN"
+  }
+
+  dynamic "challenge_config" {
+    for_each = each.value["challenge_immunity_time_sec"] != null ? [1] : []
+
+    content {
+      immunity_time_property {
+        immunity_time = each.value["challenge_immunity_time_sec"]
+      }
+    }
+  }
+
+  dynamic "captcha_config" {
+    for_each = each.value["captcha_immunity_time_sec"] != null ? [1] : []
+
+    content {
+      immunity_time_property {
+        immunity_time = each.value["captcha_immunity_time_sec"]
+      }
+    }
   }
   dynamic "rule" {
     for_each = each.value["ipv4_deny_list"] != null ? [1] : []
@@ -120,7 +147,7 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
 
     content {
       name     = "CustomDalmatianBlockIPv6Set"
-      priority = 3 # Always process this rule before any others if it is defined
+      priority = 2 # IPv6 deny follows the IPv4 lists; managed rules start at 4
 
       action {
         block {}
@@ -144,7 +171,7 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
 
     content {
       name     = "CustomDalmatianAllowIPv6Set"
-      priority = 4 # Always process this rule before any others if it is defined
+      priority = 3 # IPv6 allow follows the IPv6 deny; managed rules start at 4
 
       action {
         allow {}
@@ -164,11 +191,413 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
     }
   }
   dynamic "rule" {
-    for_each = each.value["aws_managed_rules"] != null ? each.value["aws_managed_rules"] : []
+    for_each = each.value["geo_rule_verified_bot_categories"] != null ? [each.value["geo_rule_verified_bot_categories"]] : []
+
+    content {
+      name     = "VerifiedBotGeoExemption"
+      priority = 5 # After Bot Control at 4, before the geo rules at 10
+
+      # Count only: the rule decides nothing, it labels verified bots in the
+      # listed categories so each geo rule can skip them with one label match.
+      # Matching the Bot Control labels inside the geo rule would nest four
+      # statements deep, past the provider's limit of three.
+      action {
+        count {}
+      }
+
+      rule_label {
+        name = "dalmatian:verified-bot-geo-exempt"
+      }
+
+      statement {
+        and_statement {
+          statement {
+            label_match_statement {
+              scope = "LABEL"
+              key   = "awswaf:managed:aws:bot-control:bot:verified"
+            }
+          }
+
+          dynamic "statement" {
+            for_each = length(rule.value) == 1 ? rule.value : []
+
+            content {
+              label_match_statement {
+                scope = "LABEL"
+                key   = "awswaf:managed:aws:bot-control:bot:category:${statement.value}"
+              }
+            }
+          }
+
+          # WAF rejects an or_statement with fewer than two statements.
+          dynamic "statement" {
+            for_each = length(rule.value) > 1 ? [rule.value] : []
+
+            content {
+              or_statement {
+                dynamic "statement" {
+                  for_each = statement.value
+                  iterator = category
+
+                  content {
+                    label_match_statement {
+                      scope = "LABEL"
+                      key   = "awswaf:managed:aws:bot-control:bot:category:${category.value}"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-verified-bot-geo-exemption"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+  dynamic "rule" {
+    for_each = each.value["geo_rules"] != null ? each.value["geo_rules"] : []
 
     content {
       name     = rule.value["name"]
-      priority = rule.key + 4
+      priority = rule.key + 10 # Geo rules run before the managed groups so Bot Control never inspects challenged traffic, unless geo_rule_verified_bot_categories moves it to 4
+
+      action {
+        dynamic "block" {
+          for_each = rule.value["action"] == "block" ? [1] : []
+          content {}
+        }
+        dynamic "challenge" {
+          for_each = rule.value["action"] == "challenge" ? [1] : []
+          content {}
+        }
+        dynamic "captcha" {
+          for_each = rule.value["action"] == "captcha" ? [1] : []
+          content {}
+        }
+        dynamic "count" {
+          for_each = rule.value["action"] == "count" ? [1] : []
+          content {}
+        }
+      }
+
+      statement {
+        # One condition renders as a bare (possibly negated) geo match, exactly
+        # as before the verified-bot exemption existed; two or more render as
+        # an and_statement of geo match, path exclusion and label exclusion.
+        dynamic "geo_match_statement" {
+          for_each = !rule.value["negate"] && rule.value["excluded_path_regex"] == null && each.value["geo_rule_verified_bot_categories"] == null ? [1] : []
+
+          content {
+            country_codes = rule.value["country_codes"]
+          }
+        }
+
+        dynamic "not_statement" {
+          for_each = rule.value["negate"] && rule.value["excluded_path_regex"] == null && each.value["geo_rule_verified_bot_categories"] == null ? [1] : []
+
+          content {
+            statement {
+              geo_match_statement {
+                country_codes = rule.value["country_codes"]
+              }
+            }
+          }
+        }
+
+        dynamic "and_statement" {
+          for_each = rule.value["excluded_path_regex"] != null || each.value["geo_rule_verified_bot_categories"] != null ? [1] : []
+
+          content {
+            statement {
+              dynamic "geo_match_statement" {
+                for_each = rule.value["negate"] ? [] : [1]
+
+                content {
+                  country_codes = rule.value["country_codes"]
+                }
+              }
+
+              dynamic "not_statement" {
+                for_each = rule.value["negate"] ? [1] : []
+
+                content {
+                  statement {
+                    geo_match_statement {
+                      country_codes = rule.value["country_codes"]
+                    }
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = rule.value["excluded_path_regex"] != null ? [1] : []
+
+              content {
+                not_statement {
+                  statement {
+                    regex_match_statement {
+                      regex_string = rule.value["excluded_path_regex"]
+
+                      field_to_match {
+                        uri_path {}
+                      }
+
+                      text_transformation {
+                        priority = 0
+                        type     = "NONE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = each.value["geo_rule_verified_bot_categories"] != null ? [1] : []
+
+              content {
+                not_statement {
+                  statement {
+                    label_match_statement {
+                      scope = "LABEL"
+                      key   = "dalmatian:verified-bot-geo-exempt"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-${rule.value["name"]}"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+  dynamic "rule" {
+    for_each = [
+      for r in each.value["match_rules"] != null ? each.value["match_rules"] : [] :
+      merge(r, {
+        conditions = length(compact([r["host"], r["path_regex"], r["query_regex"], r["excluded_path_regex"]])) + (r["exempt_country_codes"] != null ? 1 : 0)
+      })
+    ]
+
+    content {
+      name     = rule.value["name"]
+      priority = rule.key + 50 # After the geo rules and before the managed groups, so challenged traffic never reaches Bot Control
+
+      action {
+        dynamic "block" {
+          for_each = rule.value["action"] == "block" ? [1] : []
+          content {}
+        }
+        dynamic "challenge" {
+          for_each = rule.value["action"] == "challenge" ? [1] : []
+          content {}
+        }
+        dynamic "captcha" {
+          for_each = rule.value["action"] == "captcha" ? [1] : []
+          content {}
+        }
+        dynamic "count" {
+          for_each = rule.value["action"] == "count" ? [1] : []
+          content {}
+        }
+      }
+
+      statement {
+        # One condition renders as a bare statement, since WAF rejects an
+        # and_statement with fewer than two; validation guarantees that a lone
+        # condition is a positive match rather than an exclusion.
+        dynamic "byte_match_statement" {
+          for_each = rule.value["conditions"] == 1 && rule.value["host"] != null ? [1] : []
+
+          content {
+            positional_constraint = "EXACTLY"
+            search_string         = lower(rule.value["host"])
+
+            field_to_match {
+              single_header {
+                name = "host"
+              }
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+          }
+        }
+
+        dynamic "regex_match_statement" {
+          for_each = rule.value["conditions"] == 1 && rule.value["path_regex"] != null ? [1] : []
+
+          content {
+            regex_string = rule.value["path_regex"]
+
+            field_to_match {
+              uri_path {}
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+
+        dynamic "regex_match_statement" {
+          for_each = rule.value["conditions"] == 1 && rule.value["query_regex"] != null ? [1] : []
+
+          content {
+            regex_string = rule.value["query_regex"]
+
+            field_to_match {
+              query_string {}
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "URL_DECODE"
+            }
+          }
+        }
+
+        dynamic "and_statement" {
+          for_each = rule.value["conditions"] > 1 ? [1] : []
+
+          content {
+            dynamic "statement" {
+              for_each = rule.value["host"] != null ? [1] : []
+
+              content {
+                byte_match_statement {
+                  positional_constraint = "EXACTLY"
+                  search_string         = lower(rule.value["host"])
+
+                  field_to_match {
+                    single_header {
+                      name = "host"
+                    }
+                  }
+
+                  text_transformation {
+                    priority = 0
+                    type     = "LOWERCASE"
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = rule.value["path_regex"] != null ? [1] : []
+
+              content {
+                regex_match_statement {
+                  regex_string = rule.value["path_regex"]
+
+                  field_to_match {
+                    uri_path {}
+                  }
+
+                  text_transformation {
+                    priority = 0
+                    type     = "NONE"
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = rule.value["query_regex"] != null ? [1] : []
+
+              content {
+                regex_match_statement {
+                  regex_string = rule.value["query_regex"]
+
+                  field_to_match {
+                    query_string {}
+                  }
+
+                  # Clients may percent-encode the same query any number of
+                  # ways; the regex is written against the decoded form.
+                  text_transformation {
+                    priority = 0
+                    type     = "URL_DECODE"
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = rule.value["excluded_path_regex"] != null ? [1] : []
+
+              content {
+                not_statement {
+                  statement {
+                    regex_match_statement {
+                      regex_string = rule.value["excluded_path_regex"]
+
+                      field_to_match {
+                        uri_path {}
+                      }
+
+                      text_transformation {
+                        priority = 0
+                        type     = "NONE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            dynamic "statement" {
+              for_each = rule.value["exempt_country_codes"] != null ? [1] : []
+
+              content {
+                not_statement {
+                  statement {
+                    geo_match_statement {
+                      country_codes = rule.value["exempt_country_codes"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-${rule.value["name"]}"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+  dynamic "rule" {
+    for_each = each.value["aws_managed_rules"] != null ? each.value["aws_managed_rules"] : []
+
+    content {
+      name = rule.value["name"]
+      # Managed groups run after the IP sets and geo rules; scoped rate rules
+      # follow at 200. Bot Control moves ahead of the geo rules when
+      # geo_rule_verified_bot_categories needs its labels there.
+      priority = (
+        each.value["geo_rule_verified_bot_categories"] != null && rule.value["name"] == "AWSManagedRulesBotControlRuleSet"
+        ? 4
+        : rule.key + 100
+      )
 
       override_action {
         dynamic "count" {
@@ -196,6 +625,44 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
 
               action_to_use {
                 count {}
+              }
+            }
+          }
+
+          dynamic "rule_action_override" {
+            for_each = rule.value["challenge_rules"] != null ? rule.value["challenge_rules"] : []
+
+            content {
+              name = rule_action_override["value"]
+
+              action_to_use {
+                challenge {}
+              }
+            }
+          }
+
+          dynamic "rule_action_override" {
+            for_each = rule.value["captcha_rules"] != null ? rule.value["captcha_rules"] : []
+
+            content {
+              name = rule_action_override["value"]
+
+              action_to_use {
+                captcha {}
+              }
+            }
+          }
+
+          dynamic "managed_rule_group_configs" {
+            for_each = rule.value["bot_control_inspection_level"] != null ? [1] : []
+
+            content {
+              aws_managed_rules_bot_control_rule_set {
+                inspection_level = rule.value["bot_control_inspection_level"]
+                # The provider defaults this to true but AWS only honours it
+                # for TARGETED and stores false for COMMON, which otherwise
+                # leaves a permanent diff on the rule.
+                enable_machine_learning = rule.value["bot_control_inspection_level"] == "TARGETED"
               }
             }
           }
@@ -241,6 +708,108 @@ resource "aws_wafv2_web_acl" "infrastructure_ecs_cluster" {
                           }
                         }
                       }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "${local.resource_prefix}-${each.key}-${rule.value["name"]}"
+        sampled_requests_enabled   = true
+      }
+    }
+  }
+  dynamic "rule" {
+    for_each = each.value["rate_rules"] != null ? each.value["rate_rules"] : []
+
+    content {
+      name     = rule.value["name"]
+      priority = rule.key + 200 # Scoped rate rules run after the managed groups and before the site-wide RateLimit at 1000
+
+      action {
+        dynamic "block" {
+          for_each = rule.value["action"] == "block" ? [1] : []
+
+          content {
+            custom_response {
+              response_code            = 429
+              custom_response_body_key = "rate_limit_exceeded"
+            }
+          }
+        }
+        dynamic "challenge" {
+          for_each = rule.value["action"] == "challenge" ? [1] : []
+          content {}
+        }
+        dynamic "captcha" {
+          for_each = rule.value["action"] == "captcha" ? [1] : []
+          content {}
+        }
+        dynamic "count" {
+          for_each = rule.value["action"] == "count" ? [1] : []
+          content {}
+        }
+      }
+
+      statement {
+        rate_based_statement {
+          limit                 = rule.value["limit"]
+          aggregate_key_type    = "IP"
+          evaluation_window_sec = rule.value["evaluation_window_sec"]
+
+          scope_down_statement {
+            dynamic "regex_match_statement" {
+              for_each = rule.value["methods"] == null ? [1] : []
+
+              content {
+                regex_string = rule.value["path_regex"]
+
+                field_to_match {
+                  uri_path {}
+                }
+
+                text_transformation {
+                  priority = 0
+                  type     = "NONE"
+                }
+              }
+            }
+
+            dynamic "and_statement" {
+              for_each = rule.value["methods"] != null ? [1] : []
+
+              content {
+                statement {
+                  regex_match_statement {
+                    regex_string = rule.value["path_regex"]
+
+                    field_to_match {
+                      uri_path {}
+                    }
+
+                    text_transformation {
+                      priority = 0
+                      type     = "NONE"
+                    }
+                  }
+                }
+
+                statement {
+                  regex_match_statement {
+                    regex_string = "^(${join("|", rule.value["methods"])})$"
+
+                    field_to_match {
+                      method {}
+                    }
+
+                    text_transformation {
+                      priority = 0
+                      type     = "NONE"
                     }
                   }
                 }

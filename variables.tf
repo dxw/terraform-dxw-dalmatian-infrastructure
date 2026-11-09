@@ -388,6 +388,29 @@ variable "infrastructure_ecs_cluster_autoscaling_time_based_custom" {
   )
 }
 
+variable "infrastructure_ecs_cluster_capacity_provider" {
+  description = <<EOT
+    Create an ECS capacity provider with managed scaling over the cluster's Auto Scaling Group and run every service in the cluster through it, so instances are added and removed as the services' reserved memory and CPU require. null (the default) leaves the cluster on the EC2 launch type. ECS cannot move a service from the EC2 launch type to a capacity provider in place, so enabling (or later disabling) this on a cluster that already has services makes Terraform replace every service in the cluster: each is destroyed and recreated in the same apply, which is a short outage for that cluster only. The apply also starts a rolling instance refresh, because the AmazonECSManaged tag it adds to the ASG is a refresh trigger. A recreated blue/green service attaches to its blue target group, so before the apply confirm the listener rule forwards to blue (or run a deployment straight after), otherwise traffic goes to the empty green group until the next deployment. Requires infrastructure_ecs_cluster_draining_lambda_enabled.
+    {
+      target_capacity: Percentage of reserved capacity ECS keeps the cluster at; below 100 keeps spare instances for scale-out (default 90)
+      minimum_scaling_step_size: Fewest instances added or removed per scaling action (default 1)
+      maximum_scaling_step_size: Most instances added or removed per scaling action (default 2)
+      instance_warmup_period: Seconds a new instance takes before it counts towards capacity (default 300)
+    }
+  EOT
+  type = object({
+    target_capacity           = optional(number, 90)
+    minimum_scaling_step_size = optional(number, 1)
+    maximum_scaling_step_size = optional(number, 2)
+    instance_warmup_period    = optional(number, 300)
+  })
+  default = null
+  validation {
+    condition     = var.infrastructure_ecs_cluster_capacity_provider == null || var.infrastructure_ecs_cluster_capacity_provider.minimum_scaling_step_size <= var.infrastructure_ecs_cluster_capacity_provider.maximum_scaling_step_size
+    error_message = "infrastructure_ecs_cluster_capacity_provider.minimum_scaling_step_size must not exceed maximum_scaling_step_size."
+  }
+}
+
 variable "enable_infrastructure_ecs_cluster_asg_cpu_alert" {
   description = "Enable a CPU alert for the ECS cluster's Autoscaling Group"
   type        = bool
@@ -488,6 +511,18 @@ variable "infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie" {
   type        = bool
 }
 
+variable "infrastructure_ecs_cluster_service_pipeline_slack_notifications" {
+  description = "Send the ECS service pipelines' execution state changes (started, succeeded, failed, stopped, superseded) to the account's CloudWatch Slack alerts SNS topic. Requires the account-bootstrap CloudWatch Slack alerts to be enabled in this account."
+  type        = bool
+  default     = false
+}
+
+variable "infrastructure_ecs_cluster_autoscaling_slack_notifications" {
+  description = "Send autoscaling activity to the account's CloudWatch Slack alerts SNS topic: ECS services' target tracking alarms going into ALARM (scaling out or in), ECS cluster instance launches and terminations caused by a scaling policy or scheduled action, failed instance launches and terminations, and ECS task placement failures. On a cluster with infrastructure_ecs_cluster_capacity_provider, tasks short of capacity wait in PROVISIONING rather than failing placement, so a scale-out held at the ASG's max_size is not reported. Requires the account-bootstrap CloudWatch Slack alerts (topic and KMS key alias)."
+  type        = bool
+  default     = false
+}
+
 variable "infrastructure_ecs_cluster_enable_debug_mode" {
   description = "Enable debug mode for ECS and Docker on the Infrastructure ECS. This should only be enabled when debugging (Can cause a lot of logs)"
   type        = bool
@@ -514,22 +549,77 @@ variable "infrastructure_ecs_cluster_logspout_command" {
 }
 
 variable "infrastructure_ecs_cluster_wafs" {
-  description = "Map of WAF ACLs to create, which can be used with service CloudFront distributions"
+  description = <<EOT
+    Map of WAF ACLs to create, which can be used with service CloudFront distributions
+    {
+      waf-name = {
+        default_action: Action for requests no rule matches - 'allow' (the default) or 'block'. Set to 'block' with an allow list to restrict access to listed addresses only
+        ipv4_deny_list: List of IPv4 CIDRs to block
+        ipv4_allow_list: List of IPv4 CIDRs to allow, bypassing the managed and rate limiting rules
+        ipv6_deny_list: List of IPv6 CIDRs to block
+        ipv6_allow_list: List of IPv6 CIDRs to allow, bypassing the managed and rate limiting rules
+        aws_managed_rules: List of AWS managed rule groups to apply ({ name = "AWSManagedRulesCommonRuleSet", action = "block" }). `exclude_rules` overrides named rules to count, `challenge_rules` and `captcha_rules` override them to challenge or captcha, `excluded_path_patterns` skips the group for URI paths containing any pattern, and `bot_control_inspection_level` ('COMMON' or 'TARGETED') applies to AWSManagedRulesBotControlRuleSet only
+        geo_rules: List of geo match rules ({ name = "ChallengeNonUK", country_codes = ["GB"], negate = true, action = "challenge", excluded_path_regex = "^/api/auth/" }). `action` is one of block, challenge, captcha or count; `negate` matches requests NOT from the listed countries
+        geo_rule_verified_bot_categories: Bot Control categories whose verified bots skip every geo rule (["social_media", "page_preview", "search_engine"]). Moves AWSManagedRulesBotControlRuleSet to run before the geo rules, so it must be in aws_managed_rules
+        match_rules: List of request match rules ({ name = "ChallengeSearchEnumeration", action = "challenge", host = "www.example.com", path_regex = "^/search$", query_regex = "(^|&)q=\\[[0-9]{4}\\]", excluded_path_regex = "^/feed", exempt_country_codes = ["GB"] }). A request matches when every condition given holds: `host` is the Host header (exact, case-insensitive), `path_regex` the URI path, `query_regex` the URL-decoded query string; `excluded_path_regex` and `exempt_country_codes` exclude requests. At least one of host, path_regex or query_regex is required. `action` is one of block, challenge, captcha or count
+        rate_rules: List of per-IP rate rules scoped to a URI path regex and optionally to HTTP methods ({ name = "LoginRateLimit", limit = 20, evaluation_window_sec = 300, action = "block", path_regex = "^/login$", methods = ["POST"] })
+        rate_limiting: Site-wide per-IP rate limiting ({ enabled = true, limit = 1000, evaluation_window_sec = 300 })
+        challenge_immunity_time_sec: Seconds a solved challenge token stays valid (WAF default is 300)
+        captcha_immunity_time_sec: Seconds a solved CAPTCHA token stays valid (WAF default is 300)
+        logging: Send WAF logs to a CloudWatch log group in us-east-1 ({ enabled = true, retention = 30 })
+      }
+    }
+  EOT
   type = map(object({
+    default_action  = optional(string, "allow")
     ipv4_deny_list  = optional(list(string), null)
     ipv4_allow_list = optional(list(string), null)
     ipv6_deny_list  = optional(list(string), null)
     ipv6_allow_list = optional(list(string), null)
     aws_managed_rules = optional(list(object({
-      name                   = string
-      action                 = string
-      exclude_rules          = optional(list(string), null)
-      excluded_path_patterns = optional(list(string), null)
+      name                         = string
+      action                       = string
+      exclude_rules                = optional(list(string), null)
+      challenge_rules              = optional(list(string), null)
+      captcha_rules                = optional(list(string), null)
+      excluded_path_patterns       = optional(list(string), null)
+      bot_control_inspection_level = optional(string, null)
+    })), null)
+    geo_rules = optional(list(object({
+      name                = string
+      country_codes       = list(string)
+      negate              = optional(bool, false)
+      action              = optional(string, "challenge")
+      excluded_path_regex = optional(string, null)
+    })), null)
+    geo_rule_verified_bot_categories = optional(list(string), null)
+    match_rules = optional(list(object({
+      name                 = string
+      action               = optional(string, "challenge")
+      host                 = optional(string, null)
+      path_regex           = optional(string, null)
+      query_regex          = optional(string, null)
+      excluded_path_regex  = optional(string, null)
+      exempt_country_codes = optional(list(string), null)
+    })), null)
+    rate_rules = optional(list(object({
+      name                  = string
+      limit                 = number
+      evaluation_window_sec = optional(number, 300)
+      action                = optional(string, "block")
+      path_regex            = string
+      methods               = optional(list(string), null)
     })), null)
     rate_limiting = optional(object({
       enabled               = bool
       limit                 = optional(number, 1000)
       evaluation_window_sec = optional(number, 300)
+    }), null)
+    challenge_immunity_time_sec = optional(number, null)
+    captcha_immunity_time_sec   = optional(number, null)
+    logging = optional(object({
+      enabled   = bool
+      retention = optional(number, 30)
     }), null)
   }))
   validation {
@@ -540,6 +630,113 @@ variable "infrastructure_ecs_cluster_wafs" {
       true
     ])
     error_message = "Valid values for evaluation_window_sec are 60, 120, 300, and 600."
+  }
+  validation {
+    condition = alltrue([
+      for waf in var.infrastructure_ecs_cluster_wafs : contains(["allow", "block"], waf.default_action)
+    ])
+    error_message = "Valid values for default_action are allow and block."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.aws_managed_rules != null ? waf.aws_managed_rules : [] :
+        rule.bot_control_inspection_level == null || (
+          rule.name == "AWSManagedRulesBotControlRuleSet" && contains(["COMMON", "TARGETED"], coalesce(rule.bot_control_inspection_level, "COMMON"))
+        )
+      ]
+    ]))
+    error_message = "bot_control_inspection_level must be COMMON or TARGETED and is only valid on AWSManagedRulesBotControlRuleSet."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.geo_rules != null ? waf.geo_rules : [] :
+        contains(["block", "challenge", "captcha", "count"], rule.action) && length(rule.country_codes) > 0
+      ]
+    ]))
+    error_message = "geo_rules need at least one country code and an action of block, challenge, captcha or count."
+  }
+  validation {
+    condition = alltrue([
+      for waf in var.infrastructure_ecs_cluster_wafs :
+      waf.geo_rule_verified_bot_categories == null || (
+        length(coalesce(waf.geo_rule_verified_bot_categories, [])) > 0 &&
+        alltrue([for c in coalesce(waf.geo_rule_verified_bot_categories, []) : can(regex("^[a-z_]+$", c))])
+      )
+    ])
+    error_message = "geo_rule_verified_bot_categories must be a non-empty list of Bot Control category names such as social_media, without the awswaf:managed:aws:bot-control:bot:category: prefix."
+  }
+  validation {
+    condition = alltrue([
+      for waf in var.infrastructure_ecs_cluster_wafs :
+      waf.geo_rule_verified_bot_categories == null || contains(
+        [for rule in waf.aws_managed_rules != null ? waf.aws_managed_rules : [] : rule.name],
+        "AWSManagedRulesBotControlRuleSet"
+      )
+    ])
+    error_message = "geo_rule_verified_bot_categories needs AWSManagedRulesBotControlRuleSet in aws_managed_rules: the exemption matches the labels Bot Control adds."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.match_rules != null ? waf.match_rules : [] :
+        contains(["block", "challenge", "captcha", "count"], rule.action) &&
+        (rule.host != null || rule.path_regex != null || rule.query_regex != null) &&
+        (rule.exempt_country_codes == null || length(coalesce(rule.exempt_country_codes, [])) > 0)
+      ]
+    ]))
+    error_message = "match_rules need an action of block, challenge, captcha or count, and at least one of host, path_regex or query_regex: exclusions alone would match every other request. exempt_country_codes must be omitted or non-empty."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.rate_rules != null ? waf.rate_rules : [] :
+        contains(["block", "challenge", "captcha", "count"], rule.action) && contains([60, 120, 300, 600], rule.evaluation_window_sec)
+      ]
+    ]))
+    error_message = "rate_rules need an action of block, challenge, captcha or count, and an evaluation_window_sec of 60, 120, 300 or 600."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.rate_rules != null ? waf.rate_rules : [] :
+        rule.methods == null || (
+          length(coalesce(rule.methods, [])) > 0 && alltrue([for m in coalesce(rule.methods, []) : can(regex("^[A-Z]+$", m))])
+        )
+      ]
+    ]))
+    error_message = "rate_rules methods must be omitted or a non-empty list of upper-case HTTP methods, for example [\"POST\"]. WAF matches the method exactly, so a lower-case entry would never match."
+  }
+  validation {
+    condition = alltrue([
+      for waf in var.infrastructure_ecs_cluster_wafs :
+      length(waf.geo_rules != null ? waf.geo_rules : []) <= 40 &&
+      length(waf.match_rules != null ? waf.match_rules : []) <= 50 &&
+      length(waf.aws_managed_rules != null ? waf.aws_managed_rules : []) <= 100 &&
+      length(waf.rate_rules != null ? waf.rate_rules : []) <= 800
+    ])
+    error_message = "Rule priorities are banded (geo 10+, match 50+, managed 100+, rate 200+, RateLimit 1000), so a WAF may have at most 40 geo_rules, 50 match_rules, 100 aws_managed_rules and 800 rate_rules."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for waf in var.infrastructure_ecs_cluster_wafs : [
+        for rule in waf.aws_managed_rules != null ? waf.aws_managed_rules : [] :
+        length(setintersection(
+          toset(rule.exclude_rules != null ? rule.exclude_rules : []),
+          toset(rule.challenge_rules != null ? rule.challenge_rules : []),
+        )) == 0 &&
+        length(setintersection(
+          toset(rule.exclude_rules != null ? rule.exclude_rules : []),
+          toset(rule.captcha_rules != null ? rule.captcha_rules : []),
+        )) == 0 &&
+        length(setintersection(
+          toset(rule.challenge_rules != null ? rule.challenge_rules : []),
+          toset(rule.captcha_rules != null ? rule.captcha_rules : []),
+        )) == 0
+      ]
+    ]))
+    error_message = "A managed rule may appear in only one of exclude_rules, challenge_rules and captcha_rules; WAF rejects an ACL with two overrides for the same rule."
   }
 }
 
@@ -558,6 +755,8 @@ variable "infrastructure_ecs_cluster_service_defaults" {
       name  = string
       value = string
     })), [])
+    codebuild_compute_type        = optional(string, null)
+    codebuild_image               = optional(string, null)
     ecr_scan_target_sns_topic_arn = optional(string, null)
     deployment_type               = optional(string, null)
     enable_cloudwatch_logs        = optional(bool, null)
@@ -582,6 +781,15 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     container_count              = optional(number, null)
     container_heath_check_path   = optional(string, null)
     container_heath_grace_period = optional(number, null)
+    container_memory_reservation = optional(number, null)
+    container_cpu                = optional(number, null)
+    autoscaling = optional(object({
+      min_count                  = number
+      max_count                  = number
+      target_requests_per_target = number
+      scale_in_cooldown          = optional(number, 300)
+      scale_out_cooldown         = optional(number, 60)
+    }), null)
     scheduled_tasks = optional(map(object({
       entrypoint          = optional(list(string), null)
       schedule_expression = string
@@ -594,6 +802,7 @@ variable "infrastructure_ecs_cluster_service_defaults" {
       container_port     = optional(number, null)
       essential          = optional(bool, true)
     })), {})
+    alb_scheme                                    = optional(string, "internet-facing")
     domain_names                                  = optional(list(string), null)
     enable_cloudfront                             = optional(bool, null)
     cloudfront_tls_certificate_arn                = optional(string, null)
@@ -618,6 +827,25 @@ variable "infrastructure_ecs_cluster_service_defaults" {
       "cognito-idp:AdminUserGlobalSignOut",
       "cognito-idp:ListUsers",
     ])
+    cloudfront_cache_policies = optional(map(object({
+      min_ttl                    = optional(number, 0)
+      default_ttl                = optional(number, 86400)
+      max_ttl                    = optional(number, 31536000)
+      cookies_in_cache_key       = optional(string, "none")
+      query_strings_in_cache_key = optional(string, "all")
+      headers_in_cache_key       = optional(list(string), [])
+    })), null)
+    cloudfront_cache_behaviours = optional(list(object({
+      path_pattern = string
+      cache_policy = string
+    })), null)
+    cloudfront_enhanced_metrics_enabled = optional(bool, null)
+    cloudfront_custom_error_responses = optional(list(object({
+      error_code            = number
+      response_code         = optional(number, null)
+      response_page_path    = string
+      error_caching_min_ttl = optional(number, 10)
+    })), null)
   })
   validation {
     condition = (
@@ -643,6 +871,10 @@ variable "infrastructure_ecs_cluster_service_defaults" {
     ])
     error_message = "sidecar_containers keys must be lower-case container names: a letter, then letters, digits and single hyphens, not ending in a hyphen (^[a-z][a-z0-9]*(-[a-z0-9]+)*$)."
   }
+  validation {
+    condition     = contains(["internet-facing", "internal"], var.infrastructure_ecs_cluster_service_defaults.alb_scheme)
+    error_message = "alb_scheme must be \"internet-facing\" or \"internal\"."
+  }
 }
 
 variable "infrastructure_ecs_cluster_services" {
@@ -659,6 +891,8 @@ variable "infrastructure_ecs_cluster_services" {
         buildspec: The filename of the buildspec to use for the CodePipeline build phase, stored within the 'codepipeline buildspec store' S3 bucket
         buildspec_from_github_repo: Conditionally use the 'buildspec' filename stored within the GitHub repo as the buildspec
         codebuild_environment_variables: List of codebuild environment variable objects (eg. [{ name = "MY_VAR", value = "foo" },{ name = "MY_OTHER_VAR", value = "bar"}])
+        codebuild_compute_type: The CodeBuild compute type for the image build (eg. BUILD_GENERAL1_MEDIUM). Defaults to BUILD_GENERAL1_SMALL
+        codebuild_image: The CodeBuild image for the image build (eg. aws/codebuild/standard:7.0). Defaults to aws/codebuild/standard:5.0. Docker 23 and later, as in standard:7.0, builds with BuildKit by default
         ecr_scan_target_sns_topic_arn: An SNS topic ARN to publish ECR scan results to
         deployment_type: The service deployment type - Can be one of 'rolling' or 'blue-green'
         enable_cloudwatch_logs: Conditionally enable cloudwatch logs for the service
@@ -673,8 +907,12 @@ variable "infrastructure_ecs_cluster_services" {
         container_count: Number of containers to launch for the service
         container_heath_check_path: Destination for the health check request
         container_heath_grace_period: Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown
+        container_memory_reservation: Soft memory reservation for the container in MiB (default 16). Set it to what the process really uses so ECS can place tasks and scale instances correctly
+        container_cpu: CPU units reserved for the container (1024 = one vCPU). Omitted when unset
+        autoscaling: Scale the service's task count on ALB requests per task per minute, summed over the service's target groups, eg. { min_count = 2, max_count = 8, target_requests_per_target = 300, scale_in_cooldown = 300, scale_out_cooldown = 60 }. Requires a container_port. When unset the service runs exactly container_count tasks
         scheduled_tasks: A map of scheduled tasks that use the same image as the service defined eg. { "name" => { "entrypoint" = ["bundle", "exec", "run_jobs"], "schedule_expression" = "cron(* * * * ? *)" } }
         sidecar_containers: Map of extra containers to run in the service task alongside the application container, keyed by container name (eg. { gotenberg = { image = "docker.io/gotenberg/gotenberg@sha256:<digest>", command = ["gotenberg", "--api-timeout=30s"], memory_reservation = 768 } }). Each `image` must be pinned by digest (`<registry>/<repo>@sha256:<64 hex>`); it is mirrored into an ECR repository in this account and the task pulls from there. The mirror authenticates to Docker Hub only (with `infrastructure_dockerhub_*` when set), so images must be public unless they are on Docker Hub. The application container is linked to every sidecar so it can reach it as `http://<name>:<port>`; sidecars publish no ports, so nothing outside the task can reach them. Every container in the task can obtain the task role's credentials, so a sidecar image is trusted with the service's AWS permissions; run a helper as its own service when IAM isolation is needed. `command` and `environment` are passed through verbatim, `memory_reservation` is in MiB (default 256), `container_port` is informational only, and `essential` (default true) restarts the whole task if the sidecar exits
+        alb_scheme: `internet-facing` (default) or `internal`. An internal service is served only by a shared internal Application Load Balancer in the private subnets, over HTTPS on the infrastructure wildcard certificate at `https://<service>.<infrastructure domain>`, and gets no public ALB rule, CloudFront distribution or public-ALB record; its record resolves to private addresses. Only the cluster's container instances can connect to it, so every task on the cluster can reach every internal service, and internal services keep the instances' outbound access. Requires the infrastructure Route53 hosted zone, private subnets, `deployment_type = "rolling"`, a `container_port`, `enable_cloudfront = false` and no `domain_names`. An existing service cannot switch scheme in one apply: remove it, apply, then add it back with the new scheme and apply
         domain_names: Domain names to assign to CloudFront aliases, and the Application Load Balancer's `host_header` condition
         enable_cloudfront: Enable cloadfront for the service
         cloudfront_tls_certificate_arn: Certificate ARN to attach to CloudFront - must contain the names provided in `domain_names`
@@ -686,6 +924,10 @@ variable "infrastructure_ecs_cluster_services" {
         cloudfront_managed_origin_request_policy: Conditionally specify a CloudFront Managed Origin Request Policy for the distribution
         cloudfront_managed_response_headers_policy: Conditionally specify a CloudFront Managed Response Headers Policy for the distribution
         cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
+        cloudfront_cache_policies: Map of custom cache policies for the distribution's extra cache behaviours, eg. { static-assets = { default_ttl = 86400 } }. Defaults: min_ttl 0, default_ttl 86400, max_ttl 31536000, no cookies and all query strings in the cache key, no headers. default_ttl only applies when the origin sends no Cache-Control or Expires header
+        cloudfront_cache_behaviours: List of extra cache behaviours in evaluation order, each a CloudFront path pattern and the key of a `cloudfront_cache_policies` entry, eg. [{ path_pattern = "*.png", cache_policy = "static-assets" }]. They share the default behaviour's origin, origin request policy and response headers policy
+        cloudfront_enhanced_metrics_enabled: Subscribe the distribution to CloudFront's additional CloudWatch metrics (cache hit rate, origin latency, error rates by status code). Billed per distribution
+        cloudfront_custom_error_responses: List of origin error codes to answer with a static page served from a path on the same distribution, eg. [{ error_code = 503, response_page_path = "/__errors/503.html", error_caching_min_ttl = 30 }]. response_code defaults to error_code. The page must come from an origin other than the service, typically a custom S3 bucket served through the distribution at that path
         alb_tls_certificate_arn: Certificate ARN to attach to the Application Load Balancer - must contain the names provided in `domain_names`
         cognito_user_pools: List of Cognito User Pool names (keys of `infrastructure_cognito_user_pools`) the service task role may administer
         cognito_user_pool_actions: List of `cognito-idp` IAM actions granted on those pools. Defaults to the Admin actions an application needs to own registration, password reset, account state and session revocation. Must be Cognito Admin* user actions or ListUsers/ListUsersInGroup/ListGroups; pool-management actions and wildcards are not allowed
@@ -705,6 +947,8 @@ variable "infrastructure_ecs_cluster_services" {
       name  = string
       value = string
     })), [])
+    codebuild_compute_type        = optional(string, null)
+    codebuild_image               = optional(string, null)
     ecr_scan_target_sns_topic_arn = optional(string, null)
     deployment_type               = optional(string, null)
     enable_cloudwatch_logs        = optional(bool, null)
@@ -729,6 +973,15 @@ variable "infrastructure_ecs_cluster_services" {
     container_count              = optional(number, null)
     container_heath_check_path   = optional(string, null)
     container_heath_grace_period = optional(number, null)
+    container_memory_reservation = optional(number, null)
+    container_cpu                = optional(number, null)
+    autoscaling = optional(object({
+      min_count                  = number
+      max_count                  = number
+      target_requests_per_target = number
+      scale_in_cooldown          = optional(number, 300)
+      scale_out_cooldown         = optional(number, 60)
+    }), null)
     scheduled_tasks = optional(map(object({
       entrypoint          = list(string)
       schedule_expression = string
@@ -741,6 +994,7 @@ variable "infrastructure_ecs_cluster_services" {
       container_port     = optional(number, null)
       essential          = optional(bool, true)
     })), null)
+    alb_scheme                                    = optional(string, null)
     domain_names                                  = optional(list(string), null)
     enable_cloudfront                             = optional(bool, null)
     cloudfront_tls_certificate_arn                = optional(string, null)
@@ -755,6 +1009,25 @@ variable "infrastructure_ecs_cluster_services" {
     alb_tls_certificate_arn                       = optional(string, null)
     cognito_user_pools                            = optional(list(string), null)
     cognito_user_pool_actions                     = optional(list(string), null)
+    cloudfront_cache_policies = optional(map(object({
+      min_ttl                    = optional(number, 0)
+      default_ttl                = optional(number, 86400)
+      max_ttl                    = optional(number, 31536000)
+      cookies_in_cache_key       = optional(string, "none")
+      query_strings_in_cache_key = optional(string, "all")
+      headers_in_cache_key       = optional(list(string), [])
+    })), null)
+    cloudfront_cache_behaviours = optional(list(object({
+      path_pattern = string
+      cache_policy = string
+    })), null)
+    cloudfront_enhanced_metrics_enabled = optional(bool, null)
+    cloudfront_custom_error_responses = optional(list(object({
+      error_code            = number
+      response_code         = optional(number, null)
+      response_page_path    = string
+      error_caching_min_ttl = optional(number, 10)
+    })), null)
   }))
   validation {
     condition = alltrue([
@@ -786,6 +1059,37 @@ variable "infrastructure_ecs_cluster_services" {
       ]
     ]))
     error_message = "sidecar_containers keys must be lower-case container names: a letter, then letters, digits and single hyphens, not ending in a hyphen (^[a-z][a-z0-9]*(-[a-z0-9]+)*$), and must differ from the service name."
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_ecs_cluster_services :
+      v["alb_scheme"] == null || contains(["internet-facing", "internal"], v["alb_scheme"])
+    ])
+    error_message = "alb_scheme must be \"internet-facing\" or \"internal\"."
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_ecs_cluster_services :
+      !(coalesce(v["alb_scheme"], var.infrastructure_ecs_cluster_service_defaults.alb_scheme) == "internal") || try(coalesce(v["enable_cloudfront"], var.infrastructure_ecs_cluster_service_defaults.enable_cloudfront), false) != true
+    ])
+    error_message = "internal services cannot use CloudFront: set enable_cloudfront = false on any service with alb_scheme = \"internal\"."
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_ecs_cluster_services :
+      !(coalesce(v["alb_scheme"], var.infrastructure_ecs_cluster_service_defaults.alb_scheme) == "internal") || length(try(coalesce(v["domain_names"], var.infrastructure_ecs_cluster_service_defaults.domain_names), [])) == 0
+    ])
+    error_message = "internal services cannot set domain_names: they are reached at <service>.<infrastructure domain> only."
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.infrastructure_ecs_cluster_services :
+      !(coalesce(v["alb_scheme"], var.infrastructure_ecs_cluster_service_defaults.alb_scheme) == "internal") || (
+        try(coalesce(v["deployment_type"], var.infrastructure_ecs_cluster_service_defaults.deployment_type), null) == "rolling" &&
+        try(coalesce(v["container_port"], var.infrastructure_ecs_cluster_service_defaults.container_port), 0) != 0
+      )
+    ])
+    error_message = "internal services must be rolling and have a container_port: set deployment_type = \"rolling\" and a non-zero container_port."
   }
 }
 
@@ -928,7 +1232,8 @@ variable "infrastructure_cognito_user_pools_defaults" {
       type    = string
       mutable = optional(bool, true)
     })), {})
-    threat_protection = optional(string, "OFF")
+    threat_protection            = optional(string, "OFF")
+    allow_admin_create_user_only = optional(bool, false)
     client_defaults = optional(object({
       generate_secret               = optional(bool, true)
       explicit_auth_flows           = optional(list(string), ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"])
@@ -978,6 +1283,8 @@ variable "infrastructure_cognito_user_pools" {
         password_require_symbols: Require at least one symbol (default false)
         custom_attributes: Map of custom attribute name to { type = "Boolean" | "String" | "Number", mutable = bool }. Declared without the `custom:` prefix
         threat_protection: `OFF` (default), `AUDIT` or `ENFORCED`. Anything other than `OFF` moves the pool to the Plus feature plan, which is charged per monthly active user. With no MFA and no email configuration, ENFORCED can only block risky sign-ins; it cannot notify users.
+        allow_admin_create_user_only: Disable the public `SignUp` call so only `AdminCreateUser` can add users (default false). Set it on pools whose users are provisioned by operators, such as staff pools
+        groups: Map of user groups to create in the pool (The key will be the group name), each { description = string, precedence = number }. Membership is managed outside Terraform
         clients: Map of app clients (The key will be the client name)
           generate_secret: Generate a client secret (default from `client_defaults`: true)
           explicit_auth_flows: Allowed auth flows (default from `client_defaults`: ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"])
@@ -996,7 +1303,12 @@ variable "infrastructure_cognito_user_pools" {
       type    = string
       mutable = optional(bool, true)
     })), null)
-    threat_protection = optional(string, null)
+    threat_protection            = optional(string, null)
+    allow_admin_create_user_only = optional(bool, null)
+    groups = optional(map(object({
+      description = optional(string, null)
+      precedence  = optional(number, null)
+    })), {})
     clients = optional(map(object({
       generate_secret               = optional(bool, null)
       explicit_auth_flows           = optional(list(string), null)
@@ -1022,6 +1334,15 @@ variable "infrastructure_cognito_user_pools" {
       ]
     ]))
     error_message = "Cognito User Pool client names (keys in clients) can only contain alphanumeric characters and hyphens."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_cognito_user_pools : [
+        for gk, gv in coalesce(v["groups"], {}) : can(regex("^[a-zA-Z0-9_-]{1,128}$", gk)) && (gv["precedence"] == null || coalesce(gv["precedence"], 0) >= 0)
+      ]
+    ]))
+    error_message = "Cognito User Pool group names (keys in groups) can only contain alphanumeric characters, hyphens and underscores (at most 128), and precedence must be zero or more."
   }
 
   validation {
@@ -1113,7 +1434,7 @@ variable "custom_route53_hosted_zones" {
       example.com = {
         ns_records: Map of NS records to create ({ "domain.example.com"  = { values = ["ns1.example.com", "ns2.example.com"], ttl = 300 })
         a_records: Map of A records to create ({ "domain.example.com"  = { values = ["1.2.3.4", "5.6.7.8"], ttl = 300 })
-        alias_records: Map of ALIAS records to create ({ "domain.example.com"  = { value = "example.cloudfront.com", zone_id = "Z2FDTNDATAQYW2" })
+        alias_records: Map of ALIAS records to create ({ "domain.example.com"  = { value = "example.cloudfront.com", zone_id = "Z2FDTNDATAQYW2", ipv6 = true }). `ipv6` also creates an AAAA ALIAS to the same target, which must itself answer over IPv6 (eg. a CloudFront distribution or dual-stack ALB)
         cname_records: Map of CNAME records to create ({ "domain.example.com"  = { values = ["external1.example.com", "external2.example.com"], ttl = 60 })
         mx_records: Map of MX records to create ({ "example.com"  = { values = ["1 mail.example.com", "5 mail2.example.com"], ttl = 60 })
         txt_records: Map of TXT records to create ({ "example.com"  = { values = ["v=spf1 include:spf.example.com -all"], ttl = 60 })
@@ -1132,6 +1453,7 @@ variable "custom_route53_hosted_zones" {
     alias_records = optional(map(object({
       value   = string
       zone_id = string
+      ipv6    = optional(bool, false)
     })), null)
     cname_records = optional(map(object({
       values = list(string)
@@ -1146,6 +1468,57 @@ variable "custom_route53_hosted_zones" {
       ttl    = optional(number, 300)
     })), null)
   }))
+}
+
+variable "cloudfront_redirects" {
+  description = <<EOT
+    Map of CloudFront distributions that answer every request with a redirect to a fixed target. See docs/cloudfront-redirects.md
+    {
+      redirect-name = {
+        aliases: Hostnames the distribution answers for (lowercase, no wildcards, 1 to 100)
+        target: https:// URL to redirect to - scheme and host, optionally a path prefix, no query string or fragment
+        status_code: Redirect status code, one of 301, 302, 307 or 308 (default 301)
+        preserve_path: Append the request URI and query string to the target (default true)
+        tls_certificate_arn: us-east-1 ACM certificate covering every alias. If null, a certificate is issued and DNS-validated in the matching `custom_route53_hosted_zones` zones
+        create_route53_records: Create A and AAAA ALIAS records for every alias in its matching `custom_route53_hosted_zones` zone (default false)
+        access_logging_enabled: Enable access logging for the distribution to the infrastructure S3 logs bucket (default false)
+      }
+    }
+  EOT
+  type = map(object({
+    aliases                = list(string)
+    target                 = string
+    status_code            = optional(number, 301)
+    preserve_path          = optional(bool, true)
+    tls_certificate_arn    = optional(string, null)
+    create_route53_records = optional(bool, false)
+    access_logging_enabled = optional(bool, false)
+  }))
+  default = {}
+
+  validation {
+    condition     = alltrue([for k, v in var.cloudfront_redirects : can(regex("^[a-z0-9-]{1,46}$", k))])
+    error_message = "cloudfront_redirects keys must match ^[a-z0-9-]{1,46}$, so the CloudFront function name stays within 64 characters."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.cloudfront_redirects :
+      length(v["aliases"]) >= 1 && length(v["aliases"]) <= 100 && length(distinct(v["aliases"])) == length(v["aliases"]) &&
+      alltrue([for alias in v["aliases"] : can(regex("^([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?$", alias))])
+    ])
+    error_message = "cloudfront_redirects aliases must be 1 to 100 distinct lowercase hostnames, without wildcards."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.cloudfront_redirects : can(regex("^https://[a-z0-9.-]+(/[^?#\\s\"\\\\]*)?$", v["target"]))])
+    error_message = "cloudfront_redirects target must be an https:// URL with a lowercase host and an optional path, and no query string or fragment."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.cloudfront_redirects : contains([301, 302, 307, 308], v["status_code"])])
+    error_message = "cloudfront_redirects status_code must be one of 301, 302, 307 or 308."
+  }
 }
 
 variable "infrastructure_ecs_cluster_services_alb_enable_global_accelerator" {
@@ -1203,6 +1576,9 @@ variable "custom_s3_buckets" {
         use_aes256_encryption: Conditionally enforce using AES256 encryption, rather than the infrastructure KMS key. Also overrides `create_dedicated_kms_key`
         transition_to_ia_days: Conditionally transition objects to 'Standard Infrequent Access' storage in N days
         transition_to_glacier_days: Conditionally transition objects to 'Glacier' storage in N days
+        expiration_days: Conditionally expire current object versions N days after creation. Versioning is always on, so this leaves a noncurrent version behind; pair it with `noncurrent_version_expiration_days` to remove the data. Must be later than any transition_to_* days
+        noncurrent_version_expiration_days: Conditionally delete noncurrent object versions permanently N days after they become noncurrent. Also removes the expired-object delete markers left once no versions remain
+        abort_incomplete_multipart_upload_days: Conditionally abort multipart uploads that are still incomplete N days after they started
         cloudfront_dedicated_distribution: Conditionally create a CloudFront distribution to serve objects from the S3 bucket.
         cloudfront_decicated_distribution_aliases: Specify custom aliases, rather than using a generated infrastriucture subdomain
         cloudfront_decicated_distribution_tls_certificate_arn: Specify a CloudFront TLS certificate to use rather than the infrastructure wildcard certificate
@@ -1211,8 +1587,10 @@ variable "custom_s3_buckets" {
         cloudfront_infrastructure_ecs_cluster_service: Conditionally create an Origin on a CloudFront distribution that is serving the given Infrastructure ECS Cluster Service name
         cloudfront_infrastructure_ecs_cluster_service_path: If `cloudfront_infrastructure_ecs_cluster_service`, set this to the path that objects will be served from.
         cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
+        cloudfront_origin_shield_enabled: Enable CloudFront Origin Shield, in the infrastructure's region, on the bucket's origin. Applies to the dedicated distribution and to the origin on the service distribution set by `cloudfront_infrastructure_ecs_cluster_service`
         custom_bucket_policy_statements: Conditionally add a string of comma delimited user-defined key policy statements (eg. '{"Effect": ...},{"Effect": ...}'
         enable_missing_writes_alert: Conditionally enable an alert for missing writes to the S3 bucket.
+        objects: Map of object keys to content to keep in the bucket from Terraform, eg. { "503.html" = { content = "<html>...</html>" } }. content_type is inferred from the key's extension when unset; cache_control is sent as the object's Cache-Control header
       }
     }
   EOT
@@ -1222,6 +1600,9 @@ variable "custom_s3_buckets" {
     use_aes256_encryption                                 = optional(bool, null)
     transition_to_ia_days                                 = optional(number, null)
     transition_to_glacier_days                            = optional(number, null)
+    expiration_days                                       = optional(number, null)
+    noncurrent_version_expiration_days                    = optional(number, null)
+    abort_incomplete_multipart_upload_days                = optional(number, null)
     cloudfront_dedicated_distribution                     = optional(bool, null)
     cloudfront_decicated_distribution_aliases             = optional(list(string), null)
     cloudfront_decicated_distribution_tls_certificate_arn = optional(string, null)
@@ -1231,9 +1612,34 @@ variable "custom_s3_buckets" {
     cloudfront_infrastructure_ecs_cluster_service         = optional(string, null)
     cloudfront_infrastructure_ecs_cluster_service_path    = optional(string, null)
     cloudfront_waf_association                            = optional(string, null)
+    cloudfront_origin_shield_enabled                      = optional(bool, null)
     custom_bucket_policy_statements                       = optional(string, null)
     enable_missing_writes_alert                           = optional(bool, false)
+    objects = optional(map(object({
+      content       = string
+      content_type  = optional(string, null)
+      cache_control = optional(string, null)
+    })), null)
   }))
+  validation {
+    condition = alltrue(flatten([
+      for bucket in var.custom_s3_buckets : [
+        for days in [bucket.expiration_days, bucket.noncurrent_version_expiration_days, bucket.abort_incomplete_multipart_upload_days] :
+        days == null || try(days >= 1 && floor(days) == days, false)
+      ]
+    ]))
+    error_message = "expiration_days, noncurrent_version_expiration_days and abort_incomplete_multipart_upload_days must be whole numbers of at least 1."
+  }
+  validation {
+    condition = alltrue([
+      for bucket in var.custom_s3_buckets :
+      bucket.expiration_days == null || alltrue([
+        for days in [bucket.transition_to_ia_days, bucket.transition_to_glacier_days] :
+        days == null || try(bucket.expiration_days > days, false)
+      ])
+    ])
+    error_message = "expiration_days must be greater than transition_to_ia_days and transition_to_glacier_days, or S3 rejects the lifecycle configuration."
+  }
 }
 
 variable "external_s3_buckets_missing_writes_alert" {

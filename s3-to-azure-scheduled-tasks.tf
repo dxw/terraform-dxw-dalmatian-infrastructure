@@ -174,6 +174,8 @@ resource "aws_ecs_task_definition" "infrastructure_s3_to_azure" {
         }
       ])
       container_port        = 0
+      memory_reservation    = 16
+      cpu                   = 0
       extra_hosts           = jsonencode([])
       volumes               = jsonencode([])
       linux_parameters      = jsonencode({ initProcessEnabled = false })

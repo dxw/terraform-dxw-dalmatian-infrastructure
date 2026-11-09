@@ -36,6 +36,40 @@ own registration, password reset, account state and session revocation by
 default; overriding `cognito_user_pool_actions` requires a non-empty list
 of specific `cognito-idp:` actions — wildcards are rejected.
 
+## Operator-provisioned pools
+
+A pool whose users are created by operators rather than by the application,
+such as a staff pool, should close public sign-up and can carry the groups
+the application authorises against:
+
+```hcl
+infrastructure_cognito_user_pools = {
+  <pool> = {
+    allow_admin_create_user_only = true
+    groups = {
+      <group> = { description = "<what membership grants>" }
+    }
+    clients = { <client> = {} }
+  }
+}
+```
+
+`allow_admin_create_user_only` disables `SignUp`, so only `AdminCreateUser`
+can add users; it defaults to false because application pools register
+through `SignUp`. Groups are created empty; membership is not managed by
+Terraform.
+
+Leave the pool out of a service's `cognito_user_pools` unless the service
+must administer its users. Signing in with `USER_PASSWORD_AUTH` needs only
+the client ID and secret, and listing the pool would grant the service
+`AdminSetUserPassword` and the other default actions on it.
+
+Create users and add them to a group with
+`dalmatian aws exec -i <infrastructure> -e <environment> cognito-idp admin-create-user`
+(with `--message-action SUPPRESS`, since pools send no email) and
+`... cognito-idp admin-add-user-to-group`. How the user receives a first
+password is the application's procedure.
+
 ## Wire a service
 
 ```

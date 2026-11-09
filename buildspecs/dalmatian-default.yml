@@ -50,18 +50,23 @@ phases:
             --arg task_definition_arn "$NEW_TASK_DEFINITION_ARN" \
             --arg container_name "$CONTAINER_NAME" \
             --argjson container_port "$CONTAINER_PORT" \
+            --arg capacity_provider "${CAPACITY_PROVIDER_NAME:-}" \
             '{
               Resources: [
                 {
                   TargetService: {
                     Type: "AWS::ECS::Service",
-                    Properties: {
+                    Properties: ({
                       TaskDefinition: $task_definition_arn,
                       LoadBalancerInfo: {
                         ContainerName: $container_name,
                         ContainerPort: $container_port
                       }
-                    }
+                    } + (if $capacity_provider != "" then {
+                      CapacityProviderStrategy: [
+                        { CapacityProvider: $capacity_provider, Weight: 1, Base: 0 }
+                      ]
+                    } else {} end))
                   }
                 }
               ]
