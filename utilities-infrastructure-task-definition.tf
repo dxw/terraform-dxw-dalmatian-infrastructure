@@ -38,9 +38,11 @@ resource "aws_ecs_task_definition" "infrastructure_utilities" {
           valueFrom = each.value["type"] == "instance" ? "${aws_db_instance.infrastructure_rds[each.key].master_user_secret[0].secret_arn}:password::" : each.value["type"] == "cluster" ? "${aws_rds_cluster.infrastructure_rds[each.key].master_user_secret[0].secret_arn}:password::" : null
         }
       ])
-      container_port = 0
-      extra_hosts    = jsonencode([])
-      volumes        = jsonencode([])
+      container_port     = 0
+      memory_reservation = 16
+      cpu                = 0
+      extra_hosts        = jsonencode([])
+      volumes            = jsonencode([])
       linux_parameters = jsonencode({
         initProcessEnabled = false
       })
