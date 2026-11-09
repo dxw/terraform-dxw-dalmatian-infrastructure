@@ -65,7 +65,7 @@ resource "aws_appautoscaling_policy" "infrastructure_ecs_cluster_service_request
 
               dimensions {
                 name  = "LoadBalancer"
-                value = aws_alb.infrastructure_ecs_cluster_service[0].arn_suffix
+                value = each.value["alb_scheme"] == "internal" ? aws_alb.infrastructure_ecs_cluster_service_internal[0].arn_suffix : aws_alb.infrastructure_ecs_cluster_service[0].arn_suffix
               }
             }
           }

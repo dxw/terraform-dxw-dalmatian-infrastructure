@@ -234,13 +234,19 @@ locals {
       for service_key in local.infrastructure_ecs_cluster_services_keys : service_key => try(coalesce(v[service_key], local.infrastructure_ecs_cluster_service_defaults[service_key]), null)
     })
   }
+  infrastructure_ecs_cluster_internal_services = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["alb_scheme"] == "internal"
+  }
+  infrastructure_ecs_cluster_public_services = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["alb_scheme"] != "internal"
+  }
   # AWS allows 5 condition values per ALB listener rule in total, so custom domain
   # names are spread across as many rules as they need. The CloudFront bypass
   # secret header takes one of those values when it is enabled. The first chunk
   # keeps the service name as its key so existing rules keep their state address.
   infrastructure_ecs_cluster_service_alb_rule_condition_values_limit = 5
   infrastructure_ecs_cluster_service_alb_host_header_custom_chunks = merge([
-    for k, service in local.infrastructure_ecs_cluster_services : {
+    for k, service in local.infrastructure_ecs_cluster_public_services : {
       for i, chunk in chunklist(
         service["domain_names"],
         local.infrastructure_ecs_cluster_service_alb_rule_condition_values_limit - (service["enable_cloudfront"] == true && service["cloudfront_bypass_protection_enabled"] == true ? 1 : 0)
@@ -252,7 +258,7 @@ locals {
     } if service["domain_names"] != null ? length(service["domain_names"]) > 0 && service["container_port"] != 0 : false
   ]...)
   infrastructure_ecs_cluster_service_alb_bypass_exclusion_chunks = merge([
-    for k, service in local.infrastructure_ecs_cluster_services : {
+    for k, service in local.infrastructure_ecs_cluster_public_services : {
       for i, chunk in chunklist(service["cloudfront_bypass_protection_excluded_domains"], local.infrastructure_ecs_cluster_service_alb_rule_condition_values_limit) : (i == 0 ? k : "${k}:${i}") => {
         service_name = k
         service      = service
@@ -298,6 +304,7 @@ locals {
   infrastructure_ecs_cluster_service_autoscaling_policies = {
     for k, v in local.infrastructure_ecs_cluster_services : k => {
       autoscaling = v["autoscaling"]
+      alb_scheme  = v["alb_scheme"]
       target_group_arn_suffixes = concat(
         [for tg_k, tg in aws_alb_target_group.infrastructure_ecs_cluster_service : tg.arn_suffix if tg_k == k],
         [for tg_k, tg in aws_alb_target_group.infrastructure_ecs_cluster_service_blue : tg.arn_suffix if tg_k == k],
