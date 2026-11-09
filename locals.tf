@@ -369,9 +369,10 @@ locals {
   infrastructure_cognito_user_pools = {
     for k, v in var.infrastructure_cognito_user_pools : k => merge(
       {
-        for pool_key in local.infrastructure_cognito_user_pools_keys : pool_key => try(coalesce(v[pool_key], local.infrastructure_cognito_user_pools_defaults[pool_key]), null) if pool_key != "clients"
+        for pool_key in local.infrastructure_cognito_user_pools_keys : pool_key => try(coalesce(v[pool_key], local.infrastructure_cognito_user_pools_defaults[pool_key]), null) if !contains(["clients", "groups"], pool_key)
       },
       {
+        groups = v["groups"]
         clients = {
           for client_name, client in v["clients"] : client_name => {
             for client_key, client_value in client : client_key => try(coalesce(client_value, local.infrastructure_cognito_user_pools_defaults["client_defaults"][client_key]), null)

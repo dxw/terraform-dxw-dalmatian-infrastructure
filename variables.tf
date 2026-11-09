@@ -1232,7 +1232,8 @@ variable "infrastructure_cognito_user_pools_defaults" {
       type    = string
       mutable = optional(bool, true)
     })), {})
-    threat_protection = optional(string, "OFF")
+    threat_protection            = optional(string, "OFF")
+    allow_admin_create_user_only = optional(bool, false)
     client_defaults = optional(object({
       generate_secret               = optional(bool, true)
       explicit_auth_flows           = optional(list(string), ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"])
@@ -1282,6 +1283,8 @@ variable "infrastructure_cognito_user_pools" {
         password_require_symbols: Require at least one symbol (default false)
         custom_attributes: Map of custom attribute name to { type = "Boolean" | "String" | "Number", mutable = bool }. Declared without the `custom:` prefix
         threat_protection: `OFF` (default), `AUDIT` or `ENFORCED`. Anything other than `OFF` moves the pool to the Plus feature plan, which is charged per monthly active user. With no MFA and no email configuration, ENFORCED can only block risky sign-ins; it cannot notify users.
+        allow_admin_create_user_only: Disable the public `SignUp` call so only `AdminCreateUser` can add users (default false). Set it on pools whose users are provisioned by operators, such as staff pools
+        groups: Map of user groups to create in the pool (The key will be the group name), each { description = string, precedence = number }. Membership is managed outside Terraform
         clients: Map of app clients (The key will be the client name)
           generate_secret: Generate a client secret (default from `client_defaults`: true)
           explicit_auth_flows: Allowed auth flows (default from `client_defaults`: ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"])
@@ -1300,7 +1303,12 @@ variable "infrastructure_cognito_user_pools" {
       type    = string
       mutable = optional(bool, true)
     })), null)
-    threat_protection = optional(string, null)
+    threat_protection            = optional(string, null)
+    allow_admin_create_user_only = optional(bool, null)
+    groups = optional(map(object({
+      description = optional(string, null)
+      precedence  = optional(number, null)
+    })), {})
     clients = optional(map(object({
       generate_secret               = optional(bool, null)
       explicit_auth_flows           = optional(list(string), null)
@@ -1326,6 +1334,15 @@ variable "infrastructure_cognito_user_pools" {
       ]
     ]))
     error_message = "Cognito User Pool client names (keys in clients) can only contain alphanumeric characters and hyphens."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for k, v in var.infrastructure_cognito_user_pools : [
+        for gk, gv in coalesce(v["groups"], {}) : can(regex("^[a-zA-Z0-9_-]{1,128}$", gk)) && (gv["precedence"] == null || coalesce(gv["precedence"], 0) >= 0)
+      ]
+    ]))
+    error_message = "Cognito User Pool group names (keys in groups) can only contain alphanumeric characters, hyphens and underscores (at most 128), and precedence must be zero or more."
   }
 
   validation {
