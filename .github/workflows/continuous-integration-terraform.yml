@@ -99,7 +99,7 @@ jobs:
 
       - name: Auto-commit updated documentation
         if: "startsWith(github.head_ref || github.ref_name, 'renovate/')"
-        uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7
+        uses: stefanzweifel/git-auto-commit-action@d0b01107b5db882071f96de5dd4b54961ea93f4c # v7
         with:
           commit_message: "${{ env.GIT_COMMIT_MESSAGE }} - Regenerate Terraform docs"
           file_pattern: README.md
