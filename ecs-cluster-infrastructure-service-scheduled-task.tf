@@ -25,6 +25,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service_scheduled
       environment         = jsonencode([])
       secrets             = jsonencode([])
       container_port      = 0
+      memory_reservation  = 16
+      cpu                 = 0
       extra_hosts = each.value["extra_hosts"] != null ? jsonencode([
         for extra_host in each.value["extra_hosts"] : {
           hostname  = extra_host.value["hostname"],
@@ -46,6 +48,8 @@ resource "aws_ecs_task_definition" "infrastructure_ecs_cluster_service_scheduled
       cloudwatch_log_group  = !local.infrastructure_ecs_cluster_logspout_enabled ? each.value["enable_cloudwatch_logs"] == true ? aws_cloudwatch_log_group.infrastructure_ecs_cluster_service[each.value["container_name"]].name : "" : ""
       awslogs_stream_prefix = ""
       region                = local.aws_region
+      links                 = "[]"
+      sidecars              = ""
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_ecs_cluster_service_task_execution[each.value["container_name"]].arn

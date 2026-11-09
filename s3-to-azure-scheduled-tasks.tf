@@ -174,6 +174,8 @@ resource "aws_ecs_task_definition" "infrastructure_s3_to_azure" {
         }
       ])
       container_port        = 0
+      memory_reservation    = 16
+      cpu                   = 0
       extra_hosts           = jsonencode([])
       volumes               = jsonencode([])
       linux_parameters      = jsonencode({ initProcessEnabled = false })
@@ -183,6 +185,8 @@ resource "aws_ecs_task_definition" "infrastructure_s3_to_azure" {
       cloudwatch_log_group  = aws_cloudwatch_log_group.infrastructure_s3_to_azure[0].name
       awslogs_stream_prefix = "s3-to-azure"
       region                = local.aws_region
+      links                 = "[]"
+      sidecars              = ""
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_s3_to_azure_task_execution[0].arn

@@ -38,9 +38,11 @@ resource "aws_ecs_task_definition" "infrastructure_utilities" {
           valueFrom = each.value["type"] == "instance" ? "${aws_db_instance.infrastructure_rds[each.key].master_user_secret[0].secret_arn}:password::" : each.value["type"] == "cluster" ? "${aws_rds_cluster.infrastructure_rds[each.key].master_user_secret[0].secret_arn}:password::" : null
         }
       ])
-      container_port = 0
-      extra_hosts    = jsonencode([])
-      volumes        = jsonencode([])
+      container_port     = 0
+      memory_reservation = 16
+      cpu                = 0
+      extra_hosts        = jsonencode([])
+      volumes            = jsonencode([])
       linux_parameters = jsonencode({
         initProcessEnabled = false
       })
@@ -50,6 +52,8 @@ resource "aws_ecs_task_definition" "infrastructure_utilities" {
       cloudwatch_log_group  = aws_cloudwatch_log_group.infrastructure_utilities[each.key].name
       awslogs_stream_prefix = "utilities"
       region                = local.aws_region
+      links                 = "[]"
+      sidecars              = ""
     }
   )
   execution_role_arn       = aws_iam_role.infrastructure_utilities_task_execution[each.key].arn

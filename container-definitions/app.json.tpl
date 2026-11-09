@@ -57,6 +57,9 @@
     %{ if extra_hosts != "[]" }
     "extraHosts": ${extra_hosts},
     %{ endif }
+    %{ if links != "[]" }
+    "links": ${links},
+    %{ endif }
     %{ if linux_parameters != "{}" }
     "linuxParameters": ${linux_parameters},
     %{ endif }
@@ -69,7 +72,13 @@
     %{if command != "[]"}
     "command": ${command},
     %{ endif }
-    "memoryReservation": 16,
+    %{ if cpu != 0 }
+    "cpu": ${cpu},
+    %{ endif }
+    "memoryReservation": ${memory_reservation},
     "essential": true
   }
+  %{ if sidecars != "" }
+  ,${sidecars}
+  %{ endif }
 ]

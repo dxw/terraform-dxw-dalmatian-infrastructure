@@ -20,7 +20,9 @@ locals {
     local.infrastructure_ecs_cluster_asg_cpu_alert_slack ||
     local.infrastructure_ecs_cluster_pending_task_alert_slack ||
     local.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack ||
-    local.enable_s3_missing_writes_alert
+    local.enable_s3_missing_writes_alert ||
+    local.infrastructure_ecs_cluster_service_pipeline_slack_notifications ||
+    local.infrastructure_ecs_cluster_autoscaling_slack_notifications
   )
   infrastructure_opsgenie_sns_topic_in_use = (
     local.infrastructure_ecs_cluster_asg_cpu_alert_opsgenie ||
@@ -36,7 +38,8 @@ locals {
     local.enable_infrastructure_vpc_transfer_s3_bucket ||
     local.infrastructure_ecs_cluster_enable_execute_command_logging ||
     local.enable_infrastructure_rds_backup_to_s3 ||
-    length(local.custom_lambda_functions) != 0
+    length(local.custom_lambda_functions) != 0 ||
+    local.cloudfront_redirects_access_logging_enabled
   )
   logs_bucket_s3_source_arns = concat(
     length(local.infrastructure_ecs_cluster_services) != 0 ? [aws_s3_bucket.infrastructure_ecs_cluster_service_build_pipeline_artifact_store[0].arn] : [],
@@ -158,6 +161,12 @@ locals {
   infrastructure_ecs_cluster_autoscaling_time_based_custom = {
     for custom in toset(var.infrastructure_ecs_cluster_autoscaling_time_based_custom) : "${custom["min"]}-${custom["max"]} ${custom["cron"]}" => custom
   }
+  infrastructure_ecs_cluster_capacity_provider         = var.infrastructure_ecs_cluster_capacity_provider
+  infrastructure_ecs_cluster_capacity_provider_enabled = local.enable_infrastructure_ecs_cluster && var.infrastructure_ecs_cluster_capacity_provider != null
+  # Capacity provider names may not start with "aws", "ecs" or "fargate";
+  # resource_prefix starts with the project name, which a precondition on
+  # the capacity provider checks.
+  infrastructure_ecs_cluster_capacity_provider_name                   = "${local.resource_prefix}-infrastructure-ecs-cluster"
   enable_infrastructure_ecs_cluster_asg_cpu_alert                     = var.enable_infrastructure_ecs_cluster_asg_cpu_alert && local.enable_infrastructure_ecs_cluster
   infrastructure_ecs_cluster_asg_cpu_alert_evaluation_periods         = var.infrastructure_ecs_cluster_asg_cpu_alert_evaluation_periods
   infrastructure_ecs_cluster_asg_cpu_alert_period                     = var.infrastructure_ecs_cluster_asg_cpu_alert_period
@@ -178,6 +187,9 @@ locals {
   infrastructure_ecs_cluster_ecs_asg_diff_alert_threshold             = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_threshold
   infrastructure_ecs_cluster_ecs_asg_diff_alert_slack                 = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_slack
   infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie              = var.infrastructure_ecs_cluster_ecs_asg_diff_alert_opsgenie
+  infrastructure_ecs_cluster_service_pipeline_slack_notifications     = var.infrastructure_ecs_cluster_service_pipeline_slack_notifications && length(local.infrastructure_ecs_cluster_services) != 0
+  infrastructure_ecs_cluster_autoscaling_slack_notifications          = var.infrastructure_ecs_cluster_autoscaling_slack_notifications && local.enable_infrastructure_ecs_cluster
+  infrastructure_ecs_cluster_autoscaling_slack_notification_services  = local.infrastructure_ecs_cluster_autoscaling_slack_notifications ? keys(local.infrastructure_ecs_cluster_service_autoscaling_policies) : []
   infrastructure_ecs_cluster_enable_debug_mode                        = var.infrastructure_ecs_cluster_enable_debug_mode
   infrastructure_ecs_cluster_enable_execute_command_logging           = var.infrastructure_ecs_cluster_enable_execute_command_logging
   infrastructure_ecs_cluster_wafs                                     = var.infrastructure_ecs_cluster_wafs
@@ -222,13 +234,19 @@ locals {
       for service_key in local.infrastructure_ecs_cluster_services_keys : service_key => try(coalesce(v[service_key], local.infrastructure_ecs_cluster_service_defaults[service_key]), null)
     })
   }
+  infrastructure_ecs_cluster_internal_services = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["alb_scheme"] == "internal"
+  }
+  infrastructure_ecs_cluster_public_services = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => v if v["alb_scheme"] != "internal"
+  }
   # AWS allows 5 condition values per ALB listener rule in total, so custom domain
   # names are spread across as many rules as they need. The CloudFront bypass
   # secret header takes one of those values when it is enabled. The first chunk
   # keeps the service name as its key so existing rules keep their state address.
   infrastructure_ecs_cluster_service_alb_rule_condition_values_limit = 5
   infrastructure_ecs_cluster_service_alb_host_header_custom_chunks = merge([
-    for k, service in local.infrastructure_ecs_cluster_services : {
+    for k, service in local.infrastructure_ecs_cluster_public_services : {
       for i, chunk in chunklist(
         service["domain_names"],
         local.infrastructure_ecs_cluster_service_alb_rule_condition_values_limit - (service["enable_cloudfront"] == true && service["cloudfront_bypass_protection_enabled"] == true ? 1 : 0)
@@ -240,7 +258,7 @@ locals {
     } if service["domain_names"] != null ? length(service["domain_names"]) > 0 && service["container_port"] != 0 : false
   ]...)
   infrastructure_ecs_cluster_service_alb_bypass_exclusion_chunks = merge([
-    for k, service in local.infrastructure_ecs_cluster_services : {
+    for k, service in local.infrastructure_ecs_cluster_public_services : {
       for i, chunk in chunklist(service["cloudfront_bypass_protection_excluded_domains"], local.infrastructure_ecs_cluster_service_alb_rule_condition_values_limit) : (i == 0 ? k : "${k}:${i}") => {
         service_name = k
         service      = service
@@ -253,6 +271,47 @@ locals {
       service["container_port"] != 0
     )
   ]...)
+  infrastructure_ecs_cluster_service_sidecar_containers = merge([
+    for service_name, service in local.infrastructure_ecs_cluster_services : {
+      for sidecar_name, sidecar in coalesce(service["sidecar_containers"], {}) : "${service_name}_${sidecar_name}" => merge(
+        sidecar,
+        {
+          service_name = service_name
+          sidecar_name = sidecar_name
+          image_tag    = regex("@sha256:([a-f0-9]{64})$", sidecar["image"])[0]
+        }
+      )
+    }
+  ]...)
+  # Custom cache policies flattened across services, keyed "<service>-<policy>".
+  # merge() drops a key silently if two pairs collide, so the declared count
+  # is kept alongside for the precondition that compares them.
+  infrastructure_ecs_cluster_service_cloudfront_cache_policies = merge([
+    for k, v in local.infrastructure_ecs_cluster_services : {
+      for policy_key, policy in v["cloudfront_cache_policies"] != null ? v["cloudfront_cache_policies"] : {} :
+      "${k}-${policy_key}" => merge(policy, { service = k, key = policy_key })
+    } if v["enable_cloudfront"] == true
+  ]...)
+  infrastructure_ecs_cluster_service_cloudfront_cache_policies_declared = sum(concat([0], [
+    for k, v in local.infrastructure_ecs_cluster_services :
+    length(v["cloudfront_cache_policies"] != null ? v["cloudfront_cache_policies"] : {}) if v["enable_cloudfront"] == true
+  ]))
+  # One target-tracking policy per autoscaled service, over every target group
+  # the service has (one for rolling, blue and green for blue/green). The
+  # policy sums RequestCountPerTarget across them with FILL(..., 0), so a
+  # target group with no traffic (the idle colour, or a quiet site) counts as
+  # zero instead of leaving the scale-in alarm without data.
+  infrastructure_ecs_cluster_service_autoscaling_policies = {
+    for k, v in local.infrastructure_ecs_cluster_services : k => {
+      autoscaling = v["autoscaling"]
+      alb_scheme  = v["alb_scheme"]
+      target_group_arn_suffixes = concat(
+        [for tg_k, tg in aws_alb_target_group.infrastructure_ecs_cluster_service : tg.arn_suffix if tg_k == k],
+        [for tg_k, tg in aws_alb_target_group.infrastructure_ecs_cluster_service_blue : tg.arn_suffix if tg_k == k],
+        [for tg_k, tg in aws_alb_target_group.infrastructure_ecs_cluster_service_green : tg.arn_suffix if tg_k == k],
+      )
+    } if v["autoscaling"] != null && v["container_port"] != null && v["container_port"] != 0
+  }
   infrastructure_ecs_cluster_services_alb_enable_global_accelerator     = var.infrastructure_ecs_cluster_services_alb_enable_global_accelerator && length(local.infrastructure_ecs_cluster_services) > 0
   infrastructure_ecs_cluster_services_alb_ip_allow_list                 = var.infrastructure_ecs_cluster_services_alb_ip_allow_list
   enable_infrastructure_ecs_cluster_services_alb_logs                   = var.enable_infrastructure_ecs_cluster_services_alb_logs && length(local.infrastructure_ecs_cluster_services) > 0
@@ -310,9 +369,10 @@ locals {
   infrastructure_cognito_user_pools = {
     for k, v in var.infrastructure_cognito_user_pools : k => merge(
       {
-        for pool_key in local.infrastructure_cognito_user_pools_keys : pool_key => try(coalesce(v[pool_key], local.infrastructure_cognito_user_pools_defaults[pool_key]), null) if pool_key != "clients"
+        for pool_key in local.infrastructure_cognito_user_pools_keys : pool_key => try(coalesce(v[pool_key], local.infrastructure_cognito_user_pools_defaults[pool_key]), null) if !contains(["clients", "groups"], pool_key)
       },
       {
+        groups = v["groups"]
         clients = {
           for client_name, client in v["clients"] : client_name => {
             for client_key, client_value in client : client_key => try(coalesce(client_value, local.infrastructure_cognito_user_pools_defaults["client_defaults"][client_key]), null)
@@ -327,6 +387,36 @@ locals {
   }
 
   custom_route53_hosted_zones = var.custom_route53_hosted_zones
+
+  cloudfront_redirects                        = var.cloudfront_redirects
+  cloudfront_redirects_access_logging_enabled = contains([for redirect in local.cloudfront_redirects : redirect["access_logging_enabled"]], true)
+  cloudfront_redirect_status_descriptions = {
+    "301" = "Moved Permanently"
+    "302" = "Found"
+    "307" = "Temporary Redirect"
+    "308" = "Permanent Redirect"
+  }
+  # The custom zone each alias belongs to: the longest zone name that equals
+  # the alias or is a suffix of it on a label boundary. null when none does.
+  cloudfront_redirect_alias_zones = {
+    for alias in distinct(flatten([for redirect in local.cloudfront_redirects : redirect["aliases"]])) :
+    alias => try(
+      split(" ", reverse(sort([
+        for zone in keys(local.custom_route53_hosted_zones) : format("%04d %s", length(zone), zone)
+        if alias == zone || endswith(alias, ".${zone}")
+      ]))[0])[1],
+      null
+    )
+  }
+  cloudfront_redirect_aliases = merge([
+    for k, v in local.cloudfront_redirects : {
+      for alias in v["aliases"] : "${k}_${alias}" => {
+        redirect = k
+        alias    = alias
+        zone     = local.cloudfront_redirect_alias_zones[alias]
+      }
+    }
+  ]...)
 
   custom_s3_buckets = var.custom_s3_buckets
 

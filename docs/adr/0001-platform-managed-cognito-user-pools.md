@@ -55,3 +55,7 @@ tfvars where a legacy policy must be honoured.
   secret hash) followed by `AdminConfirmSignUp`; `admin_create_user_config`
   is deliberately left open and `AdminCreateUser` is not in the default
   action set.
+  Amended 2026-11-06: pools whose users are provisioned by operators can
+  close `SignUp` with `allow_admin_create_user_only`, and pools can declare
+  user groups. Both are opt-in; the default for application pools is
+  unchanged.
