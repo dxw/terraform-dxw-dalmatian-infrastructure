@@ -221,6 +221,35 @@ variable "infrastructure_vpc_network_acl_ingress_custom_rules_public" {
   }))
 }
 
+variable "infrastructure_vpc_egress_domain_filtering_allow_list" {
+  description = "Domains that resources in the private subnets may reach over HTTP and TLS, enforced by an AWS Network Firewall between the private subnets and the NAT gateway. A leading dot (`.example.com`) also allows every subdomain; without one only that exact host is allowed. Domains the platform itself needs (AWS APIs, plus the Datadog, syslog, logspout and S3-to-Azure endpoints when configured) are added automatically. Only HTTP and TLS are filtered; restrict other protocols with the private egress network ACL rules. Leave empty to disable. Needs public and private subnets, and an ECS cluster that is not publicly available."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition = alltrue([
+      for domain in var.infrastructure_vpc_egress_domain_filtering_allow_list : can(regex("^\\.?([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}$", domain))
+    ])
+    error_message = "infrastructure_vpc_egress_domain_filtering_allow_list entries must be lower-case hostnames, optionally with a leading dot to include subdomains (no wildcards, schemes, ports or paths)."
+  }
+
+  validation {
+    condition     = length(var.infrastructure_vpc_egress_domain_filtering_allow_list) == 0 || (var.infrastructure_vpc && var.infrastructure_vpc_network_enable_private && var.infrastructure_vpc_network_enable_public && !var.infrastructure_ecs_cluster_publicly_avaialble)
+    error_message = "Egress domain filtering inspects traffic leaving the private subnets through the NAT gateway, so it needs infrastructure_vpc, infrastructure_vpc_network_enable_private and infrastructure_vpc_network_enable_public, and infrastructure_ecs_cluster_publicly_avaialble must be false."
+  }
+
+  validation {
+    condition     = length(var.infrastructure_vpc_egress_domain_filtering_allow_list) == 0 || length(distinct(var.infrastructure_vpc_network_availability_zones)) < pow(2, 24 - (tonumber(split("/", var.infrastructure_vpc_cidr_block)[1]) + 1))
+    error_message = "Egress domain filtering puts its subnets in the last /24 of the public half of the VPC, which must not hold a public subnet: the VPC CIDR block is too small for this many availability zones."
+  }
+}
+
+variable "infrastructure_vpc_egress_domain_filtering_log_retention" {
+  description = "Retention in days of the egress domain filtering alert logs, which record each dropped request and the domain it was for"
+  type        = number
+  default     = 30
+}
+
 variable "enable_infrastructure_vpc_transfer_s3_bucket" {
   description = "Enable VPC transfer S3 bucket. This allows uploading/downloading files from resources within the infrastructure VPC"
   type        = bool
