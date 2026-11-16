@@ -96,8 +96,33 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
       days = local.infrastructure_logging_bucket_retention
     }
 
+    # Versioning is on, so expiry only adds a delete marker; without this the
+    # expired objects are kept forever as noncurrent versions
+    noncurrent_version_expiration {
+      noncurrent_days = 1
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
     filter {
       prefix = ""
+    }
+
+    status = "Enabled"
+  }
+
+  # S3 rejects expired_object_delete_marker alongside days in one expiration block
+  rule {
+    id = "expired_object_delete_marker"
+
+    filter {
+      prefix = ""
+    }
+
+    expiration {
+      expired_object_delete_marker = true
     }
 
     status = "Enabled"
