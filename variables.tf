@@ -1617,6 +1617,7 @@ variable "custom_s3_buckets" {
         cloudfront_infrastructure_ecs_cluster_service_path: If `cloudfront_infrastructure_ecs_cluster_service`, set this to the path that objects will be served from.
         cloudfront_waf_association: Conditionally associate WAF created via `infrastructure_ecs_cluster_wafs` using the key of the waf configuration
         cloudfront_origin_shield_enabled: Enable CloudFront Origin Shield, in the infrastructure's region, on the bucket's origin. Applies to the dedicated distribution and to the origin on the service distribution set by `cloudfront_infrastructure_ecs_cluster_service`
+        cloudfront_custom_response_headers: List of headers the dedicated distribution adds to every response, eg. [{ header = "Cross-Origin-Resource-Policy", value = "same-site" }]. `override` (default true) replaces a header of the same name sent by S3. Headers CloudFront manages through a response headers policy's CORS or security headers settings (Access-Control-*, Content-Security-Policy, Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy) are not allowed. Does not apply to the origin on the service distribution set by `cloudfront_infrastructure_ecs_cluster_service`
         custom_bucket_policy_statements: Conditionally add a string of comma delimited user-defined key policy statements (eg. '{"Effect": ...},{"Effect": ...}'
         enable_missing_writes_alert: Conditionally enable an alert for missing writes to the S3 bucket.
         objects: Map of object keys to content to keep in the bucket from Terraform, eg. { "503.html" = { content = "<html>...</html>" } }. content_type is inferred from the key's extension when unset; cache_control is sent as the object's Cache-Control header
@@ -1642,8 +1643,13 @@ variable "custom_s3_buckets" {
     cloudfront_infrastructure_ecs_cluster_service_path    = optional(string, null)
     cloudfront_waf_association                            = optional(string, null)
     cloudfront_origin_shield_enabled                      = optional(bool, null)
-    custom_bucket_policy_statements                       = optional(string, null)
-    enable_missing_writes_alert                           = optional(bool, false)
+    cloudfront_custom_response_headers = optional(list(object({
+      header   = string
+      value    = string
+      override = optional(bool, true)
+    })), null)
+    custom_bucket_policy_statements = optional(string, null)
+    enable_missing_writes_alert     = optional(bool, false)
     objects = optional(map(object({
       content       = string
       content_type  = optional(string, null)
@@ -1668,6 +1674,29 @@ variable "custom_s3_buckets" {
       ])
     ])
     error_message = "expiration_days must be greater than transition_to_ia_days and transition_to_glacier_days, or S3 rejects the lifecycle configuration."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for bucket in var.custom_s3_buckets : [
+        for h in coalesce(bucket.cloudfront_custom_response_headers, []) :
+        !startswith(lower(h.header), "access-control-") && !contains([
+          "content-security-policy",
+          "strict-transport-security",
+          "x-frame-options",
+          "x-content-type-options",
+          "x-xss-protection",
+          "referrer-policy",
+        ], lower(h.header))
+      ]
+    ]))
+    error_message = "cloudfront_custom_response_headers cannot set CORS (Access-Control-*) or security headers; CloudFront only accepts those through a response headers policy's CORS and security headers settings."
+  }
+  validation {
+    condition = alltrue([
+      for bucket in var.custom_s3_buckets :
+      length(distinct([for h in coalesce(bucket.cloudfront_custom_response_headers, []) : lower(h.header)])) == length(coalesce(bucket.cloudfront_custom_response_headers, []))
+    ])
+    error_message = "cloudfront_custom_response_headers must not set the same header twice."
   }
 }
 
