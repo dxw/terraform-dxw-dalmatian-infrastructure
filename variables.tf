@@ -66,7 +66,7 @@ variable "infrastructure_kms_key_policy_statements" {
 }
 
 variable "infrastructure_logging_bucket_retention" {
-  description = "Retention in days for the infrasrtucture S3 logs. This is for the default S3 logs bucket, where all AWS service logs will be delivered"
+  description = "Retention in days for the infrastructure S3 logs. This is for the default S3 logs bucket, where all AWS service logs will be delivered. Objects are permanently deleted (including noncurrent versions) about a day after this. Set to 0 to keep logs indefinitely"
   type        = number
 }
 
@@ -1202,7 +1202,7 @@ variable "infrastructure_rds_backup_to_s3_cron_expression" {
 }
 
 variable "infrastructure_rds_backup_to_s3_retention" {
-  description = "Retention in days to keep the S3 SQL backups"
+  description = "Retention in days to keep the S3 SQL backups. Backups are permanently deleted (including noncurrent versions) about a day after this. Set to 0 to keep backups indefinitely"
   type        = number
 }
 
@@ -1566,7 +1566,7 @@ variable "enable_infrastructure_ecs_cluster_services_alb_logs" {
 }
 
 variable "infrastructure_ecs_cluster_services_alb_logs_retention" {
-  description = "Retention in days for the infrasrtucture ecs cluster ALB logs"
+  description = "Retention in days for the infrastructure ECS cluster ALB logs. Logs are permanently deleted (including noncurrent versions) about a day after this. Set to 0 to keep logs indefinitely"
   type        = number
 }
 
