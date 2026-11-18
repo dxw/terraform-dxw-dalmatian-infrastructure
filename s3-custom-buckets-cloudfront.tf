@@ -35,11 +35,12 @@ resource "aws_cloudfront_distribution" "custom_s3_buckets" {
   }
 
   default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
-    cached_methods         = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id       = "${each.key}-custom-bucket"
-    viewer_protocol_policy = "redirect-to-https"
-    cache_policy_id        = aws_cloudfront_cache_policy.custom_s3_buckets[each.key].id
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id           = "${each.key}-custom-bucket"
+    viewer_protocol_policy     = "redirect-to-https"
+    cache_policy_id            = aws_cloudfront_cache_policy.custom_s3_buckets[each.key].id
+    response_headers_policy_id = length(coalesce(each.value["cloudfront_custom_response_headers"], [])) > 0 ? aws_cloudfront_response_headers_policy.custom_s3_buckets[each.key].id : null
 
     dynamic "function_association" {
       for_each = each.value["cloudfront_s3_root"] != null || each.value["cloudfront_basic_auth_user_list"] != null || each.value["cloudfront_infrastructure_ecs_cluster_service_path"] != null || each.value["cloudfront_s3_root_file"] != null ? [1] : []
