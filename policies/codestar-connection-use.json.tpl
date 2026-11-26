@@ -3,6 +3,7 @@
   "Statement": [
     {
       "Action": [
+        "codeconnections:UseConnection",
         "codestar-connections:UseConnection"
       ],
       "Effect": "Allow",
